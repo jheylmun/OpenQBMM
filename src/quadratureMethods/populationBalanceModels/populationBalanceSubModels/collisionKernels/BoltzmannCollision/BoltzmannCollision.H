@@ -65,39 +65,47 @@ class BoltzmannCollision
 protected:
     // Protected data
 
+        //- Refrence to particle diameter
+//         const volScalarField& dp_;
+
         //- Coefficient of restitution
         scalar e_;
 
-        //- Equilibrium moments (fields)
-        mappedPtrList<volScalarField> Meqf_;
+        //- Modified coefficient of restitution
+        scalar omega_;
 
-        //- Equilibrium moments (fields)
-        mappedList<scalar> Meq_;
+        //- Collisional coefficients sources
+        mappedList<scalar> Is_;
 
-        mappedPtrList<volScalarField> Isf_;
-
-        mappedPtrList<scalar> Is_;
+        //- Collision sources
+        mappedList<scalar> Cs_;
 
 
     // Protected functions
 
         //- Update equilibrium moments for a cell (1D)
-        virtual void updateCells1D(const label celli);
+        void I1D
+        (
+            const label celli,
+            const label node1,
+            const label node2
+        );
 
         //- Update equilibrium moments for a cell (2D)
-        virtual void updateCells2D(const label celli);
+        void I2D
+        (
+            const label celli,
+            const label node1,
+            const label node2
+        );
 
         //- Update equilibrium moments for a cell (3D)
-        virtual void updateCells3D(const label celli);
-
-        //- Update equilibrium moments for fields (1D)
-        virtual void updateFields1D();
-
-        //- Update equilibrium moments for fields (2D)
-        virtual void updateFields2D();
-
-        //- Update equilibrium moments for fields (3D)
-        virtual void updateFields3D();
+        void I3D
+        (
+            const label celli,
+            const label node1,
+            const label node2
+        );
 
 
 public:
@@ -123,6 +131,12 @@ public:
 
 
     // Member Functions
+
+        //- Update equilibrium moments
+        virtual void updateCells(const label celli);
+
+        //- Update equilibrium moments
+        virtual void updateFields();
 
         //- Return explicit collision source term
         virtual scalar explicitCollisionSource

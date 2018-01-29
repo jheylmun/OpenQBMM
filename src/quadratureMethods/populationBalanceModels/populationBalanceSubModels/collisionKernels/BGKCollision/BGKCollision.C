@@ -279,6 +279,43 @@ Foam::populationBalanceSubModels::collisionKernels::BGKCollision
 
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
 
+void Foam::populationBalanceSubModels::collisionKernels::BGKCollision
+::updateCells
+(
+    const label celli
+)
+{
+    if (nDimensions_ == 1)
+    {
+        updateCells1D(celli);
+    }
+    else if (nDimensions_ == 2)
+    {
+        updateCells2D(celli);
+    }
+    else if (nDimensions_ == 3)
+    {
+        updateCells3D(celli);
+    }
+}
+
+void Foam::populationBalanceSubModels::collisionKernels::BGKCollision
+::updateFields()
+{
+    if (nDimensions_ == 1)
+    {
+        updateFields1D();
+    }
+    else if (nDimensions_ == 2)
+    {
+        updateFields2D();
+    }
+    else if (nDimensions_ == 3)
+    {
+        updateFields3D();
+    }
+}
+
 Foam::scalar
 Foam::populationBalanceSubModels::collisionKernels::BGKCollision
 ::explicitCollisionSource(const label mi, const label celli) const

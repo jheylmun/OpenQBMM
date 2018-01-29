@@ -83,22 +83,22 @@ protected:
     // Protected functions
 
         //- Update equilibrium moments for a cell (1D)
-        virtual void updateCells1D(const label celli);
+        void updateCells1D(const label celli);
 
         //- Update equilibrium moments for a cell (2D)
-        virtual void updateCells2D(const label celli);
+        void updateCells2D(const label celli);
 
         //- Update equilibrium moments for a cell (3D)
-        virtual void updateCells3D(const label celli);
+        void updateCells3D(const label celli);
 
         //- Update equilibrium moments for fields (1D)
-        virtual void updateFields1D();
+        void updateFields1D();
 
         //- Update equilibrium moments for fields (2D)
-        virtual void updateFields2D();
+        void updateFields2D();
 
         //- Update equilibrium moments for fields (3D)
-        virtual void updateFields3D();
+        void updateFields3D();
 
 
 public:
@@ -124,6 +124,12 @@ public:
 
 
     // Member Functions
+
+        //- Update equilibrium moments
+        virtual void updateCells(const label celli);
+
+        //- Update equilibrium moments
+        virtual void updateFields();
 
         //- Return explicit collision source term
         virtual scalar explicitCollisionSource

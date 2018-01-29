@@ -98,7 +98,7 @@ protected:
         );
 
         //- Variances for a cell
-        virtual scalar variance
+        scalar variance
         (
             const scalar& m0,
             const scalar& sqrM1,
@@ -106,30 +106,12 @@ protected:
         ) const;
 
         //- Variance for a field
-        virtual tmp<volScalarField> variance
+        tmp<volScalarField> variance
         (
             const volScalarField& m0,
             const volScalarField& sqrM1,
             const volScalarField& m2
         );
-
-        //- Update equilibrium moments for a cell (1D)
-        virtual void updateCells1D(const label celli) = 0;
-
-        //- Update equilibrium moments for a cell (2D)
-        virtual void updateCells2D(const label celli) = 0;
-
-        //- Update equilibrium moments for a cell (3D)
-        virtual void updateCells3D(const label celli) = 0;
-
-        //- Update equilibrium moments for fields (1D)
-        virtual void updateFields1D() = 0;
-
-        //- Update equilibrium moments for fields (2D)
-        virtual void updateFields2D() = 0;
-
-        //- Update equilibrium moments for fields (3D)
-        virtual void updateFields3D() = 0;
 
 
 public:
@@ -182,11 +164,11 @@ public:
 
     // Member Functions
 
-        //- Update equilibrium moments
-        virtual void updateCells(const label celli);
+        //- Update collision sources in a cell
+        virtual void updateCells(const label celli) = 0;
 
-        //- Update equilibrium moments
-        virtual void updateFields();
+        //- Update collision sources
+        virtual void updateFields() = 0;
 
         //- Return explicit collision source term
         virtual scalar explicitCollisionSource

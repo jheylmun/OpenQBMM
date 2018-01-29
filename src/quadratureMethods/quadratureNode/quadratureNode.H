@@ -168,7 +168,7 @@ public:
                         weightType, abscissaType, sigmaType
                     >
                     (
-                        mappedPtrList<scalar>::listToWord(ent),
+                        "node" + mappedPtrList<scalar>::listToWord(ent),
                         distributionName_,
                         mesh_,
                         weightDimensions_,

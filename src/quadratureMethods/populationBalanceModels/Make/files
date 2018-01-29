@@ -43,6 +43,7 @@ populationBalanceSubModels/nucleationModels/Miller/Miller.C
 
 populationBalanceSubModels/collisionKernels/collisionKernel/collisionKernel.C
 populationBalanceSubModels/collisionKernels/collisionKernel/newCollisionKernel.C
+populationBalanceSubModels/collisionKernels/BoltzmannCollision/BoltzmannCollision.C
 populationBalanceSubModels/collisionKernels/BGKCollision/BGKCollision.C
 populationBalanceSubModels/collisionKernels/esBGKCollision/esBGKCollision.C
 populationBalanceSubModels/collisionKernels/noCollision/noCollision.C

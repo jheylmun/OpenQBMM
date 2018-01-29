@@ -55,31 +55,6 @@ class noCollision
 :
     public collisionKernel
 {
-    // Protected Functions
-
-        //- Update equilibrium moments for a cell (1D)
-        virtual void updateCells1D(const label celli)
-        {}
-
-        //- Update equilibrium moments for a cell (2D)
-        virtual void updateCells2D(const label celli)
-        {}
-
-        //- Update equilibrium moments for a cell (3D)
-        virtual void updateCells3D(const label celli)
-        {}
-
-        //- Update equilibrium moments for fields (1D)
-        virtual void updateFields1D()
-        {}
-
-        //- Update equilibrium moments for fields (2D)
-        virtual void updateFields2D()
-        {}
-
-        //- Update equilibrium moments for fields (3D)
-        virtual void updateFields3D()
-        {}
 
 public:
 
