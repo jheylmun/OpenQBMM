@@ -130,8 +130,11 @@ public:
             //- Extended moment inversion method
             inline fieldMomentInversion& momentFieldInverter();
 
-            //- Return the nodes
+            //- Const access to the nodes
             inline const mappedPtrList<nodeType>& nodes() const;
+
+            //- Non-Const access to the nodes
+            inline mappedPtrList<nodeType>& nodes();
 
             //- Const access to the moments
             inline const momentFieldSetType& moments() const;

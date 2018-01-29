@@ -11,35 +11,55 @@ FoamFile
     format      ascii;
     class       dictionary;
     location    "system";
-    object      decomposeParDict;
+    object      momentGenerationDict;
 }
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
-numberOfSubdomains 3;
+phases
+(
+    particles
+);
 
-method          scotch;
-
-simpleCoeffs
+boundaries
 {
-    n               (1 12 1);
-    delta           0.001;
+    inlet
+    {
+        type    cyclic;
+    }
+    outlet
+    {
+        type    cyclic;
+    }
+    walls
+    {
+        type    zeroGradient;
+    }
+    frontBack
+    {
+        type    empty;
+    }
 }
 
-hierarchicalCoeffs
+particles
 {
-    n               (1 1 1);
-    delta           0.001;
-    order           xyz;
+    type                weightsAndAbscissae;
+    weightDimension     [0 0 0 0 0 0 0];
+    abscissaDimension   [0 1 -1 0 0 0 0];
+
+    internal
+    {
+        node0
+        {
+            weight  0.005;
+            abscissa (0.01 0);
+        }
+        node1
+        {
+            weight  0.005;
+            abscissa (-0.01 0);
+        }
+    }
 }
-
-manualCoeffs
-{
-    dataFile        "";
-}
-
-distributed     no;
-
-roots           ( );
 
 
 // ************************************************************************* //

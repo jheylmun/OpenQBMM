@@ -10,36 +10,12 @@ FoamFile
     version     2.0;
     format      ascii;
     class       dictionary;
-    location    "system";
-    object      decomposeParDict;
+    object      transportProperties;
 }
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
-numberOfSubdomains 3;
+transportModel  Newtonian;
 
-method          scotch;
-
-simpleCoeffs
-{
-    n               (1 12 1);
-    delta           0.001;
-}
-
-hierarchicalCoeffs
-{
-    n               (1 1 1);
-    delta           0.001;
-    order           xyz;
-}
-
-manualCoeffs
-{
-    dataFile        "";
-}
-
-distributed     no;
-
-roots           ( );
-
+nu              [0 2 -1 0 0 0 0] 1.48e-5; // kinematic -> 0.002 dynamic
 
 // ************************************************************************* //

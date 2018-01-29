@@ -48,6 +48,13 @@ Foam::quadratureApproximation<momentFieldSetType, nodeType>::nodes() const
 }
 
 template <class momentFieldSetType, class nodeType>
+Foam::mappedPtrList<nodeType>&
+Foam::quadratureApproximation<momentFieldSetType, nodeType>::nodes()
+{
+    return nodes_();
+}
+
+template <class momentFieldSetType, class nodeType>
 const momentFieldSetType&
 Foam::quadratureApproximation<momentFieldSetType, nodeType>::moments() const
 {

@@ -113,7 +113,7 @@ void Foam::hyperbolicMomentInversion::invert
     }
 
     // Compute normalized moments
-    scalarList normalisedMoments(nInvertibleMoments_);
+    scalarList normalisedMoments(moments);
 
     forAll(normalisedMoments, mi)
     {
@@ -146,7 +146,7 @@ void Foam::hyperbolicMomentInversion::invert
     // Manage unrealizable cases
     if (centralMoments[2] < 0.0)
     {
-        if (centralMoments[2] < -1e-6 && debug)
+        if (centralMoments[2] < -1e-10)
         {
             WarningInFunction
                 << "Second-order central moment is negative. C2 = "
@@ -192,7 +192,7 @@ void Foam::hyperbolicMomentInversion::invert
             centralMoments[3] = q*c2*sqrtC2;
             centralMoments[4] = eta*sqrC2;
 
-            if (realizability < smallNegRealizability_ && debug)
+            if (realizability < smallNegRealizability_)
             {
                 WarningInFunction
                     << "Fourth-order central moment is too small."
