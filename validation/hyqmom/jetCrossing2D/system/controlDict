@@ -29,7 +29,7 @@ deltaT          .001;
 
 writeControl    adjustableRunTime;
 
-writeInterval   0.1;
+writeInterval   0.02;
 
 purgeWrite      250;
 
@@ -47,7 +47,7 @@ runTimeModifiable yes;
 
 adjustTimeStep  yes;
 
-maxCo           .1;
+maxCo           .5;
 
 maxDeltaT       1;
 

@@ -58,15 +58,8 @@ class BoltzmannCollision
 {
     // Private data
 
-        //- Collisional time scale
-        dimensionedScalar tauCollisional_;
-
-
-protected:
-    // Protected data
-
         //- Refrence to particle diameter
-//         const volScalarField& dp_;
+        const volScalarField& dp_;
 
         //- Coefficient of restitution
         scalar e_;

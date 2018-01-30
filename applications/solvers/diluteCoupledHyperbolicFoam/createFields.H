@@ -63,8 +63,21 @@ word particleName(phaseProperties.lookup("dilutePhase"));
 scalar residualAlpha(phaseProperties.lookupType<scalar>("residualAlpha"));
 dimensionedScalar rhof(phaseProperties.lookup("rhof"));
 dimensionedScalar rhop(phaseProperties.lookup("rhop"));
-dimensionedScalar dp(phaseProperties.lookup("d"));
 scalar e(phaseProperties.lookupType<scalar>("e"));
+
+volScalarField dp
+(
+    IOobject
+    (
+        IOobject::groupName("d", particleName),
+        runTime.timeName(),
+        mesh,
+        IOobject::NO_READ,
+        IOobject::NO_WRITE
+    ),
+    mesh,
+    dimensionedScalar(phaseProperties.lookup("d"))
+);
 
 Info<< "Reading populationBalanceProperties\n" << endl;
 IOdictionary populationBalanceProperties
@@ -130,19 +143,7 @@ volScalarField Thetap
     dimensionedScalar("zero", sqr(dimVelocity), 0.0)
 );
 
-volScalarField g0
-(
-    IOobject
-    (
-        IOobject::groupName("g0", particleName),
-        runTime.timeName(),
-        mesh,
-        IOobject::NO_READ,
-        IOobject::NO_WRITE
-    ),
-    mesh,
-    dimensionedScalar("zero", dimless, 0.0)
-);
+
 #include "computeParticleFields.H"
 
 #include "createMRF.H"

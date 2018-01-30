@@ -22,33 +22,17 @@ ddtSchemes
 
 gradSchemes
 {
-    default         cellLimited     leastSquares .2;
-    grad(p_rgh)     leastSquares;
+    default         none;
 }
 
 divSchemes
 {
-    default                         Gauss upwind phi;
-
-    div(phi,alpha.air)              Gauss upwind;
-    div(phir,alpha.air)             Gauss upwind;
-    div(phi,alpha.water)            Gauss upwind;
-    "div\(phir,alpha.*,alpha.*\)"   Gauss upwind;
-
-    "div\(alphaRhoPhi.*,U.*\)"      Gauss upwind;
-    "div\(phi.*,U.*\)"              Gauss upwind;
-
-    "div\(alphaRhoPhi.*,(k|epsilon).*\)"  Gauss upwind;
-    "div\(phim,(k|epsilon)m\)"      Gauss upwind;
-
-    "div\(\(\(\(alpha.*\*thermo:rho.*\)\*nuEff.*\)\*dev2\(T\(grad\(U.*\)\)\)\)\)" Gauss linear;
-
-    div((((alpha.air*rho.air)*nu.air)*dev2(T(grad(U.air))))) Gauss linear;
+    default         none;
 }
 
 laplacianSchemes
 {
-    default         Gauss linear corrected;
+    default         none;
 }
 
 interpolationSchemes
@@ -63,11 +47,5 @@ snGradSchemes
 {
     default         corrected;
 }
-
-wallDist
-{
-    method meshWave;
-}
-
 
 // ************************************************************************* //

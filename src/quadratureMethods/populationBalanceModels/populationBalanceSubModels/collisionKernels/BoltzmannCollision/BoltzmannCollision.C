@@ -66,18 +66,20 @@ Foam::populationBalanceSubModels::collisionKernels::BoltzmannCollision::I1D
     scalar gMag = mag(g);
     scalar gMagSqr = sqr(gMag);
     scalar omegaSqr = sqr(omega_);
+    scalar omegaPow3 = omega_*omegaSqr;
+    scalar omegaPow4 = omegaSqr*omegaSqr;
 
     Is_(0) = 0.0;
     Is_(1) = -(omega_/2.0)*g1;
     Is_(2) = (omegaSqr/12.0)*gMagSqr + (omegaSqr/4.0)*g1Sqr - omega_*g1*v1;
     Is_(3) =
-      - (omega_*omegaSqr/8.0)*(gMagSqr + g1Sqr)*g1
+      - (omegaPow3/8.0)*(gMagSqr + g1Sqr)*g1
       + (omegaSqr/4.0)*(gMagSqr + 3.0*g1Sqr)*v1
       - (1.5*omega_)*g1*sqr(v1);
     Is_(4) =
-        (sqr(omegaSqr)/80.0)*(sqr(gMagSqr) + 10.0*gMagSqr*g1Sqr +5.0*sqr(g1Sqr))
-      - (omega_*omegaSqr/2.0)*(gMagSqr + g1Sqr)*g1*v1
-      + (omegaSqr/2.0)*(gMagSqr + 3.0*g1)*sqr(v1)
+        (omegaPow4/80.0)*(sqr(gMagSqr) + 10.0*gMagSqr*g1Sqr + 5.0*sqr(g1Sqr))
+      - (omegaPow3/2.0)*(gMagSqr + g1Sqr)*g1*v1
+      + (omegaSqr/2.0)*(gMagSqr + 3.0*g1Sqr)*sqr(v1)
       - 2.0*omega_*g1*pow3(v1);
 }
 
@@ -101,30 +103,32 @@ Foam::populationBalanceSubModels::collisionKernels::BoltzmannCollision::I2D
     scalar gMag = mag(g);
     scalar gMagSqr = sqr(gMag);
     scalar omegaSqr = sqr(omega_);
+    scalar omegaPow3 = omega_*omegaSqr;
+    scalar omegaPow4 = omegaSqr*omegaSqr;
 
     Is_(0,0) = 0.0;
     Is_(1,0) = -(omega_/2.0)*g1;
     Is_(0,1) = -(omega_/2.0)*g2;
     Is_(2,0) = (omegaSqr/12.0)*gMagSqr + (omegaSqr/4.0)*g1Sqr - omega_*g1*v1;
-    Is_(1,1) = (omegaSqr/4.0)*g1*g2 + (omega_/2.0)*(v1*g2 + g1*v2);
+    Is_(1,1) = (omegaSqr/4.0)*g1*g2 - (omega_/2.0)*(v1*g2 + g1*v2);
     Is_(0,2) = (omegaSqr/12.0)*gMagSqr + (omegaSqr/4.0)*g2Sqr - omega_*g2*v2;
     Is_(3,0) =
-      - (omega_*omegaSqr/8.0)*(gMagSqr + g1Sqr)*g1
+      - (omegaPow3/8.0)*(gMagSqr + g1Sqr)*g1
       + (omegaSqr/4.0)*(gMagSqr + 3.0*g1Sqr)*v1
       - (1.5*omega_)*g1*sqr(v1);
     Is_(0,3) =
-      - (omega_*omegaSqr/8.0)*(gMagSqr + g2Sqr)*g2
+      - (omegaPow3/8.0)*(gMagSqr + g2Sqr)*g2
       + (omegaSqr/4.0)*(gMagSqr + 3.0*g2Sqr)*v2
       - (1.5*omega_)*g2*sqr(v2);
     Is_(4,0) =
-        (sqr(omegaSqr)/80.0)*(sqr(gMagSqr) + 10.0*gMagSqr*g1Sqr +5.0*sqr(g1Sqr))
-      - (omega_*omegaSqr/2.0)*(gMagSqr + g1Sqr)*g1*v1
-      + (omegaSqr/2.0)*(gMagSqr + 3.0*g1)*sqr(v1)
+        (omegaPow4/80.0)*(sqr(gMagSqr) + 10.0*gMagSqr*g1Sqr + 5.0*sqr(g1Sqr))
+      - (omegaPow3/2.0)*(gMagSqr + g1Sqr)*g1*v1
+      + (omegaSqr/2.0)*(gMagSqr + 3.0*g1Sqr)*sqr(v1)
       - 2.0*omega_*g1*pow3(v1);
     Is_(0,4) =
-        (sqr(omegaSqr)/80.0)*(sqr(gMagSqr) + 10.0*gMagSqr*g2Sqr +5.0*sqr(g2Sqr))
-      - (omega_*omegaSqr/2.0)*(gMagSqr + g2Sqr)*g2*v2
-      + (omegaSqr/2.0)*(gMagSqr + 3.0*g2)*sqr(v2)
+        (omegaPow4/80.0)*(sqr(gMagSqr) + 10.0*gMagSqr*g2Sqr + 5.0*sqr(g2Sqr))
+      - (omegaPow3/2.0)*(gMagSqr + g2Sqr)*g2*v2
+      + (omegaSqr/2.0)*(gMagSqr + 3.0*g2Sqr)*sqr(v2)
       - 2.0*omega_*g2*pow3(v2);
 }
 
@@ -151,43 +155,45 @@ Foam::populationBalanceSubModels::collisionKernels::BoltzmannCollision::I3D
     scalar gMag = mag(g);
     scalar gMagSqr = sqr(gMag);
     scalar omegaSqr = sqr(omega_);
+    scalar omegaPow3 = omega_*omegaSqr;
+    scalar omegaPow4 = omegaSqr*omegaSqr;
 
     Is_(0,0,0) = 0.0;
     Is_(1,0,0) = -(omega_/2.0)*g1;
     Is_(0,1,0) = -(omega_/2.0)*g2;
     Is_(0,0,1) = -(omega_/2.0)*g3;
     Is_(2,0,0) = (omegaSqr/12.0)*gMagSqr + (omegaSqr/4.0)*g1Sqr - omega_*g1*v1;
-    Is_(1,1,0) = (omegaSqr/4.0)*g1*g2 + (omega_/2.0)*(v1*g2 + g1*v2);
-    Is_(1,0,1) = (omegaSqr/4.0)*g1*g3 + (omega_/2.0)*(v1*g3 + g1*v3);
+    Is_(1,1,0) = (omegaSqr/4.0)*g1*g2 - (omega_/2.0)*(v1*g2 + g1*v2);
+    Is_(1,0,1) = (omegaSqr/4.0)*g1*g3 - (omega_/2.0)*(v1*g3 + g1*v3);
     Is_(0,2,0) = (omegaSqr/12.0)*gMagSqr + (omegaSqr/4.0)*g2Sqr - omega_*g2*v2;
-    Is_(0,1,1) = (omegaSqr/4.0)*g2*g3 + (omega_/2.0)*(v2*g3 + g2*v3);
+    Is_(0,1,1) = (omegaSqr/4.0)*g2*g3 - (omega_/2.0)*(v2*g3 + g2*v3);
     Is_(0,0,2) = (omegaSqr/12.0)*gMagSqr + (omegaSqr/4.0)*g3Sqr - omega_*g3*v3;
     Is_(3,0,0) =
-      - (omega_*omegaSqr/8.0)*(gMagSqr + g1Sqr)*g1
+      - (omegaPow3/8.0)*(gMagSqr + g1Sqr)*g1
       + (omegaSqr/4.0)*(gMagSqr + 3.0*g1Sqr)*v1
       - (1.5*omega_)*g1*sqr(v1);
     Is_(0,3,0) =
-      - (omega_*omegaSqr/8.0)*(gMagSqr + g2Sqr)*g2
+      - (omegaPow3/8.0)*(gMagSqr + g2Sqr)*g2
       + (omegaSqr/4.0)*(gMagSqr + 3.0*g2Sqr)*v2
       - (1.5*omega_)*g2*sqr(v2);
     Is_(0,0,3) =
-      - (omega_*omegaSqr/8.0)*(gMagSqr + g3Sqr)*g3
+      - (omegaPow3/8.0)*(gMagSqr + g3Sqr)*g3
       + (omegaSqr/4.0)*(gMagSqr + 3.0*g3Sqr)*v3
       - (1.5*omega_)*g3*sqr(v3);
     Is_(4,0,0) =
-        (sqr(omegaSqr)/80.0)*(sqr(gMagSqr) + 10.0*gMagSqr*g1Sqr +5.0*sqr(g1Sqr))
-      - (omega_*omegaSqr/2.0)*(gMagSqr + g1Sqr)*g1*v1
-      + (omegaSqr/2.0)*(gMagSqr + 3.0*g1)*sqr(v1)
+        (omegaPow4/80.0)*(sqr(gMagSqr) + 10.0*gMagSqr*g1Sqr + 5.0*sqr(g1Sqr))
+      - (omegaPow3/2.0)*(gMagSqr + g1Sqr)*g1*v1
+      + (omegaSqr/2.0)*(gMagSqr + 3.0*g1Sqr)*sqr(v1)
       - 2.0*omega_*g1*pow3(v1);
     Is_(0,4,0) =
-        (sqr(omegaSqr)/80.0)*(sqr(gMagSqr) + 10.0*gMagSqr*g2Sqr +5.0*sqr(g2Sqr))
-      - (omega_*omegaSqr/2.0)*(gMagSqr + g2Sqr)*g2*v2
-      + (omegaSqr/2.0)*(gMagSqr + 3.0*g2)*sqr(v2)
+        (omegaPow4/80.0)*(sqr(gMagSqr) + 10.0*gMagSqr*g2Sqr + 5.0*sqr(g2Sqr))
+      - (omegaPow3/2.0)*(gMagSqr + g2Sqr)*g2*v2
+      + (omegaSqr/2.0)*(gMagSqr + 3.0*g2Sqr)*sqr(v2)
       - 2.0*omega_*g2*pow3(v2);
     Is_(0,0,4) =
-        (sqr(omegaSqr)/80.0)*(sqr(gMagSqr) + 10.0*gMagSqr*g3Sqr +5.0*sqr(g3Sqr))
-      - (omega_*omegaSqr/2.0)*(gMagSqr + g3Sqr)*g3*v3
-      + (omegaSqr/2.0)*(gMagSqr + 3.0*g3)*sqr(v3)
+        (omegaPow4/80.0)*(sqr(gMagSqr) + 10.0*gMagSqr*g3Sqr + 5.0*sqr(g3Sqr))
+      - (omegaPow3/2.0)*(gMagSqr + g3Sqr)*g3*v3
+      + (omegaSqr/2.0)*(gMagSqr + 3.0*g3Sqr)*sqr(v3)
       - 2.0*omega_*g3*pow3(v3);
 }
 
@@ -203,17 +209,28 @@ Foam::populationBalanceSubModels::collisionKernels::BoltzmannCollision::Boltzman
 )
 :
     collisionKernel(dict, mesh, quadrature, ode),
-    tauCollisional_(dict.lookup("tau")),
+    dp_
+    (
+        mesh.lookupObject<volScalarField>
+        (
+            IOobject::groupName
+            (
+                "d",
+                quadrature.moments()[0].group()
+            )
+        )
+    ),
     e_(dict.lookupType<scalar>("e")),
     omega_((1.0 + e_)*0.5),
     Is_(momentOrders_.size(), momentOrders_),
     Cs_(momentOrders_.size(), momentOrders_)
 {
+    Info<<"found d.particles"<<endl;
     if (!ode)
     {
         FatalErrorInFunction
             << "Boltzmann collision kernel does not support implicit" << nl
-            << "solutions to the collision source term."
+            << "solutions to the collisional source term."
             << abort(FatalError);
     }
 }
@@ -282,7 +299,7 @@ void Foam::populationBalanceSubModels::collisionKernels::BoltzmannCollision
 
     forAll(Cs_, momenti)
     {
-        Cs_[momenti] *= 6.0*g0/300e-6;
+        Cs_[momenti] *= 6.0*g0/dp_[celli];
     }
 }
 

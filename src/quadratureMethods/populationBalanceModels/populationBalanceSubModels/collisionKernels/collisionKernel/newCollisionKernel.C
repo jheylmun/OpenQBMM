@@ -38,7 +38,7 @@ Foam::populationBalanceSubModels::collisionKernel::New
 {
     word collisionKernelType(dict.lookup("collisionKernel"));
 
-    Info<< "Selecting collisionKernel "
+    Info<< "Selecting collisionKernel: "
         << collisionKernelType << endl;
 
     dictionaryConstructorTable::iterator cstrIter =

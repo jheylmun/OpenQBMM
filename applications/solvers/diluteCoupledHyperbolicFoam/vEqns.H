@@ -2,17 +2,8 @@ forAll(nodes, nodei)
 {
     const volVectorNode& node = nodes[nodei];
     const volScalarField& alphapi = node.primaryWeight();
-    volVectorField Upi
-    (
-        IOobject
-        (
-            "U.particles",
-            runTime.timeName(),
-            mesh
-        ),
-        node.primaryAbscissa(),
-        U.boundaryField().types()
-    );
+    volVectorField& Upi = nodes[nodei].primaryAbscissa();
+
 
     fvVectorMatrix UpiEqn
     (
@@ -27,8 +18,6 @@ forAll(nodes, nodei)
 
     UpiEqn.relax();
     UpiEqn.solve();
-
-    nodes[nodei].primaryAbscissa() == Upi;
 }
 forAll(moments[0], celli)
 {

@@ -54,7 +54,7 @@ particles
     {
         node0
         {
-            weight  1;
+            weight  0.1;
             abscissa (1 1 1);
         }
     }
@@ -62,7 +62,7 @@ particles
     {
         node0
         {
-            weight  1;
+            weight  0.1;
             abscissa (-1 1 -1);
         }
     }
