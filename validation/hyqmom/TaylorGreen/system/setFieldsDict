@@ -9,37 +9,25 @@ FoamFile
 {
     version     2.0;
     format      ascii;
-    class       volScalarField;
-    location    "0";
-    object      moment.110.particles;
+    class       dictionary;
+    location    "system";
+    object      setFieldsDict;
 }
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
-dimensions      [0 2 -2 0 0 0 0];
-
-internalField   uniform 0;
-
-boundaryField
-{
-    inlet1
+regions
+(
+    cylinderToCell
     {
-        type            fixedValue;
-        value           uniform 0.1;
+        p1 (0 0.2 0);
+        p2 (0 0.2 0.1);
+        radius   0.2;
+        fieldValues
+        (
+            volScalarFieldValue moment.00.particles 0.1
+        );
     }
-    inlet2
-    {
-        type            fixedValue;
-        value           uniform -0.1;
-    }
-    outlet
-    {
-        type            zeroGradient;
-    }
-    walls
-    {
-        type            zeroGradient;
-    }
-}
+);
 
 
 // ************************************************************************* //

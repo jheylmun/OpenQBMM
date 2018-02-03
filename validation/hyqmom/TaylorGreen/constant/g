@@ -9,37 +9,14 @@ FoamFile
 {
     version     2.0;
     format      ascii;
-    class       volScalarField;
-    location    "0";
-    object      moment.110.particles;
+    class       uniformDimensionedVectorField;
+    location    "constant";
+    object      g;
 }
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
-dimensions      [0 2 -2 0 0 0 0];
-
-internalField   uniform 0;
-
-boundaryField
-{
-    inlet1
-    {
-        type            fixedValue;
-        value           uniform 0.1;
-    }
-    inlet2
-    {
-        type            fixedValue;
-        value           uniform -0.1;
-    }
-    outlet
-    {
-        type            zeroGradient;
-    }
-    walls
-    {
-        type            zeroGradient;
-    }
-}
+dimensions      [0 1 -2 0 0 0 0];
+value           (0 -9.81 0);
 
 
 // ************************************************************************* //

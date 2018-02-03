@@ -155,6 +155,12 @@ public:
 
             //- Set mapped location using pointer and label list
             void set(const labelList& l, mappedType* entry);
+
+            //- Set mapped location using autoPtr and label list
+            void set(const labelList& l, autoPtr<mappedType> entry);
+
+            //- Set mapped location using tmp and label list
+            void set(const labelList& l, tmp<mappedType> entry);
 };
 
 

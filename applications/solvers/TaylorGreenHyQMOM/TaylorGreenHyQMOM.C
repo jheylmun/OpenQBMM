@@ -34,7 +34,9 @@ Description
 
 #include "fvCFD.H"
 #include "populationBalanceModel.H"
-
+#include "quadratureApproximations.H"
+#include "mappedPtrList.H"
+#include "constants.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
@@ -45,7 +47,6 @@ int main(int argc, char *argv[])
     #include "setRootCase.H"
     #include "createTime.H"
     #include "createMesh.H"
-    #include "createControl.H"
     #include "createFields.H"
     #include "createTimeControls.H"
     #include "CourantNos.H"
@@ -64,9 +65,12 @@ int main(int argc, char *argv[])
         runTime++;
 
         Info<< "Time = " << runTime.timeName() << nl << endl;
-        {
-            populationBalance->solve();
-        }
+
+        #include "computeDrag.H"
+
+        populationBalance->solve();
+        #include "vEqns.H"
+        #include "computeParticleFields.H"
 
         runTime.write();
 

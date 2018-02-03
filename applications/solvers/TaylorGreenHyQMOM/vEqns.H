@@ -10,9 +10,7 @@ forAll(nodes, nodei)
         fvm::ddt(alphapi, Upi)
       - alphapi*fvc::ddt(Upi)
      ==
-        g*alphapi*rhop/rhof
-
-      + Kds[nodei]*U
+        Kds[nodei]*U
       - fvm::Sp(Kds[nodei], Upi)
     );
 

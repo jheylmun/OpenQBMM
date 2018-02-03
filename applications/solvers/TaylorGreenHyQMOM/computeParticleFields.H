@@ -7,7 +7,7 @@ forAll(momentOrders[0], cmpti)
     order1[cmpti] = 1;
     order2[cmpti] = 2;
 
-    volScalarField meanU("meanU", moments(order1)/max(alpha, residualAlpha));
+    volScalarField meanU(moments(order1)/max(alpha, residualAlpha));
     Up.replace(cmpti, meanU);
 
     Thetap +=

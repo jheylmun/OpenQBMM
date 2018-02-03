@@ -1,19 +1,3 @@
-#include "readGravitationalAcceleration.H"
-
-Info<< "Reading field p\n" << endl;
-volScalarField p
-(
-    IOobject
-    (
-        "p",
-        runTime.timeName(),
-        mesh,
-        IOobject::MUST_READ,
-        IOobject::AUTO_WRITE
-    ),
-    mesh
-);
-
 Info<< "Reading field U\n" << endl;
 volVectorField U
 (
@@ -22,31 +6,28 @@ volVectorField U
         "U",
         runTime.timeName(),
         mesh,
-        IOobject::MUST_READ,
+        IOobject::NO_READ,
         IOobject::AUTO_WRITE
     ),
-    mesh
+    mesh,
+    dimensionedVector("0", dimVelocity, Zero)
 );
 
-#include "createPhi.H"
-
-
-label pRefCell = 0;
-scalar pRefValue = 0.0;
-setRefCell(p, pimple.dict(), pRefCell, pRefValue);
-mesh.setFluxRequired(p.name());
-
-
-singlePhaseTransportModel laminarTransport(U, phi);
-
-autoPtr<incompressible::turbulenceModel> turbulence
+surfaceScalarField phi
 (
-    incompressible::turbulenceModel::New(U, phi, laminarTransport)
+    IOobject
+    (
+        "phi",
+        runTime.timeName(),
+        mesh,
+        IOobject::NO_READ,
+        IOobject::NO_WRITE
+    ),
+    mesh,
+    dimensionedScalar("0", dimVolume/dimTime, 0.0)
 );
-const volScalarField& nuf = laminarTransport.nu();
 
 // Particle fields
-
 Info<< "Reading phaseProperties\n" << endl;
 IOdictionary phaseProperties
 (
@@ -62,8 +43,25 @@ IOdictionary phaseProperties
 word particleName(phaseProperties.lookup("dilutePhase"));
 scalar residualAlpha(phaseProperties.lookupType<scalar>("residualAlpha"));
 dimensionedScalar rhof(phaseProperties.lookup("rhof"));
+dimensionedScalar mu(phaseProperties.lookup("mu"));
+dimensionedScalar nu = mu/rhof;
 dimensionedScalar rhop(phaseProperties.lookup("rhop"));
 scalar e(phaseProperties.lookupType<scalar>("e"));
+
+const vectorField& points = mesh.C();
+const scalar twoPi = 2.0*Foam::constant::mathematical::pi;
+forAll (U, celli)
+{
+    scalar x = points[celli].x();
+    scalar y = points[celli].y();
+    U[celli] =
+        vector
+        (
+            Foam::cos(twoPi*x)*Foam::sin(twoPi*y),
+            -Foam::sin(twoPi*x)*Foam::cos(twoPi*y),
+            0.0
+        );
+}
 
 volScalarField dp
 (
@@ -115,7 +113,7 @@ mappedPtrList<volVectorNode>& nodes = quadrature.nodes();
 const label nDims = momentOrders[0].size();
 
 const volScalarField& alpha = moments(labelList(nDims, 0));
-
+Info<<labelList(nDims, 0)<<endl;
 volVectorField Up
 (
     IOobject
@@ -144,8 +142,6 @@ volScalarField Thetap
     dimensionedScalar("zero", sqr(dimVelocity), 0.0)
 );
 
+Info<< "St= " << (rhop*sqr(dp[0])/(mu*18.0)).value() << endl;
 
 #include "computeParticleFields.H"
-
-#include "createMRF.H"
-#include "createFvOptions.H"

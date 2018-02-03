@@ -9,37 +9,36 @@ FoamFile
 {
     version     2.0;
     format      ascii;
-    class       volScalarField;
-    location    "0";
-    object      moment.110.particles;
+    class       dictionary;
+    location    "constant";
+    object      populationaBalanceProperties;
 }
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
-dimensions      [0 2 -2 0 0 0 0];
+populationBalanceModel velocity;
 
-internalField   uniform 0;
-
-boundaryField
+velocityCoeffs
 {
-    inlet1
+    odeCoeffs
     {
-        type            fixedValue;
-        value           uniform 0.1;
+        solveODESource off;
+
+        ATol    1.0e-6;
+        RTol    1.0e-4;
+        fac     0.9;
+        facMin  0.1;
+        facMax  5.0;
+        minLocalDt 1.0e-4;
     }
-    inlet2
+
+    collision  on;
+
+    collisionKernel
     {
-        type            fixedValue;
-        value           uniform -0.1;
-    }
-    outlet
-    {
-        type            zeroGradient;
-    }
-    walls
-    {
-        type            zeroGradient;
+        collisionKernel esBGK;
+        e           0.8;
+        tau         tau     [0 0 1 0 0 0 0]     0.3;
     }
 }
-
 
 // ************************************************************************* //

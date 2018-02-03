@@ -16,35 +16,32 @@ FoamFile
 
 convertToMeters 1;
 
-W       0.03;
-H       0.6;
+W       0.5;
+nW      -0.5;
+H       0.5;
+nH      -0.5;
 depth   0.01;
+
+cellSize    0.025;
+
+nWPts       100;//#calc "round($W/$cellSize)";
+nHPts       100;//#calc "round($H/$cellSize)";
 
 vertices
 (
-    (   0    0      0           )   //0
-    (   $W   0      0           )   //1
-    (   $W   $H     0           )   //2
-    (   0    $H     0           )   //3
-    (   0    0      $depth      )   //4
-    (   $W   0      $depth      )   //5
-    (   $W   $H     $depth      )   //6
-    (   0    $H     $depth      )   //7
+    (   $nW  $nH    0           )   //0
+    (   $W   $nH    0           )   //3
+    (   $W   $H     0           )   //4
+    (   $nW  $H     0           )   //7
+    (   $nW  $nH    $depth      )   //16
+    (   $W   $nH    $depth      )   //19
+    (   $W   $H     $depth      )   //20
+    (   $nW  $H     $depth      )   //23
 );
 
 blocks
 (
-    hex (0 1 2 3 4 5 6 7) (56 200 1)
-    simpleGrading
-    (
-        (
-            (0.1    0.15     2.0)    // 20% y-dir, 30% cells, expansion = 4
-            (0.80    0.7     1.0)    // 60% y-dir, 40% cells, expansion = 1
-            (0.1    0.15     0.5)  // 20% y-dir, 30% cells, expansion = 0.25 (1/4)
-        )
-        1
-        1
-    )
+    hex (0 1 2 3 4 5 6 7) ($nWPts $nHPts 1) simpleGrading (1 1 1)
 );
 
 edges
@@ -53,40 +50,40 @@ edges
 
 boundary
 (
-    inlet
+    bottom
     {
         type            cyclic;
-        neighbourPatch  outlet;
+        neighbourPatch  top;
         faces
         (
             (0 1 5 4)
         );
     }
-    outlet
+    top
     {
         type            cyclic;
-        neighbourPatch  inlet;
+        neighbourPatch  bottom;
         faces
         (
-            (2 3 7 6)
+            (3 2 6 7)
         );
     }
-    walls
+    right
     {
-        type            wall;
+        type            cyclic;
+        neighbourPatch  left;
         faces
         (
             (0 3 7 4)
-            (1 2 6 5)
         );
     }
-    frontBack
+    left
     {
-        type            empty;
+        type            cyclic;
+        neighbourPatch  right;
         faces
         (
-            (0 1 2 3)
-            (4 5 6 7)
+            (1 2 6 5)
         );
     }
 );

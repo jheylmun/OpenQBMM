@@ -1,0 +1,27 @@
+#!/bin/sh
+cd ${0%/*} || exit 1    # Run from this directory
+
+# Source tutorial run functions
+. $WM_PROJECT_DIR/bin/tools/RunFunctions
+
+foamListTimes -rm
+generateMoments
+setFields
+
+par=0
+
+if [ $1 = "-parallel" ]
+then
+    par=1
+fi
+
+if [ $par = 1 ]
+then
+    rm -r processor*
+    nProcs=$(getNumberOfProcessors)
+
+    decomposePar
+    mpirun -np $nProcs TaylorGreenHyQMOM -parallel
+else
+    TaylorGreenHyQMOM
+fi

@@ -111,9 +111,10 @@ template <class mappedType>
 template<class INew>
 Foam::mappedPtrList<mappedType>::mappedPtrList(Istream& is, const INew& iNewt)
 :
-    PtrList<mappedType>(is, iNewt),
-    map_(this->size())
-{}
+    PtrList<mappedType>(is, iNewt)
+{
+    map_.resize(this->size());
+}
 
 
 // * * * * * * * * * * * * * * * * Destructor  * * * * * * * * * * * * * * * //
@@ -172,6 +173,26 @@ void Foam::mappedPtrList<mappedType>::set
 (
     const labelList& l,
     mappedType* entry
+)
+{
+    PtrList<mappedType>::set(map_[listToLabel(l)], entry);
+}
+
+template <class mappedType>
+void Foam::mappedPtrList<mappedType>::set
+(
+    const labelList& l,
+    autoPtr<mappedType> entry
+)
+{
+    PtrList<mappedType>::set(map_[listToLabel(l)], entry);
+}
+
+template <class mappedType>
+void Foam::mappedPtrList<mappedType>::set
+(
+    const labelList& l,
+    tmp<mappedType> entry
 )
 {
     PtrList<mappedType>::set(map_[listToLabel(l)], entry);
