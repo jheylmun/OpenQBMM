@@ -153,6 +153,9 @@ public:
         //- Return the maximum Courant number ensuring moment realizability
         virtual scalar realizableCo() = 0;
 
+        //- Return the maximum Courant number based on velocities
+        virtual scalar CoNum() = 0;
+
         //- Update moment advection
         virtual void update() = 0;
 

@@ -69,6 +69,11 @@ Foam::scalar Foam::velocityAdvection::noAdvection::realizableCo()
     return scalar(1);
 }
 
+Foam::scalar Foam::velocityAdvection::noAdvection::CoNum()
+{
+    return scalar(0);
+}
+
 void Foam::velocityAdvection::noAdvection::update()
 {
     return;

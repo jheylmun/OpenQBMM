@@ -124,6 +124,9 @@ public:
         //- Return the maximum Courant number ensuring moment realizability
         virtual scalar realizableCo() = 0;
 
+        //- Return the maximum Courant number based on velocities
+        virtual scalar CoNum() = 0;
+
         //- Solve population balance equation
         virtual void solve() = 0;
 

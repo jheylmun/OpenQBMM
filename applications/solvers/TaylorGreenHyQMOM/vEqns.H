@@ -7,7 +7,7 @@ forAll(nodes, nodei)
 
     fvVectorMatrix UpiEqn
     (
-        fvm::ddt(alphapi, Upi)
+        alphapi*fvm::ddt(Upi)
       - alphapi*fvc::ddt(Upi)
      ==
         Kds[nodei]*U

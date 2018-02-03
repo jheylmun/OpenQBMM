@@ -19,12 +19,12 @@ regions
 (
     cylinderToCell
     {
-        p1 (0 0.2 0);
-        p2 (0 0.2 0.1);
-        radius   0.2;
+        p1 (0 0.1 0);
+        p2 (0 0.1 0.1);
+        radius   0.1;
         fieldValues
         (
-            volScalarFieldValue moment.00.particles 0.1
+            volScalarFieldValue moment.00.particles 0.001
         );
     }
 );

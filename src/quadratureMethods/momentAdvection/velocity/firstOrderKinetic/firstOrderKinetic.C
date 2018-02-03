@@ -151,6 +151,11 @@ void Foam::velocityAdvection::firstOrderKinetic::interpolateNodes()
 
 Foam::scalar Foam::velocityAdvection::firstOrderKinetic::realizableCo()
 {
+    return 1.0;
+}
+
+Foam::scalar Foam::velocityAdvection::firstOrderKinetic::CoNum()
+{
     scalar CoNum = 0.0;
     const fvMesh& mesh = own_.mesh();
     forAll(nodes_, nodei)

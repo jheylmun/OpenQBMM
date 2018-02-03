@@ -162,6 +162,12 @@ Foam::scalar Foam::PDFTransportModels::populationBalanceModels
     return velocityPDFTransportModel::realizableCo();
 }
 
+Foam::scalar Foam::PDFTransportModels::populationBalanceModels
+::velocityPopulationBalance::CoNum()
+{
+    return velocityPDFTransportModel::CoNum();
+}
+
 void Foam::PDFTransportModels::populationBalanceModels
 ::velocityPopulationBalance::solve()
 {

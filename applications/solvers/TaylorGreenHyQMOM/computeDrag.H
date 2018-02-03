@@ -1,52 +1,23 @@
 PtrList<volScalarField> Kds(nodes.size());
-volScalarField Kd
-(
-    IOobject
-    (
-        "Kd",
-        runTime.timeName(),
-        mesh,
-        IOobject::NO_READ,
-        IOobject::NO_WRITE
-    ),
-    mesh,
-    dimensionedScalar("zero", inv(dimTime), 0.0)
-);
 
+forAll(nodes, nodei)
 {
-    volScalarField alphaf
+    const volVectorNode& node = nodes[nodei];
+        const volScalarField& alphapi = node.primaryWeight();
+    const volVectorField& Upi = node.primaryAbscissa();
+
+    volScalarField Re(mag(Upi - U)*dp/nu);
+    volScalarField CdRe
     (
-        max(scalar(1) - alpha, residualAlpha)
+        24.0*(1.0 + 0.15*pow(Re, 0.687))
     );
 
-    forAll(nodes, nodei)
-    {
-        const volVectorNode& node = nodes[nodei];
-        const volScalarField& alphapi = node.primaryWeight();
-        const volVectorField& Upi = node.primaryAbscissa();
-
-        // WenYu drag
-        volScalarField alphafi
+    Kds.set
+    (
+        nodei,
+        new volScalarField
         (
-            max(scalar(1) - alphapi, residualAlpha)
-        );
-        volScalarField Re(mag(Upi - U)*dp/nu);
-        volScalarField Res(alphafi*Re);
-        volScalarField CdsRes
-        (
-            neg(Res - 1000)*24*(1.0 + 0.15*pow(Res, 0.687))
-          + pos0(Res - 1000)*0.44*max(Res, 1e-4)
-        );
-
-        volScalarField CdRe
-        (
-            CdsRes
-           *pow(alphafi, -3.65)
-           *max(1.0 - alpha, residualAlpha)
-        );
-
-        volScalarField Kdi(max(alphapi, residualAlpha)*0.75*CdRe*nu/sqr(dp));
-        Kds.set(nodei, new volScalarField(Kdi));
-        Kd += Kdi;
-    }
+            max(alphapi, residualAlpha)*rhof/rhop*0.75*CdRe*nu/sqr(dp)
+        )
+    );
 }

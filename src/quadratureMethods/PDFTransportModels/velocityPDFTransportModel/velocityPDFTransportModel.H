@@ -154,6 +154,9 @@ public:
             //- Return the maximum Courant number ensuring moment realizability
             inline scalar realizableCo();
 
+            //- Return the maximum Courant number based on velocities
+            virtual scalar CoNum();
+
 
         //-Edit
 

@@ -71,6 +71,13 @@ Foam::populationBalanceModels::noPopulationBalance::realizableCo
     return 1.0;
 }
 
+Foam::scalar
+Foam::populationBalanceModels::noPopulationBalance::CoNum
+()
+{
+    return 0.0;
+}
+
 void Foam::populationBalanceModels::noPopulationBalance::solve()
 {
     return;

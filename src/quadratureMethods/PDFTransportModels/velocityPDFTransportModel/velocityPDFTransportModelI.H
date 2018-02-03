@@ -37,4 +37,9 @@ Foam::PDFTransportModels::velocityPDFTransportModel::realizableCo()
     return momentAdvection_().realizableCo();
 }
 
+Foam::scalar
+Foam::PDFTransportModels::velocityPDFTransportModel::CoNum()
+{
+    return momentAdvection_().CoNum();
+}
 // ************************************************************************* //
