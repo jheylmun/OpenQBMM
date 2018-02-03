@@ -49,12 +49,11 @@ volScalarField Kd
         (
             0.75
            *max(alphapi, residualAlpha)
-           *rhof/rhop
            *CdRe
            *nuf
            /sqr(dp)
         );
-        Kds.set(nodei, new volScalarField(Kdi));
+        Kds.set(nodei, new volScalarField(Kdi*rhof));
         Kd += Kdi;
     }
 }

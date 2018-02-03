@@ -16,9 +16,9 @@ FoamFile
 
 convertToMeters 1;
 
-W       0.03;
-H       0.6;
-depth   0.01;
+W       0.05;
+H       0.3;
+depth   0.06;
 
 vertices
 (

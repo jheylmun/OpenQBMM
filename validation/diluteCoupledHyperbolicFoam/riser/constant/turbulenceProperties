@@ -16,4 +16,18 @@ FoamFile
 
 simulationType laminar;
 
+LES
+{
+    LESModel Smagorinsky;
+
+    turbulence      on;
+    printCoeffs     on;
+
+    delta           cubeRootVol;
+
+    cubeRootVolCoeffs
+    {
+    }
+}
+
 // ************************************************************************* //

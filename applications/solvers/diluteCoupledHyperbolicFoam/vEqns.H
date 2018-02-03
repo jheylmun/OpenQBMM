@@ -1,16 +1,16 @@
 forAll(nodes, nodei)
 {
     const volVectorNode& node = nodes[nodei];
-    const volScalarField& alphapi = node.primaryWeight();
+    volScalarField alphaRho(node.primaryWeight()*rhop);
     volVectorField& Upi = nodes[nodei].primaryAbscissa();
 
 
     fvVectorMatrix UpiEqn
     (
-        fvm::ddt(alphapi, Upi)
-      - alphapi*fvc::ddt(Upi)
+        alphaRho*fvm::ddt(Upi)
+      - alphaRho*fvc::ddt(Upi)
      ==
-        g*alphapi*rhop/rhof
+        g*alphaRho
 
       + Kds[nodei]*U
       - fvm::Sp(Kds[nodei], Upi)
