@@ -6,7 +6,6 @@ cd ${0%/*} || exit 1    # Run from this directory
 
 foamListTimes -rm
 generateMoments
-setFields
 
 par=0
 

@@ -50,7 +50,7 @@ particles
     {
         node0
         {
-            weight  0;
+            weight  0.001;
             abscissa (0 0);
         }
 //         node0

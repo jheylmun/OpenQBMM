@@ -154,16 +154,16 @@ void Foam::populationBalanceSubModels::collisionKernels::esBGKCollision
 ::updateFields1D()
 {
     const volVectorMomentFieldSet& moments = quadrature_.moments();
-    volScalarField m0 = max(moments(0), SMALL);
+    volScalarField m0(max(moments(0), SMALL));
 
     // Mean velocity
-    volScalarField u = meanVelocity(m0, moments(1));
-    volScalarField uSqr = sqr(u);
+    volScalarField u(meanVelocity(m0, moments(1)));
+    volScalarField uSqr(sqr(u));
 
     // Variances of velocities
     dimensionedScalar zeroVar("zero", sqr(dimVelocity), 0.0);
-    volScalarField sigma = max(moments(2)/m0 - uSqr, zeroVar);
-    volScalarField sigma1 = (a1_ + b1_)*sigma;
+    volScalarField sigma(max(moments(2)/m0 - uSqr, zeroVar));
+    volScalarField sigma1((a1_ + b1_)*sigma);
 
     Meqf_(0) = moments(0);
     Meqf_(1) = moments(1);
@@ -176,23 +176,23 @@ void Foam::populationBalanceSubModels::collisionKernels::esBGKCollision
 ::updateFields2D()
 {
     const volVectorMomentFieldSet& moments = quadrature_.moments();
-    volScalarField m00 = max(moments(0,0), SMALL);
+    volScalarField m00(max(moments(0,0), SMALL));
 
     // Mean velocity
-    volScalarField u = meanVelocity(m00, moments(1,0));
-    volScalarField v = meanVelocity(m00, moments(0,1));
-    volScalarField uSqr = sqr(u);
-    volScalarField vSqr = sqr(v);
+    volScalarField u(meanVelocity(m00, moments(1,0)));
+    volScalarField v(meanVelocity(m00, moments(0,1)));
+    volScalarField uSqr(sqr(u));
+    volScalarField vSqr(sqr(v));
 
     // Variances of velocities
     dimensionedScalar zeroVar("zero", sqr(dimVelocity), 0.0);
-    volScalarField sigma1 = max(moments(2,0)/m00 - uSqr, zeroVar);
-    volScalarField sigma2 = max(moments(0,2)/m00 - vSqr, zeroVar);
-    volScalarField Theta = (sigma1 + sigma2)/2.0;
+    volScalarField sigma1(max(moments(2,0)/m00 - uSqr, zeroVar));
+    volScalarField sigma2(max(moments(0,2)/m00 - vSqr, zeroVar));
+    volScalarField Theta((sigma1 + sigma2)/2.0);
 
-    volScalarField sigma11 = a1_*Theta + b1_*sigma1;
-    volScalarField sigma22 = a1_*Theta + b1_*sigma2;
-    volScalarField sigma12 = b1_*(moments(1,1)/m00 - u*v);
+    volScalarField sigma11(a1_*Theta + b1_*sigma1);
+    volScalarField sigma22(a1_*Theta + b1_*sigma2);
+    volScalarField sigma12(b1_*(moments(1,1)/m00 - u*v));
 
     Meqf_(0,0) = moments(0,0);
     Meqf_(1,0) = moments(1,0);
@@ -210,29 +210,29 @@ void Foam::populationBalanceSubModels::collisionKernels::esBGKCollision
 ::updateFields3D()
 {
     const volVectorMomentFieldSet& moments = quadrature_.moments();
-    volScalarField m000 = max(moments(0,0,0), SMALL);
+    volScalarField m000(max(moments(0,0,0), SMALL));
 
     // Mean velocity
-    volScalarField u = meanVelocity(m000, moments(1,0,0));
-    volScalarField v = meanVelocity(m000, moments(0,1,0));
-    volScalarField w = meanVelocity(m000, moments(0,0,1));
-    volScalarField uSqr = sqr(u);
-    volScalarField vSqr = sqr(v);
-    volScalarField wSqr = sqr(w);
+    volScalarField u(meanVelocity(m000, moments(1,0,0)));
+    volScalarField v(meanVelocity(m000, moments(0,1,0)));
+    volScalarField w(meanVelocity(m000, moments(0,0,1)));
+    volScalarField uSqr(sqr(u));
+    volScalarField vSqr(sqr(v));
+    volScalarField wSqr(sqr(w));
 
     // Variances of velocities
     dimensionedScalar zeroVar("zero", sqr(dimVelocity), 0.0);
-    volScalarField sigma1 = max(moments(2,0,0)/m000 - uSqr, zeroVar);
-    volScalarField sigma2 = max(moments(0,2,0)/m000 - vSqr, zeroVar);
-    volScalarField sigma3 = max(moments(0,0,2)/m000 - wSqr, zeroVar);
-    volScalarField Theta = (sigma1 + sigma2 + sigma3)/3.0;
+    volScalarField sigma1(max(moments(2,0,0)/m000 - uSqr, zeroVar));
+    volScalarField sigma2(max(moments(0,2,0)/m000 - vSqr, zeroVar));
+    volScalarField sigma3(max(moments(0,0,2)/m000 - wSqr, zeroVar));
+    volScalarField Theta((sigma1 + sigma2 + sigma3)/3.0);
 
-    volScalarField sigma11 = a1_*Theta + b1_*sigma1;
-    volScalarField sigma22 = a1_*Theta + b1_*sigma2;
-    volScalarField sigma33 = a1_*Theta + b1_*sigma3;
-    volScalarField sigma12 = b1_*(moments(1,1,0)/m000 - u*v);
-    volScalarField sigma13 = b1_*(moments(1,0,1)/m000 - u*w);
-    volScalarField sigma23 = b1_*(moments(0,1,1)/m000 - v*w);
+    volScalarField sigma11(a1_*Theta + b1_*sigma1);
+    volScalarField sigma22(a1_*Theta + b1_*sigma2);
+    volScalarField sigma33(a1_*Theta + b1_*sigma3);
+    volScalarField sigma12(b1_*(moments(1,1,0)/m000 - u*v));
+    volScalarField sigma13(b1_*(moments(1,0,1)/m000 - u*w));
+    volScalarField sigma23(b1_*(moments(0,1,1)/m000 - v*w));
 
     Meqf_(0,0,0) = moments(0,0,0);
     Meqf_(1,0,0) = moments(1,0,0);

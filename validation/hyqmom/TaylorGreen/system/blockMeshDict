@@ -22,10 +22,8 @@ H       0.5;
 nH      -0.5;
 depth   0.01;
 
-cellSize    0.025;
-
-nWPts       50;//#calc "round($W/$cellSize)";
-nHPts       50;//#calc "round($H/$cellSize)";
+nWPts       100;//#calc "round($W/$cellSize)";
+nHPts       100;//#calc "round($H/$cellSize)";
 
 vertices
 (

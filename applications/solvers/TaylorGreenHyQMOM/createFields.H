@@ -42,11 +42,12 @@ IOdictionary phaseProperties
 );
 word particleName(phaseProperties.lookup("dilutePhase"));
 scalar residualAlpha(phaseProperties.lookupType<scalar>("residualAlpha"));
-dimensionedScalar rhof(phaseProperties.lookup("rhof"));
-dimensionedScalar mu(phaseProperties.lookup("mu"));
-dimensionedScalar nu = mu/rhof;
-dimensionedScalar rhop(phaseProperties.lookup("rhop"));
-scalar e(phaseProperties.lookupType<scalar>("e"));
+dimensionedScalar St
+(
+    "St",
+    dimTime,
+    phaseProperties
+);
 
 const vectorField& points = mesh.C();
 const scalar twoPi = 2.0*Foam::constant::mathematical::pi;
@@ -57,25 +58,11 @@ forAll (U, celli)
     U[celli] =
         vector
         (
-            Foam::cos(twoPi*x)*Foam::sin(twoPi*y),
-            -Foam::sin(twoPi*x)*Foam::cos(twoPi*y),
+            Foam::sin(twoPi*x)*Foam::cos(twoPi*y),
+            -Foam::sin(twoPi*y)*Foam::cos(twoPi*x),
             0.0
         );
 }
-
-volScalarField dp
-(
-    IOobject
-    (
-        IOobject::groupName("d", particleName),
-        runTime.timeName(),
-        mesh,
-        IOobject::NO_READ,
-        IOobject::NO_WRITE
-    ),
-    mesh,
-    dimensionedScalar(phaseProperties.lookup("d"))
-);
 
 Info<< "Reading populationBalanceProperties\n" << endl;
 IOdictionary populationBalanceProperties
@@ -141,7 +128,5 @@ volScalarField Thetap
     mesh,
     dimensionedScalar("zero", sqr(dimVelocity), 0.0)
 );
-
-Info<< "St= " << (rhop*sqr(dp[0])/(mu*18.0)).value() << endl;
 
 #include "computeParticleFields.H"
