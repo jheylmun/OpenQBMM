@@ -22,7 +22,7 @@ ddtSchemes
 
 gradSchemes
 {
-    default         none;
+    default         cellLimited leastSquares 0.2;
 }
 
 divSchemes

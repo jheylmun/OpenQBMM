@@ -65,6 +65,7 @@ Foam::hyperbolicFieldMomentInversion::hyperbolicFieldMomentInversion
         new hyperbolicConditionalMomentInversion
         (
             dict.subDict("basicMomentInversion"),
+            mesh.geometricD(),
             momentOrders[0].size()
         )
     )

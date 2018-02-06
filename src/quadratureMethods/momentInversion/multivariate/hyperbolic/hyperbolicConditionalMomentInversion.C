@@ -121,28 +121,29 @@ Foam::hyperbolicConditionalMomentInversion::hyperbolicConditionalMomentInversion
 Foam::hyperbolicConditionalMomentInversion::hyperbolicConditionalMomentInversion
 (
     const dictionary& dict,
-    const label nGeometricD
+    const Vector<label>& geometricD,
+    const label nDimensions
 )
 :
-    nGeometricD_(nGeometricD),
-    nDimensions_(3),
-    nMoments_(nGeometricD_ == 2 ? 10 : 16),
-    nNodes_(nGeometricD_ == 2 ? 9 : 27),
+    geometricD_(geometricD),
+    nDimensions_(nDimensions),
+    nMoments_(nDimensions == 2 ? 10 : 16),
+    nNodes_(nDimensions == 2 ? 9 : 27),
     support_("R"),
     moments_
     (
         nMoments_,
-        nGeometricD_ == 2 ? twoDimMomentOrders : threeDimMomentOrders
+        nDimensions == 2 ? twoDimMomentOrders : threeDimMomentOrders
     ),
     abscissae_
     (
         nNodes_,
-        nGeometricD_ == 2 ? twoDimNodeIndexes : threeDimNodeIndexes
+        nDimensions == 2 ? twoDimNodeIndexes : threeDimNodeIndexes
     ),
     weights_
     (
         nNodes_,
-        nGeometricD_ == 2 ? twoDimNodeIndexes : threeDimNodeIndexes
+        nDimensions == 2 ? twoDimNodeIndexes : threeDimNodeIndexes
     ),
     univariateInverter_
     (
@@ -224,10 +225,69 @@ void Foam::hyperbolicConditionalMomentInversion::realizabilityUnivariateMoments
 
 void Foam::hyperbolicConditionalMomentInversion::invert1D
 (
-    const multivariateMomentSet& moments
+    const multivariateMomentSet& moments,
+    scalarList& weights1D,
+    scalarList& abscissae1D
 )
 {
-    NotImplemented;
+    scalar m0 = moments[0];
+    label nWeights1D = weights1D.size();
+
+    if (m0 < SMALL)
+    {
+        forAll(weights1D, wi)
+        {
+            weights1D[wi] = m0/scalar(nWeights1D);
+            abscissae1D[wi] = 0.0;
+        }
+        return;
+    };
+
+    // Calculate normalized moments
+    mappedScalarList scaledMoments(moments);
+
+    forAll(scaledMoments, mi)
+    {
+        scaledMoments[mi] /= m0;
+    }
+
+    // Mean velocities and powers
+    scalar meanU = scaledMoments(1);
+    scalar sqrMeanU = sqr(meanU);
+
+    // Calculate central moments
+    mappedScalarList centralMoments(scaledMoments);
+
+    centralMoments(1) = 0.0;
+
+    // NOTE: Sign changed due to -= operator
+    centralMoments(2) -= sqrMeanU;
+    centralMoments(3) -= (3.0*meanU*scaledMoments(2) - 2.0*pow3(meanU));
+    centralMoments(4) -= (4.0*meanU*scaledMoments(3)
+        - 6.0*sqrMeanU*scaledMoments(2) + 3.0*sqr(sqrMeanU));
+
+    // One-dimensional inversion with realizability test
+    univariateMomentSet momentsToInvert
+    (
+        {
+            1.0,
+            0.0,
+            centralMoments(2),
+            centralMoments(3),
+            centralMoments(4)
+        },
+        "R"
+    );
+
+    // Find univariate quadrature in first direction
+    univariateInverter_().invert(momentsToInvert);
+
+    // Store univariate quadrature in first direction
+    forAll(weights1D, wi)
+    {
+        weights1D[wi] = univariateInverter_().weights()[wi];
+        abscissae1D[wi] = univariateInverter_().abscissae()[wi];
+    }
 }
 
 void Foam::hyperbolicConditionalMomentInversion::invert2D
@@ -1003,11 +1063,11 @@ void Foam::hyperbolicConditionalMomentInversion::invert
 )
 {
     reset();
-    if (nGeometricD_ == 3)
+    if (nDimensions_ == 3)
     {
         invert3D(moments);
     }
-    else if (nGeometricD_ == 2)
+    else if (nDimensions_ == 2)
     {
         mappedList<scalar> w
         (
@@ -1036,7 +1096,16 @@ void Foam::hyperbolicConditionalMomentInversion::invert
     }
     else
     {
-        invert1D(moments);
+        scalarList w(nNodes_, 0.0);
+        scalarList u(nNodes_, 0.0);
+
+        invert1D(moments, w, u);
+
+        forAll(u, nodei)
+        {
+            weights_[nodei] = w[nodei];
+            abscissae_[nodei] = vector(u[nodei], 0.0, 0.0);
+        }
     }
 }
 

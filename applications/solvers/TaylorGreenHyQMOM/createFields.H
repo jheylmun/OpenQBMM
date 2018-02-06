@@ -55,12 +55,13 @@ forAll (U, celli)
 {
     scalar x = points[celli].x();
     scalar y = points[celli].y();
+    scalar z = points[celli].z();
     U[celli] =
         vector
         (
             Foam::sin(twoPi*x)*Foam::cos(twoPi*y),
             -Foam::sin(twoPi*y)*Foam::cos(twoPi*x),
-            0.0
+            0.0//-Foam::sin(twoPi*z)*Foam::cos(twoPi*y)
         );
 }
 

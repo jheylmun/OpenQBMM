@@ -63,7 +63,7 @@ class hyperbolicConditionalMomentInversion
     // Private member data
 
         //- Number of geometric dimensions
-        const label nGeometricD_;
+        const Vector<label>& geometricD_;
 
         //- Number of dimensions in velocity space
         const label nDimensions_;
@@ -119,7 +119,12 @@ class hyperbolicConditionalMomentInversion
         );
 
         //- One-dimensional HyQMOM inversion
-        void invert1D(const multivariateMomentSet& moments);
+        void invert1D
+        (
+            const multivariateMomentSet& moments,
+            scalarList& weights1D,
+            scalarList& abscissae1D
+        );
 
         //- Two-dimensional HyCQMOM inversion
         void invert2D
@@ -153,7 +158,8 @@ public:
         hyperbolicConditionalMomentInversion
         (
             const dictionary& dict,
-            const label nGeometricD
+            const Vector<label>& geometicD,
+            const label nDimensions
         );
 
 

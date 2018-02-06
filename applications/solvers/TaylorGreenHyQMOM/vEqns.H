@@ -1,7 +1,6 @@
 forAll(nodes, nodei)
 {
     volVectorField& Upi = nodes[nodei].primaryAbscissa();
-
     fvVectorMatrix UpiEqn
     (
         fvm::ddt(Upi)
@@ -14,7 +13,6 @@ forAll(nodes, nodei)
     UpiEqn.relax();
     UpiEqn.solve();
 }
-forAll(moments[0], celli)
-{
-    quadrature.updateLocalMoments(celli);
-}
+
+//- Update moments to include drag source
+quadrature.updateMoments();
