@@ -89,6 +89,13 @@ public:
         //- Update moment advection using a specified velocity field
         virtual void update
         (
+            const volVectorField& U,
+            const bool wallCollisions = false
+        );
+
+        //- Update moment advection using a specified list of velocity fields
+        virtual void update
+        (
             const mappedPtrList<volVectorField>& Us,
             const bool wallCollisions = false
         );

@@ -81,6 +81,15 @@ void Foam::velocityAdvection::noAdvection::update()
 
 void Foam::velocityAdvection::noAdvection::update
 (
+    const volVectorField& U,
+    const bool wallCollisions
+)
+{
+    return;
+}
+
+void Foam::velocityAdvection::noAdvection::update
+(
     const mappedPtrList<volVectorField>& Us,
     const bool wallCollisions
 )

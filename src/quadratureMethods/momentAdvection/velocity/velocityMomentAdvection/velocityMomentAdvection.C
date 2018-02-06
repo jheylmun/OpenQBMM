@@ -114,6 +114,4 @@ Foam::velocityMomentAdvection::~velocityMomentAdvection()
 
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
 
-
-
 // ************************************************************************* //
