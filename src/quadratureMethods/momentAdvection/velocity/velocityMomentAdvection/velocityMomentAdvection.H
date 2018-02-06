@@ -159,6 +159,13 @@ public:
         //- Update moment advection
         virtual void update() = 0;
 
+        //- Update moment advection using a specified velocity field
+        virtual void update
+        (
+            const mappedPtrList<volVectorField>& Us,
+            const bool wallCollisions
+        ) = 0;
+
 };
 
 
