@@ -115,6 +115,72 @@ Foam::hyperbolicConditionalMomentInversion::hyperbolicConditionalMomentInversion
     {3, 3, 3}
 };
 
+Foam::label Foam::hyperbolicConditionalMomentInversion::nHyperbolicNodes
+(
+    const label nDims
+)
+{
+    if (nDims == 1)
+    {
+        return 3;
+    }
+    else if (nDims == 2)
+    {
+        return 9;
+    }
+    return 27;
+}
+
+Foam::labelListList
+Foam::hyperbolicConditionalMomentInversion::hyperbolicNodeIndexes
+(
+    const label nDims
+)
+{
+    if (nDims == 1)
+    {
+        return {{1}, {2}, {3}};
+    }
+    else if (nDims == 2)
+    {
+        return twoDimNodeIndexes;
+    }
+    return threeDimNodeIndexes;
+}
+
+Foam::label Foam::hyperbolicConditionalMomentInversion::nHyperbolicMoments
+(
+    const label nDims
+)
+{
+    if (nDims == 1)
+    {
+        return 5;
+    }
+    else if (nDims == 2)
+    {
+        return 10;
+    }
+    return 16;
+}
+
+Foam::labelListList
+Foam::hyperbolicConditionalMomentInversion::hyperbolicMomentOrders
+(
+    const label nDims
+)
+{
+    if (nDims == 1)
+    {
+        return {{0}, {1}, {2}, {3}, {4}};
+    }
+    else if (nDims == 2)
+    {
+        return twoDimMomentOrders;
+    }
+    return threeDimMomentOrders;
+}
+
 
 // * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
 
@@ -125,23 +191,23 @@ Foam::hyperbolicConditionalMomentInversion::hyperbolicConditionalMomentInversion
 )
 :
     nDimensions_(nDimensions),
-    nMoments_(nDimensions == 2 ? 10 : 16),
-    nNodes_(nDimensions == 2 ? 9 : 27),
+    nMoments_(nHyperbolicMoments(nDimensions)),
+    nNodes_(nHyperbolicNodes(nDimensions)),
     support_("R"),
     moments_
     (
         nMoments_,
-        nDimensions == 2 ? twoDimMomentOrders : threeDimMomentOrders
+        hyperbolicMomentOrders(nDimensions)
     ),
     abscissae_
     (
         nNodes_,
-        nDimensions == 2 ? twoDimNodeIndexes : threeDimNodeIndexes
+        hyperbolicNodeIndexes(nDimensions)
     ),
     weights_
     (
         nNodes_,
-        nDimensions == 2 ? twoDimNodeIndexes : threeDimNodeIndexes
+        hyperbolicNodeIndexes(nDimensions)
     ),
     univariateInverter_
     (
@@ -1099,10 +1165,17 @@ void Foam::hyperbolicConditionalMomentInversion::invert
 
         invert1D(moments, w, u);
 
+        // Compute multivariate quadrature
+        scalar meanU = 0.0;
+        if (moments(0) > SMALL)
+        {
+            meanU = moments(1)/moments(0);
+        }
+
         forAll(u, nodei)
         {
             weights_[nodei] = w[nodei];
-            abscissae_[nodei] = vector(u[nodei], 0.0, 0.0);
+            abscissae_[nodei] = vector(u[nodei] + meanU, 0.0, 0.0);
         }
     }
 }

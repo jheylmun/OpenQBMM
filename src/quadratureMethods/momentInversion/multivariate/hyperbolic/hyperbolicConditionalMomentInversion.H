@@ -176,6 +176,18 @@ public:
         //- List of node indexes in three dimensions
         static const labelListList threeDimNodeIndexes;
 
+        //- Return the number of nodes needed
+        static label nHyperbolicNodes(const label nDims);
+
+        //- Return the node indexes
+        static labelListList hyperbolicNodeIndexes(const label nDims);
+
+        //- Return the number of moments needed
+        static label nHyperbolicMoments(const label nDims);
+
+        //- Return the momentOrders
+        static labelListList hyperbolicMomentOrders(const label nDims);
+
 
     // Member Functions
 
