@@ -925,12 +925,7 @@ void Foam::pdPhaseModel::averageTransport(const PtrList<fvVectorMatrix>& AEqns)
         volScalarField alphaRhoi
         (
             "alphaRhoi",
-            Foam::max
-            (
-                quadrature_.nodes()[nodei].primaryAbscissa()
-               *quadrature_.nodes()[nodei].primaryWeight(),
-                residualAlpha_*rho()
-            )
+            alphas_[nodei]*rho()
         );
 
         // Solve for velocities using acceleration terms
