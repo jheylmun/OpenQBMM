@@ -80,7 +80,7 @@ void Foam::PDFTransportModels::velocityPDFTransportModel::solve()
     {
         if (this->solveODESource_)
         {
-            explicitMomentSource();
+            explicitMomentSource(this->quadrature_);
         }
         else
         {

@@ -120,7 +120,7 @@ Foam::PDFTransportModels::mixingModels::turbulentMixing
 }
 
 void Foam::PDFTransportModels::mixingModels::turbulentMixing
-::explicitMomentSource()
+::explicitMomentSource(quadratureApproximation& quadrature)
 {}
 
 Foam::tmp<Foam::fvScalarMatrix>

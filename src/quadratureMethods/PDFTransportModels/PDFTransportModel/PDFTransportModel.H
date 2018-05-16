@@ -100,7 +100,7 @@ protected:
     // Protected member functions
 
         //- Calculate explicit source terms with realizable ODE solver
-        virtual void explicitMomentSource();
+        virtual void explicitMomentSource(quadratureApproximation&);
 
         //- Calculate source term for moment equation in the specified cell
         virtual scalar cellMomentSource

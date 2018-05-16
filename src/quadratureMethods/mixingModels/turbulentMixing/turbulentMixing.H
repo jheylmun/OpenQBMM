@@ -88,7 +88,7 @@ class turbulentMixing
         );
 
         //- Calculate explicit source terms
-        virtual void explicitMomentSource();
+        virtual void explicitMomentSource(quadratureApproximation&);
 
         //- Calculate implicit source terms
         virtual tmp<fvScalarMatrix> implicitMomentSource

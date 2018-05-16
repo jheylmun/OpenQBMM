@@ -59,10 +59,13 @@ Foam::PDFTransportModel::~PDFTransportModel()
 
 // * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * * //
 
-void Foam::PDFTransportModel::explicitMomentSource()
+void Foam::PDFTransportModel::explicitMomentSource
+(
+    quadratureApproximation& quadrature
+)
 {
-    volMomentFieldSet& moments(this->quadrature_.moments());
-    label nMoments = this->quadrature_.nMoments();
+    volMomentFieldSet& moments(quadrature.moments());
+    label nMoments = quadrature.nMoments();
     scalar globalDt = moments[0].mesh().time().deltaT().value();
 
     Info << "Solving source terms in realizable ODE solver." << endl;
@@ -111,9 +114,9 @@ void Foam::PDFTransportModel::explicitMomentSource()
                 }
 
                 realizableUpdate1 =
-                        this->quadrature_.updateLocalQuadrature(celli, false);
+                        quadrature.updateLocalQuadrature(celli, false);
 
-                this->quadrature_.updateLocalMoments(celli);
+                quadrature.updateLocalMoments(celli);
 
                 // Second moment update
                 forAll(oldMoments, mi)
@@ -125,9 +128,9 @@ void Foam::PDFTransportModel::explicitMomentSource()
                 }
 
                 realizableUpdate2 =
-                        this->quadrature_.updateLocalQuadrature(celli, false);
+                        quadrature.updateLocalQuadrature(celli, false);
 
-                this->quadrature_.updateLocalMoments(celli);
+                quadrature.updateLocalMoments(celli);
 
                 // Third moment update
                 forAll(oldMoments, mi)
@@ -138,9 +141,9 @@ void Foam::PDFTransportModel::explicitMomentSource()
                 }
 
                 realizableUpdate3 =
-                        this->quadrature_.updateLocalQuadrature(celli, false);
+                    quadrature.updateLocalQuadrature(celli, false);
 
-                this->quadrature_.updateLocalMoments(celli);
+                quadrature.updateLocalMoments(celli);
 
                 if
                 (
@@ -157,7 +160,7 @@ void Foam::PDFTransportModel::explicitMomentSource()
                     }
 
                     // Updating local quadrature with old moments
-                    this->quadrature_.updateLocalQuadrature(celli);
+                    quadrature.updateLocalQuadrature(celli);
 
                     localDt /= 2.0;
 

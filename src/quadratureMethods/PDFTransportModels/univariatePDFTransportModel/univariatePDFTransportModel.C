@@ -97,7 +97,7 @@ void Foam::PDFTransportModels::univariatePDFTransportModel::solve()
 
     if (this->solveODESource_)
     {
-        explicitMomentSource();
+        explicitMomentSource(this->quadrature_);
     }
 
     forAll (momentEqns, mEqni)
