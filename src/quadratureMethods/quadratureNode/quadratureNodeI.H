@@ -39,6 +39,13 @@ extended() const
 }
 
 template <class weightType, class abscissaType, class sigmaType, class vType>
+inline bool Foam::quadratureNode<weightType, abscissaType, sigmaType, vType>::
+velocity() const
+{
+    return (velocityIndexes_[0] != -1);
+}
+
+template <class weightType, class abscissaType, class sigmaType, class vType>
 Foam::label
 Foam::quadratureNode<weightType, abscissaType, sigmaType, vType>::
 nSecondaryNodes() const

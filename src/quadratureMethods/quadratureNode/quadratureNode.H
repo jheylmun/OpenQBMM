@@ -196,7 +196,11 @@ public:
             //- Return the name of the node
             inline const word& name() const;
 
+            //- Does the node use extended quadrature
             inline bool extended() const;
+
+            //- Does the node include velocity abscissae
+            inline bool velocity() const;
 
             //- Returns the number of secondary nodes
             inline label nSecondaryNodes() const;

@@ -60,7 +60,17 @@ Foam::PDFTransportModels::univariatePDFTransportModel
             support
         )
     )
-{}
+{
+    if (quadrature_.momentOrders()[0].size() != 1)
+    {
+        FatalErrorInFunction
+            << "Only one dimensional distributions can be used with" << nl
+            << "    univariatePDFTransportModel, but "
+            << quadrature_.momentOrders()[0].size() << " dimensions have" << nl
+            << "    been specified." << nl
+            << abort(FatalError);
+    }
+}
 
 // * * * * * * * * * * * * * * * * Destructor  * * * * * * * * * * * * * * * //
 
