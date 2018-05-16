@@ -37,7 +37,6 @@ SourceFiles
 #define univariatePDFTransportModel_H
 
 #include "PDFTransportModel.H"
-#include "quadratureApproximations.H"
 #include "univariateMomentAdvection.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
@@ -55,38 +54,9 @@ class univariatePDFTransportModel
 :
     public PDFTransportModel
 {
-    // Private data
-
-        //- Name of the univariatePDFTransportModel
-        const word name_;
-
-        Switch solveODESource_;
-
-        //- Absolute tolerance for realizable ODE solver
-        scalar ATol_;
-
-        //- Relative tolerance for realizable ODE solver
-        scalar RTol_;
-
-        //- Time-step change factor
-        scalar fac_;
-
-        //- Minimum time-step change factor
-        scalar facMin_;
-
-        //- Maximum time-step change factor
-        scalar facMax_;
-
-        //- Minimum local step in realizable ODE solver
-        scalar minLocalDt_;
-
-
 protected:
 
     // Protected data
-
-        //- Univariate quadrature approximation used to solve PDF transport
-        univariateQuadratureApproximation quadrature_;
 
         //- Moment advection
         autoPtr<univariateMomentAdvection> momentAdvection_;
@@ -103,16 +73,6 @@ protected:
         virtual tmp<fvScalarMatrix> implicitMomentSource
         (
             const volMoment& moment
-        ) = 0;
-
-        //- Calculate explicit source terms with realizable ODE solver
-        virtual void explicitMomentSource();
-
-        //- Calculate source term for moment equation in the specified cell
-        virtual scalar cellMomentSource
-        (
-            label& momentOrder,
-            label& celli
         ) = 0;
 
 
@@ -138,9 +98,6 @@ public:
     // Member Functions
 
         //- Access
-
-            //- Returns a const reference to the quadrature approximation
-            inline const univariateQuadratureApproximation& quadrature() const;
 
             //- Return the maximum Courant number ensuring moment realizability
             inline scalar realizableCo() const;

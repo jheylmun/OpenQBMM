@@ -99,8 +99,8 @@ class turbulentMixing
         //- Calculate source term for moment equation in the specified cell
         virtual scalar cellMomentSource
         (
-            label& momentOrder,
-            label& celli
+            const label momentOrder,
+            const label celli
         );
 
 

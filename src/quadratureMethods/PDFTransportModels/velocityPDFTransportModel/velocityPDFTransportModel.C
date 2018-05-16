@@ -35,19 +35,7 @@ Foam::PDFTransportModels::velocityPDFTransportModel::velocityPDFTransportModel
     const word& support
 )
 :
-    PDFTransportModel(name, dict, mesh),
-    name_(name),
-    solveODESource_
-    (
-        dict.subDict("odeCoeffs").lookupOrDefault("solveODESource", false)
-    ),
-    ATol_(readScalar(dict.subDict("odeCoeffs").lookup("ATol"))),
-    RTol_(readScalar(dict.subDict("odeCoeffs").lookup("RTol"))),
-    fac_(readScalar(dict.subDict("odeCoeffs").lookup("fac"))),
-    facMin_(readScalar(dict.subDict("odeCoeffs").lookup("facMin"))),
-    facMax_(readScalar(dict.subDict("odeCoeffs").lookup("facMax"))),
-    minLocalDt_(readScalar(dict.subDict("odeCoeffs").lookup("minLocalDt"))),
-    quadrature_(name, mesh, support),
+    PDFTransportModel(name, dict, mesh, support),
     momentAdvection_
     (
         velocityMomentAdvection::New
@@ -66,190 +54,17 @@ Foam::PDFTransportModels::velocityPDFTransportModel::~velocityPDFTransportModel(
 
 // * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * * //
 
-void Foam::PDFTransportModels::velocityPDFTransportModel::explicitMomentSource()
-{
-    volMomentFieldSet& moments(quadrature_.moments());
-    label nMoments = quadrature_.nMoments();
-    scalar globalDt = moments[0].mesh().time().deltaT().value();
-
-    Info << "Solving source terms in realizable ODE solver." << endl;
-
-    forAll(moments[0], celli)
-    {
-        // Storing old moments to recover from failed step
-
-        scalarList oldMoments(nMoments, 0.0);
-
-        forAll(oldMoments, mi)
-        {
-            oldMoments[mi] = moments[mi][celli];
-        }
-
-        //- Local time
-        scalar localT = 0.0;
-
-        // Initialize the local step
-        scalar localDt = globalDt/100.0;
-
-        // Initialize RK parameters
-        scalarList k1(nMoments, 0.0);
-        scalarList k2(nMoments, 0.0);
-        scalarList k3(nMoments, 0.0);
-
-        // Flag to indicate if the time step is complete
-        bool timeComplete = false;
-
-        // Check realizability of intermediate moment sets
-        bool realizableUpdate1 = false;
-        bool realizableUpdate2 = false;
-        bool realizableUpdate3 = false;
-
-        scalarList momentsSecondStep(nMoments, 0.0);
-
-        while (!timeComplete)
-        {
-            do
-            {
-                // First intermediate update
-                updateExplicitCollisionSource(celli);
-                forAll(oldMoments, mi)
-                {
-                    k1[mi] = localDt*cellMomentSource(mi, celli);
-                    moments[mi][celli] = oldMoments[mi] + k1[mi];
-                }
-
-                realizableUpdate1 =
-                        quadrature_.updateLocalQuadrature(celli, false);
-
-                quadrature_.updateLocalMoments(celli);
-
-                // Second moment update
-                updateExplicitCollisionSource(celli);
-                forAll(oldMoments, mi)
-                {
-                    k2[mi] = localDt*cellMomentSource(mi, celli);
-                    moments[mi][celli] = oldMoments[mi] + (k1[mi] + k2[mi])/4.0;
-
-                    momentsSecondStep[mi] = moments[mi][celli];
-                }
-
-                realizableUpdate2 =
-                        quadrature_.updateLocalQuadrature(celli, false);
-
-                quadrature_.updateLocalMoments(celli);
-
-                // Third moment update
-                updateExplicitCollisionSource(celli);
-                forAll(oldMoments, mi)
-                {
-                    k3[mi] = localDt*cellMomentSource(mi, celli);
-                    moments[mi][celli] =
-                        oldMoments[mi] + (k1[mi] + k2[mi] + 4.0*k3[mi])/6.0;
-                }
-
-                realizableUpdate3 =
-                        quadrature_.updateLocalQuadrature(celli, false);
-
-                quadrature_.updateLocalMoments(celli);
-
-                if
-                (
-                    !realizableUpdate1
-                 || !realizableUpdate2
-                 || !realizableUpdate3
-                )
-                {
-                    Info << "Not realizable" << endl;
-
-                    forAll(oldMoments, mi)
-                    {
-                        moments[mi][celli] = oldMoments[mi];
-                    }
-
-                    localDt /= 2.0;
-
-                    if (localDt < minLocalDt_)
-                    {
-                        FatalErrorInFunction
-                            << "Reached minimum local step in realizable ODE"
-                            << nl
-                            << "    solver. Cannot ensure realizability." << nl
-                            << abort(FatalError);
-                    }
-                }
-            }
-            while
-            (
-                !realizableUpdate1
-             || !realizableUpdate2
-             || !realizableUpdate3
-            );
-
-            scalar error = 0.0;
-
-            for (label mi = 0; mi < nMoments; mi++)
-            {
-                scalar scalei =
-                        ATol_
-                    + max
-                        (
-                            mag(momentsSecondStep[mi]), mag(oldMoments[mi])
-                        )*RTol_;
-
-                error +=
-                        sqr
-                        (
-                            (momentsSecondStep[mi] - moments[mi][celli])/scalei
-                        );
-            }
-
-            error = max(sqrt(error/nMoments), SMALL);
-
-            if (error < 1)
-            {
-                localDt *= min(facMax_, max(facMin_, fac_/pow(error, 1.0/3.0)));
-
-                scalar maxLocalDt = max(globalDt - localT, 0.0);
-                localDt = min(maxLocalDt, localDt);
-
-                forAll(oldMoments, mi)
-                {
-                    oldMoments[mi] = moments[mi][celli];
-                }
-
-                if (localDt == 0.0)
-                {
-                    timeComplete = true;
-                    localT = 0.0;
-                    break;
-                }
-
-                localT += localDt;
-            }
-            else
-            {
-                localDt *= min(1.0, max(facMin_, fac_/pow(error, 1.0/3.0)));
-
-                forAll(oldMoments, mi)
-                {
-                    moments[mi][celli] = oldMoments[mi];
-                }
-            }
-        }
-    }
-}
-
 void Foam::PDFTransportModels::velocityPDFTransportModel::solve()
 {
     momentAdvection_().update();
 
     // List of moment transport equations
-    PtrList<fvScalarMatrix> momentEqns(quadrature_.nMoments());
+    PtrList<fvScalarMatrix> momentEqns(this->quadrature_.nMoments());
 
     // Solve moment transport equations
-    forAll(quadrature_.moments(), momenti)
+    forAll(this->quadrature_.moments(), momenti)
     {
-        volMoment& m = quadrature_.moments()[momenti];
+        volMoment& m = this->quadrature_.moments()[momenti];
         momentEqns.set
         (
             momenti,
@@ -263,7 +78,7 @@ void Foam::PDFTransportModels::velocityPDFTransportModel::solve()
 
     if (collision())
     {
-        if (solveODESource_)
+        if (this->solveODESource_)
         {
             explicitMomentSource();
         }
@@ -272,11 +87,11 @@ void Foam::PDFTransportModels::velocityPDFTransportModel::solve()
             updateImplicitCollisionSource();
         }
 
-        forAll(quadrature_.moments(), mEqni)
+        forAll(this->quadrature_.moments(), mEqni)
         {
-            volMoment& m = quadrature_.moments()[mEqni];
+            volMoment& m = this->quadrature_.moments()[mEqni];
 
-            if (solveODESource_)
+            if (this->solveODESource_)
             {
                 momentEqns[mEqni] -= fvc::ddt(m);
             }
@@ -305,13 +120,13 @@ void Foam::PDFTransportModels::velocityPDFTransportModel::solve()
         }
     }
 
-    forAll(quadrature_.moments(), mEqni)
+    forAll(this->quadrature_.moments(), mEqni)
     {
         momentEqns[mEqni].relax();
         momentEqns[mEqni].solve();
     }
 
-    quadrature_.updateQuadrature();
+    this->quadrature_.updateQuadrature();
 }
 
 void Foam::PDFTransportModels::velocityPDFTransportModel::meanTransport
@@ -325,9 +140,9 @@ void Foam::PDFTransportModels::velocityPDFTransportModel::meanTransport
     momentAdvection_().update(phi, wallCollisions);
 
     // Solve moment transport equations
-    forAll(quadrature_.moments(), momenti)
+    forAll(this->quadrature_.moments(), momenti)
     {
-        volScalarField& m = quadrature_.moments()[momenti];
+        volScalarField& m = this->quadrature_.moments()[momenti];
         fvScalarMatrix mEqn
         (
             fvm::ddt(m)
@@ -351,9 +166,9 @@ void Foam::PDFTransportModels::velocityPDFTransportModel::relativeTransport
     momentAdvection_().update(Vs, wallCollisions);
 
     // Solve moment transport equations
-    forAll(quadrature_.moments(), momenti)
+    forAll(this->quadrature_.moments(), momenti)
     {
-        volScalarField& m = quadrature_.moments()[momenti];
+        volScalarField& m = this->quadrature_.moments()[momenti];
         fvScalarMatrix mEqn
         (
             fvm::ddt(m)

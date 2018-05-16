@@ -76,7 +76,7 @@ protected:
         const fvMesh& mesh_;
 
         //- Quadrature approximation
-        const velocityQuadratureApproximation& quadrature_;
+        const quadratureApproximation& quadrature_;
 
         //- Moment indicies ues to map moments
         const labelListList momentOrders_;
@@ -128,7 +128,7 @@ public:
         (
             const dictionary& dict,
             const fvMesh& mesh,
-            const velocityQuadratureApproximation& quadrature,
+            const quadratureApproximation& quadrature,
             const bool ode
         ),
         (dict, mesh, quadrature, ode)
@@ -142,7 +142,7 @@ public:
         (
             const dictionary& dict,
             const fvMesh& mesh,
-            const velocityQuadratureApproximation& quadrature,
+            const quadratureApproximation& quadrature,
             const bool ode
         );
 
@@ -153,7 +153,7 @@ public:
         (
             const dictionary& dict,
             const fvMesh& mesh,
-            const velocityQuadratureApproximation& quadrature,
+            const quadratureApproximation& quadrature,
             const bool ode
         );
 

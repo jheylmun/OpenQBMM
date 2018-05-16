@@ -204,7 +204,7 @@ Foam::populationBalanceSubModels::collisionKernels::BoltzmannCollision::Boltzman
 (
     const dictionary& dict,
     const fvMesh& mesh,
-    const velocityQuadratureApproximation& quadrature,
+    const quadratureApproximation& quadrature,
     const bool ode
 )
 :

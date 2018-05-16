@@ -56,7 +56,6 @@ namespace Foam
                 Class univariateQuadratureApproximation Declaration
 \*---------------------------------------------------------------------------*/
 
-template <class momentFieldSetType, class nodeType>
 class quadratureApproximation
 :
     public IOdictionary
@@ -79,10 +78,10 @@ protected:
         const labelListList nodeIndexes_;
 
         //- AutoPtr to the mappedPtrList of quadrature nodes
-        autoPtr<mappedPtrList<nodeType>> nodes_;
+        autoPtr<mappedPtrList<volNode>> nodes_;
 
         //- List of moments
-        momentFieldSetType moments_;
+        volMomentFieldSet moments_;
 
         //- Dimensionality of the distribution function
         const label nDimensions_;
@@ -131,16 +130,16 @@ public:
             inline fieldMomentInversion& momentFieldInverter();
 
             //- Const access to the nodes
-            inline const mappedPtrList<nodeType>& nodes() const;
+            inline const mappedPtrList<volNode>& nodes() const;
 
             //- Non-Const access to the nodes
-            inline mappedPtrList<nodeType>& nodes();
+            inline mappedPtrList<volNode>& nodes();
 
             //- Const access to the moments
-            inline const momentFieldSetType& moments() const;
+            inline const volMomentFieldSet& moments() const;
 
             //- Non-const access to the moments
-            inline momentFieldSetType& moments();
+            inline volMomentFieldSet& moments();
 
             //- Return the number of dimensions in the distribution
             inline label nDimensions() const;
@@ -170,8 +169,8 @@ public:
             //  specified cell
             bool updateLocalQuadrature
             (
-                label celli,
-                bool fatalErrorOnFailedRealizabilityTest = true
+                const label celli,
+                const bool fatalErrorOnFailedRealizabilityTest = true
             );
 };
 
@@ -181,10 +180,9 @@ public:
 } // End namespace Foam
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
-#ifdef NoRepository
-#   include "quadratureApproximationI.H"
-#   include "quadratureApproximation.C"
-#endif
+
+#include "quadratureApproximationI.H"
+
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
 #endif

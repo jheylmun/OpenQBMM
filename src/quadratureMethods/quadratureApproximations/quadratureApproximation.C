@@ -27,16 +27,13 @@ License
 
 // * * * * * * * * * * * * * Private Member Functions  * * * * * * * * * * * //
 
-template<class momentFieldSetType, class nodeType>
-const Foam::word Foam::quadratureApproximation<momentFieldSetType, nodeType>::
-propertiesName("quadratureProperties");
+const Foam::word
+Foam::quadratureApproximation::propertiesName("quadratureProperties");
 
 
 // * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
 
-template<class momentFieldSetType, class nodeType>
-Foam::quadratureApproximation<momentFieldSetType, nodeType>::
-quadratureApproximation
+Foam::quadratureApproximation::quadratureApproximation
 (
     const word& name,
     const fvMesh& mesh,
@@ -59,17 +56,11 @@ quadratureApproximation
     dict_(*this),
     momentOrders_
     (
-        const_cast
-        <
-            const quadratureApproximation<momentFieldSetType, nodeType>&
-        >(*this).lookup("moments")
+        const_cast<const quadratureApproximation&>(*this).lookup("moments")
     ),
     nodeIndexes_
     (
-        const_cast
-        <
-            const quadratureApproximation<momentFieldSetType, nodeType>&
-        >(*this).lookup("nodes")
+        const_cast<const quadratureApproximation&>(*this).lookup("nodes")
     ),
     nodes_(),
     moments_(name_, *this, mesh_, nodes_, support),
@@ -109,12 +100,12 @@ quadratureApproximation
     }
 
     // Allocating nodes
-    nodes_ = autoPtr<mappedPtrList<nodeType>>
+    nodes_ = autoPtr<mappedPtrList<volNode>>
     (
-        new mappedPtrList<nodeType>
+        new mappedPtrList<volNode>
         (
             lookup("nodes"),
-            typename nodeType::iNew
+            typename volNode::iNew
             (
                 name_,
                 mesh_,
@@ -135,39 +126,33 @@ quadratureApproximation
 
 // * * * * * * * * * * * * * * * * Destructor  * * * * * * * * * * * * * * * //
 
-template<class momentFieldSetType, class nodeType>
-Foam::quadratureApproximation<momentFieldSetType, nodeType>
-::~quadratureApproximation()
+Foam::quadratureApproximation::~quadratureApproximation()
 {}
 
 
 // * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * * //
 
-template<class momentFieldSetType, class nodeType>
-void Foam::quadratureApproximation<momentFieldSetType, nodeType>
-::updateQuadrature()
+void Foam::quadratureApproximation::updateQuadrature()
 {
     momentFieldInverter_().invert(moments_, nodes_());
     updateMoments();
 }
 
-template<class momentFieldSetType, class nodeType>
-void Foam::quadratureApproximation<momentFieldSetType, nodeType>
-::updateMoments()
+void Foam::quadratureApproximation::updateMoments()
 {
     moments_.update();
 }
 
-template<class momentFieldSetType, class nodeType>
-void Foam::quadratureApproximation<momentFieldSetType, nodeType>
-::updateLocalMoments(label celli)
+void Foam::quadratureApproximation::updateLocalMoments(label celli)
 {
     moments_.updateLocalMoments(celli);
 }
 
-template<class momentFieldSetType, class nodeType>
-bool Foam::quadratureApproximation<momentFieldSetType, nodeType>
-::updateLocalQuadrature(label celli, bool fatalErrorOnFailedRealizabilityTest)
+bool Foam::quadratureApproximation::updateLocalQuadrature
+(
+    const label celli,
+    const bool fatalErrorOnFailedRealizabilityTest
+)
 {
     bool realizable = momentFieldInverter_().invertLocalMoments
     (

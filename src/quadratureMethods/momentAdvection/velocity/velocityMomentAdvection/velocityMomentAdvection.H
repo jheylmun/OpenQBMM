@@ -112,7 +112,7 @@ public:
             dictionary,
             (
                 const dictionary& dict,
-                const velocityQuadratureApproximation& quadrature,
+                const quadratureApproximation& quadrature,
                 const word& support
             ),
             (dict, quadrature, support)
@@ -125,7 +125,7 @@ public:
         velocityMomentAdvection
         (
             const dictionary& dict,
-            const velocityQuadratureApproximation& quadrature,
+            const quadratureApproximation& quadrature,
             const word& support
         );
 
@@ -139,7 +139,7 @@ public:
         static autoPtr<velocityMomentAdvection> New
         (
             const dictionary& dict,
-            const velocityQuadratureApproximation& quadrature,
+            const quadratureApproximation& quadrature,
             const word& support
         );
 

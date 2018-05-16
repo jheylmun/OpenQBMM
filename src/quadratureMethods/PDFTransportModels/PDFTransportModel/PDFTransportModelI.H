@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2015-2018 Alberto Passalacqua
+    \\  /    A nd           | Copyright (C) 2018 Alberto Passalacqua
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -25,56 +25,15 @@ License
 
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
 
-const word Foam::quadratureApproximation::name() const
+const Foam::quadratureApproximation&
+Foam::PDFTransportModel::quadrature() const
 {
-    return name_;
+    return quadrature_;
 }
 
-Foam::fieldMomentInversion& Foam::quadratureApproximation::momentFieldInverter()
+Foam::quadratureApproximation& Foam::PDFTransportModel::quadrature()
 {
-    return momentFieldInverter_();
+    return quadrature_;
 }
-
-const Foam::mappedPtrList<Foam::volNode>&
-Foam::quadratureApproximation::nodes() const
-{
-    return nodes_();
-}
-
-Foam::mappedPtrList<Foam::volNode>& Foam::quadratureApproximation::nodes()
-{
-    return nodes_();
-}
-
-const Foam::volMomentFieldSet& Foam::quadratureApproximation::moments() const
-{
-    return moments_;
-}
-
-Foam::volMomentFieldSet& Foam::quadratureApproximation::moments()
-{
-    return moments_;
-}
-
-Foam::label Foam::quadratureApproximation::nDimensions() const
-{
-    return nDimensions_;
-}
-
-Foam::label Foam::quadratureApproximation::nMoments() const
-{
-    return nMoments_;
-}
-
-const Foam::labelListList& Foam::quadratureApproximation::momentOrders() const
-{
-    return momentOrders_;
-}
-
-const Foam::labelListList& Foam::quadratureApproximation::nodeIndexes() const
-{
-    return nodeIndexes_;
-}
-
 
 // ************************************************************************* //

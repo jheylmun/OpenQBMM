@@ -100,8 +100,8 @@ autoPtr<populationBalanceModel> populationBalance
         particleName, populationBalanceProperties, phi
     )
 );
-velocityQuadratureApproximation& quadrature =
-    mesh.lookupObjectRef<velocityQuadratureApproximation>
+quadratureApproximation& quadrature =
+    mesh.lookupObjectRef<quadratureApproximation>
     (
         IOobject::groupName
         (

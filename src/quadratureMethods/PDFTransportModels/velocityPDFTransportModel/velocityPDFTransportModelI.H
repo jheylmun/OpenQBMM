@@ -25,12 +25,6 @@ License
 
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
 
-const Foam::velocityQuadratureApproximation&
-Foam::PDFTransportModels::velocityPDFTransportModel::quadrature() const
-{
-    return quadrature_;
-}
-
 Foam::scalar
 Foam::PDFTransportModels::velocityPDFTransportModel::realizableCo() const
 {

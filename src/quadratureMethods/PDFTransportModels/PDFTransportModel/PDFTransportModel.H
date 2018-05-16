@@ -39,6 +39,7 @@ SourceFiles
 #include "fvMesh.H"
 #include "volFields.H"
 #include "dimensionedTypes.H"
+#include "quadratureApproximation.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
@@ -56,6 +57,23 @@ class PDFTransportModel
         //- Name of the PDFTransportModel
         const word name_;
 
+        //- Absolute tolerance for realizable ODE solver
+        scalar ATol_;
+
+        //- Relative tolerance for realizable ODE solver
+        scalar RTol_;
+
+        //- Time-step change factor
+        scalar fac_;
+
+        //- Minimum time-step change factor
+        scalar facMin_;
+
+        //- Maximum time-step change factor
+        scalar facMax_;
+
+        //- Minimum local step in realizable ODE solver
+        scalar minLocalDt_;
     // Private Member Functions
 
         //- Disallow default bitwise copy construct
@@ -72,6 +90,25 @@ protected:
         //- Constant reference to the mesh
         const fvMesh& mesh_;
 
+        //- Quadrature approximation used to solve PDF transport
+        quadratureApproximation quadrature_;
+
+        //- Are source Terms solved with the ode solver
+        Switch solveODESource_;
+
+
+    // Protected member functions
+
+        //- Calculate explicit source terms with realizable ODE solver
+        virtual void explicitMomentSource();
+
+        //- Calculate source term for moment equation in the specified cell
+        virtual scalar cellMomentSource
+        (
+            const label momentOrder,
+            const label celli
+        ) = 0;
+
 
 public:
 
@@ -82,7 +119,8 @@ public:
         (
             const word& name,
             const dictionary& dict,
-            const fvMesh& mesh
+            const fvMesh& mesh,
+            const word& support
         );
 
     //- Destructor
@@ -90,6 +128,12 @@ public:
 
 
     // Member Functions
+
+        //- Returns a const reference to the quadrature approximation
+        inline const quadratureApproximation& quadrature() const;
+
+        //- Returns a non-const reference to the quadrature approximation
+        inline quadratureApproximation& quadrature();
 
         //- Solve PDF transport equation
         virtual void solve() = 0;
@@ -100,6 +144,11 @@ public:
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
 } // End namespace Foam
+
+
+// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
+
+#include "PDFTransportModelI.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 

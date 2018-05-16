@@ -37,7 +37,6 @@ SourceFiles
 #define velocityPDFTransportModel_H
 
 #include "PDFTransportModel.H"
-#include "quadratureApproximations.H"
 #include "velocityMomentAdvection.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
@@ -55,39 +54,9 @@ class velocityPDFTransportModel
 :
     public PDFTransportModel
 {
-    // Private data
-
-        //- Name of the velocityPDFTransportModel
-        const word name_;
-
-        //- Switch to solve source terms with ode solver
-        Switch solveODESource_;
-
-        //- Absolute tolerance for realizable ODE solver
-        scalar ATol_;
-
-        //- Relative tolerance for realizable ODE solver
-        scalar RTol_;
-
-        //- Time-step change factor
-        scalar fac_;
-
-        //- Minimum time-step change factor
-        scalar facMin_;
-
-        //- Maximum time-step change factor
-        scalar facMax_;
-
-        //- Minimum local step in realizable ODE solver
-        label minLocalDt_;
-
-
 protected:
 
     // Protected data
-
-        //- velocity quadrature approximation used to solve PDF transport
-        velocityQuadratureApproximation quadrature_;
 
         //- Moment advection
         autoPtr<velocityMomentAdvection> momentAdvection_;
@@ -115,16 +84,6 @@ protected:
             const label celli
         ) = 0;
 
-        //- Calculate explicit source terms with realizable ODE solver
-        virtual void explicitMomentSource();
-
-        //- Calculate source term for moment equation in the specified cell
-        virtual scalar cellMomentSource
-        (
-            const label momentOrder,
-            const label celli
-        ) = 0;
-
 
 public:
 
@@ -147,9 +106,6 @@ public:
     // Member Functions
 
         //- Access
-
-            //- Returns a const reference to the quadrature approximation
-            virtual inline const velocityQuadratureApproximation& quadrature() const;
 
             //- Return the maximum Courant number ensuring moment realizability
             virtual inline scalar realizableCo() const;

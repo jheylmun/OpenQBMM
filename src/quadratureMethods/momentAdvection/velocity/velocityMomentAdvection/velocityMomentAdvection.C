@@ -39,7 +39,7 @@ namespace Foam
 Foam::velocityMomentAdvection::velocityMomentAdvection
 (
     const dictionary& dict,
-    const velocityQuadratureApproximation& quadrature,
+    const quadratureApproximation& quadrature,
     const word& support
 )
 :

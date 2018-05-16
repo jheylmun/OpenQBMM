@@ -39,21 +39,6 @@ SourceFiles
 #include "quadratureApproximation.H"
 #include "monoKineticQuadratureApproximation.H"
 
-// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
-
-namespace Foam
-{
-
-typedef quadratureApproximation<volMomentFieldSet, volNode>
-    univariateQuadratureApproximation;
-
-typedef quadratureApproximation<volMomentFieldSet, volNode>
-    velocityQuadratureApproximation;
-
-// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
-
-} // End namespace Foam
-
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 

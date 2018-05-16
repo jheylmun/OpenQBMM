@@ -117,15 +117,15 @@ class univariatePopulationBalance
         //- Calculate aggregation source terms
         scalar aggregationSource
         (
-            const label& momentOrder,
-            const label& celli
+            const label momentOrder,
+            const label celli
         );
 
         //- Calculate Breakup source term
         scalar breakupSource
         (
-            const label& momentOrder,
-            const label& celli
+            const label momentOrder,
+            const label celli
         );
 
         //- Diffusion term
@@ -137,8 +137,8 @@ class univariatePopulationBalance
         //- Convect moments in phase space
         virtual scalar phaseSpaceConvection
         (
-            const label& momentOrder,
-            const label& celli
+            const label momentOrder,
+            const label celli
         );
 
         //- Calculate implicit source terms
@@ -150,8 +150,8 @@ class univariatePopulationBalance
         //- Calculate source term for moment equation in the specified cell
         virtual scalar cellMomentSource
         (
-            label& momentOrder,
-            label& celli
+            const label momentOrder,
+            const label celli
         );
 
 public:

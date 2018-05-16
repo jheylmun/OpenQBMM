@@ -122,8 +122,8 @@ Foam::scalar
 Foam::PDFTransportModels::populationBalanceModels::univariatePopulationBalance
 ::aggregationSource
 (
-    const label& momentOrder,
-    const label& celli
+    const label momentOrder,
+    const label celli
 )
 {
     scalar aSource = 0.0;
@@ -232,8 +232,8 @@ Foam::scalar
 Foam::PDFTransportModels::populationBalanceModels::univariatePopulationBalance
 ::breakupSource
 (
-    const label& momentOrder,
-    const label& celli
+    const label momentOrder,
+    const label celli
 )
 {
     scalar bSource = 0.0;
@@ -301,8 +301,8 @@ Foam::scalar
 Foam::PDFTransportModels::populationBalanceModels::univariatePopulationBalance
 ::phaseSpaceConvection
 (
-    const label& momentOrder,
-    const label& celli
+    const label momentOrder,
+    const label celli
 )
 {
     scalar gSource = 0.0;
@@ -376,8 +376,8 @@ Foam::PDFTransportModels::populationBalanceModels::univariatePopulationBalance
 Foam::scalar Foam::PDFTransportModels::populationBalanceModels
 ::univariatePopulationBalance::cellMomentSource
 (
-    label& momentOrder,
-    label& celli
+    const label momentOrder,
+    const label celli
 )
 {
     return aggregationSource(momentOrder, celli)

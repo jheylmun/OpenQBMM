@@ -91,7 +91,7 @@ public:
         firstOrderKinetic
         (
             const dictionary& dict,
-            const velocityQuadratureApproximation& quadrature,
+            const quadratureApproximation& quadrature,
             const word& support
         );
 

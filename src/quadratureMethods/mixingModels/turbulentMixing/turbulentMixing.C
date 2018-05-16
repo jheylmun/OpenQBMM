@@ -137,8 +137,8 @@ Foam::PDFTransportModels::mixingModels::turbulentMixing::implicitMomentSource
 Foam::scalar
 Foam::PDFTransportModels::mixingModels::turbulentMixing::cellMomentSource
 (
-    label& momentOrder,
-    label& celli
+    const label momentOrder,
+    const label celli
 )
 {
     return 0.0;

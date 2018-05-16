@@ -49,7 +49,7 @@ namespace velocityAdvection
 Foam::velocityAdvection::firstOrderKinetic::firstOrderKinetic
 (
     const dictionary& dict,
-    const velocityQuadratureApproximation& quadrature,
+    const quadratureApproximation& quadrature,
     const word& support
 )
 :

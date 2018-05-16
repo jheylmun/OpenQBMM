@@ -31,7 +31,7 @@ Foam::autoPtr<Foam::velocityMomentAdvection>
 Foam::velocityMomentAdvection::New
 (
     const dictionary& dict,
-    const velocityQuadratureApproximation& quadrature,
+    const quadratureApproximation& quadrature,
     const word& support
 )
 {

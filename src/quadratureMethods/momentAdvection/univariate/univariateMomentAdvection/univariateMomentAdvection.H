@@ -113,7 +113,7 @@ public:
             dictionary,
             (
                 const dictionary& dict,
-                const univariateQuadratureApproximation& quadrature,
+                const quadratureApproximation& quadrature,
                 const surfaceScalarField& phi,
                 const word& support
             ),
@@ -127,7 +127,7 @@ public:
         univariateMomentAdvection
         (
             const dictionary& dict,
-            const univariateQuadratureApproximation& quadrature,
+            const quadratureApproximation& quadrature,
             const surfaceScalarField& phi,
             const word& support
         );
@@ -142,7 +142,7 @@ public:
         static autoPtr<univariateMomentAdvection> New
         (
             const dictionary& dict,
-            const univariateQuadratureApproximation& quadrature,
+            const quadratureApproximation& quadrature,
             const surfaceScalarField& phi,
             const word& support
         );

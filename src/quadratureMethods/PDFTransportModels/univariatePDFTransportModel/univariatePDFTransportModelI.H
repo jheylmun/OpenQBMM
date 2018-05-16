@@ -25,12 +25,6 @@ License
 
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
 
-const Foam::univariateQuadratureApproximation&
-Foam::PDFTransportModels::univariatePDFTransportModel::quadrature() const
-{
-    return quadrature_;
-}
-
 Foam::scalar
 Foam::PDFTransportModels::univariatePDFTransportModel::realizableCo() const
 {

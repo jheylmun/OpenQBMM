@@ -22,4 +22,5 @@ EXE_LIBS = \
     -lvandermonde \
     -lmomentSets \
     -lmomentInversion \
+    -lquadratureApproximation \
     -lfieldMomentInversion

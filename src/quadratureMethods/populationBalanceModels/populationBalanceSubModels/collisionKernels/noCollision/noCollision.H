@@ -69,7 +69,7 @@ public:
         (
             const dictionary& dict,
             const fvMesh& mesh,
-            const velocityQuadratureApproximation& quadrature,
+            const quadratureApproximation& quadrature,
             const bool ode
         );
 
