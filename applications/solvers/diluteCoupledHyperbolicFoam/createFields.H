@@ -100,16 +100,8 @@ autoPtr<populationBalanceModel> populationBalance
         particleName, populationBalanceProperties, phi
     )
 );
-quadratureApproximation& quadrature =
-    mesh.lookupObjectRef<quadratureApproximation>
-    (
-        IOobject::groupName
-        (
-            "quadratureProperties",
-            particleName
-        )
-    );
 
+quadratureApproximation& quadrature = *(populationBalance->quadrature());
 const labelListList& momentOrders = quadrature.momentOrders();
 const labelListList& nodeIndexes = quadrature.nodeIndexes();
 

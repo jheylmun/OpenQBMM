@@ -39,6 +39,7 @@ SourceFiles
 #include "volFields.H"
 #include "dimensionedTypes.H"
 #include "runTimeSelectionTables.H"
+#include "quadratureApproximation.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
@@ -129,6 +130,15 @@ public:
 
         //- Solve population balance equation
         virtual void solve() = 0;
+
+
+    // Access functions
+
+        //- Return const quadratureApproximation
+        virtual const quadratureApproximation* quadrature() const = 0;
+
+        //- Return non-const quadratureApproximation
+        virtual quadratureApproximation* quadrature() = 0;
 
 };
 

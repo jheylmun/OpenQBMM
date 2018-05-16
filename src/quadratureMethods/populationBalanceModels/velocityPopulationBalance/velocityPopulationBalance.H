@@ -122,6 +122,7 @@ public:
     //- Destructor
     virtual ~velocityPopulationBalance();
 
+
     // Member Functions
 
         //- Return the maximum Courant number ensuring moment realizability
@@ -146,6 +147,21 @@ public:
             const mappedPtrList<volVectorField>& Vs,
             const bool wallCollisions
         );
+
+
+    // Access functions
+
+        //- Return const quadratureApproximation
+        virtual const quadratureApproximation* quadrature() const
+        {
+            return &this->quadrature_;
+        }
+
+        //- Return non-const quadratureApproximation
+        virtual quadratureApproximation* quadrature()
+        {
+            return &this->quadrature_;
+        }
 };
 
 

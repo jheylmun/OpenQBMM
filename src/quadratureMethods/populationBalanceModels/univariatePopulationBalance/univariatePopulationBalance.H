@@ -174,6 +174,7 @@ public:
     //- Destructor
     virtual ~univariatePopulationBalance();
 
+
     // Member Functions
 
         //- Return the maximum Courant number ensuring moment realizability
@@ -184,6 +185,21 @@ public:
 
         //- Solve population balance equation
         void solve();
+
+
+    // Access functions
+
+        //- Return const quadratureApproximation
+        virtual const quadratureApproximation* quadrature() const
+        {
+            return &this->quadrature_;
+        }
+
+        //- Return non-const quadratureApproximation
+        virtual quadratureApproximation* quadrature()
+        {
+            return &this->quadrature_;
+        }
 };
 
 

@@ -13,6 +13,7 @@ EXE_INC = \
     -I../../mappedList \
     -I../../mappedPtrList \
     -I../momentSets/lnInclude \
+    -I../momentSets/lnInclude \
     -I../quadratureNode \
     -I../moments \
     -I../momentInversion/lnInclude \

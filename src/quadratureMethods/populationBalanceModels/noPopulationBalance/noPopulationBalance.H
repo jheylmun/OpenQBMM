@@ -88,6 +88,20 @@ public:
 
         //- Solve population balance equation
         void solve();
+
+        // Access functions
+
+        //- Return const quadratureApproximation
+        virtual const quadratureApproximation* quadrature() const
+        {
+            return 0;
+        }
+
+        //- Return non-const quadratureApproximation
+        virtual quadratureApproximation* quadrature()
+        {
+            return 0;
+        }
 };
 
 
