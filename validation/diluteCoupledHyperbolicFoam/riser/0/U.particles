@@ -9,40 +9,34 @@ FoamFile
 {
     version     2.0;
     format      ascii;
-    class       volScalarField;
-    object      moment.04.particles;
+    class       volVectorField;
+    object      U.particles;
 }
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
-dimensions          [0 4 -4 0 0 0 0];
+dimensions      [0 1 -1 0 0 0 0];
 
-internalField       uniform 0;
+internalField   uniform (0 1 0);
 
 boundaryField
 {
-    walls
+    inlet
     {
-        type                zeroGradient;
-        value               $internalField;
+        type            cyclic;
     }
     outlet
     {
-        type               zeroGradient;
+        type            cyclic;
     }
-    inlet1
+    wall
     {
-        type               fixedValue;
-        value              uniform 1;
+        type            calculated;
+        value           $internalField;
     }
-    inlet2
+    frontBack
     {
-        type               fixedValue;
-        value              uniform 1;
-    }
-    defaultFaces
-    {
-        type    empty;
+        type            empty;
     }
 }
 
-// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
+// ************************************************************************* //
