@@ -73,7 +73,7 @@ quadratureApproximation
     ),
     nodes_(),
     moments_(name_, *this, mesh_, nodes_, support),
-    nDimensions_(moments_[0].cmptOrders().size()),
+    nDimensions_(momentOrders_[0].size()),
     nMoments_(moments_.size()),
     nSecondaryNodes_
     (
@@ -92,6 +92,22 @@ quadratureApproximation
         )
     )
 {
+    PtrList<dimensionSet> abscissaeDimensions(momentOrders_[0].size());
+    labelList orderZero(nDimensions_, 0);
+    dimensionSet m0Dimensions(moments_(orderZero).dimensions());
+
+    forAll(abscissaeDimensions, cmpt)
+    {
+        labelList orderOne(orderZero);
+        orderOne[cmpt] = 1;
+
+        abscissaeDimensions.set
+        (
+            cmpt,
+            new dimensionSet(moments_(orderOne).dimensions()/m0Dimensions)
+        );
+    }
+
     // Allocating nodes
     nodes_ = autoPtr<mappedPtrList<nodeType>>
     (
@@ -102,8 +118,8 @@ quadratureApproximation
             (
                 name_,
                 mesh_,
-                moments_[0].dimensions(),
-                moments_[1].dimensions()/moments_[0].dimensions(),
+                m0Dimensions,
+                abscissaeDimensions,
                 moments_[0].boundaryField().types(),
                 momentFieldInverter_().extended(),
                 nSecondaryNodes_

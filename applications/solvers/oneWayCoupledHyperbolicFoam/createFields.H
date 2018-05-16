@@ -36,8 +36,7 @@ dimensionedScalar St
     dimTime,
     phaseProperties
 );
-Info<<particleName << endl;
-Info<<phi.name()<<endl;
+
 Info<< "Reading populationBalanceProperties\n" << endl;
 IOdictionary populationBalanceProperties
 (
@@ -69,10 +68,12 @@ velocityQuadratureApproximation& quadrature =
     );
 
 const labelListList& momentOrders = quadrature.momentOrders();
-volVectorMomentFieldSet& moments = quadrature.moments();
-mappedPtrList<volVectorNode>& nodes = quadrature.nodes();
-const label nDims = momentOrders[0].size();
+const labelListList& nodeIndexes = quadrature.nodeIndexes();
 
+volMomentFieldSet& moments = quadrature.moments();
+mappedPtrList<volNode>& nodes = quadrature.nodes();
+mappedPtrList<volVectorField> Ups(nodes.size(), nodeIndexes);
+const label nDims = momentOrders[0].size();
 const volScalarField& alpha = moments(labelList(nDims, 0));
 
 volVectorField Up
@@ -82,11 +83,10 @@ volVectorField Up
         IOobject::groupName("U", particleName),
         runTime.timeName(),
         mesh,
-        IOobject::NO_READ,
+        IOobject::MUST_READ,
         IOobject::AUTO_WRITE
     ),
-    mesh,
-    dimensionedVector("zero", dimVelocity, Zero)
+    mesh
 );
 
 volScalarField Thetap
@@ -102,5 +102,32 @@ volScalarField Thetap
     mesh,
     dimensionedScalar("zero", sqr(dimVelocity), 0.0)
 );
+
+forAll(Ups, nodei)
+{
+    const labelList& nodeIndex = nodeIndexes[nodei];
+    Ups.set
+    (
+        nodeIndex,
+        new volVectorField
+        (
+            IOobject
+            (
+                IOobject::groupName
+                (
+                    "U" + mappedPtrList<scalar>::listToWord(nodeIndex),
+                    particleName
+                ),
+                runTime.timeName(),
+                mesh,
+                IOobject::NO_READ,
+                IOobject::NO_WRITE
+            ),
+            mesh,
+            dimensionedVector("Up", dimVelocity, Zero),
+            Up.boundaryField().types()
+        )
+    );
+}
 
 #include "computeParticleFields.H"

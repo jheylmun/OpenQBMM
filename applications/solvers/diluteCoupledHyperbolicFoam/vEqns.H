@@ -1,23 +1,25 @@
 forAll(nodes, nodei)
 {
-    const volVectorNode& node = nodes[nodei];
+    const volNode& node = nodes[nodei];
+    Ups[nodei] = node.velocityAbscissae();
     volScalarField alphaRho(node.primaryWeight()*rhop);
-    volVectorField& Upi = nodes[nodei].primaryAbscissa();
 
 
-    fvVectorMatrix UpiEqn
+    fvVectorMatrix UpEqn
     (
-        alphaRho*fvm::ddt(Upi)
-      - alphaRho*fvc::ddt(Upi)
+        alphaRho*fvm::ddt(Ups[nodei])
+      - alphaRho*fvc::ddt(Ups[nodei])
      ==
         g*alphaRho
 
       + Kds[nodei]*U
-      - fvm::Sp(Kds[nodei], Upi)
+      - fvm::Sp(Kds[nodei], Ups[nodei])
     );
 
-    UpiEqn.relax();
-    UpiEqn.solve();
+    UpEqn.relax();
+    UpEqn.solve();
+
+    nodes[nodei].setVelocityAbscissae(Ups[nodei]);
 }
 
 // Update moments to include drag and gravity

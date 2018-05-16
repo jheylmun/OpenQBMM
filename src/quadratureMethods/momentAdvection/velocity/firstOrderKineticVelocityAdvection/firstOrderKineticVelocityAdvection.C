@@ -58,18 +58,43 @@ Foam::velocityAdvection::firstOrderKinetic::firstOrderKinetic
     nodesNei_(),
     nodesOwn_()
 {
-    nodesNei_ = autoPtr<PtrList<surfaceVectorNode> >
+    nodesNei_ = autoPtr<PtrList<surfaceNode> >
     (
-        new PtrList<surfaceVectorNode>(nodes_.size())
+        new PtrList<surfaceNode>(nodes_.size())
     );
 
-    nodesOwn_ = autoPtr<PtrList<surfaceVectorNode> >
+    nodesOwn_ = autoPtr<PtrList<surfaceNode> >
     (
-        new PtrList<surfaceVectorNode>(nodes_.size())
+        new PtrList<surfaceNode>(nodes_.size())
     );
 
-    PtrList<surfaceVectorNode>& nodesNei = nodesNei_();
-    PtrList<surfaceVectorNode>& nodesOwn = nodesOwn_();
+    PtrList<surfaceNode>& nodesNei = nodesNei_();
+    PtrList<surfaceNode>& nodesOwn = nodesOwn_();
+
+    PtrList<dimensionSet> abscissaeDimensions
+    (
+        quadrature.momentOrders()[0].size()
+    );
+    labelList orderZero(abscissaeDimensions.size(), 0);
+    dimensionSet m0Dimensions
+    (
+        quadrature.moments()(orderZero).dimensions()
+    );
+
+    forAll(abscissaeDimensions, cmpt)
+    {
+        labelList orderOne(orderZero);
+        orderOne[cmpt] = 1;
+
+        abscissaeDimensions.set
+        (
+            cmpt,
+            new dimensionSet
+            (
+                quadrature.moments()(orderOne).dimensions()/m0Dimensions
+            )
+        );
+    }
 
     // Populating nodes and interpolated nodes
     forAll(nodes_, nodei)
@@ -78,13 +103,13 @@ Foam::velocityAdvection::firstOrderKinetic::firstOrderKinetic
         nodesNei.set
         (
             nodei,
-            new surfaceVectorNode
+            new surfaceNode
             (
                 "nodeNei" + mappedList<scalar>::listToWord(nodeIndex),
                 name_,
                 moments_[0].mesh(),
-                moments_[0].dimensions(),
-                moments_[1].dimensions()/moments_[0].dimensions(),
+                m0Dimensions,
+                abscissaeDimensions,
                 false
             )
         );
@@ -92,13 +117,13 @@ Foam::velocityAdvection::firstOrderKinetic::firstOrderKinetic
         nodesOwn.set
         (
             nodei,
-            new surfaceVectorNode
+            new surfaceNode
             (
                 "nodeOwn" + mappedList<scalar>::listToWord(nodeIndex),
                 name_,
                 moments_[0].mesh(),
-                moments_[0].dimensions(),
-                moments_[1].dimensions()/moments_[0].dimensions(),
+                m0Dimensions,
+                abscissaeDimensions,
                 false
             )
         );
@@ -116,36 +141,39 @@ Foam::velocityAdvection::firstOrderKinetic::~firstOrderKinetic()
 
 void Foam::velocityAdvection::firstOrderKinetic::interpolateNodes()
 {
-    PtrList<surfaceVectorNode>& nodesNei = nodesNei_();
-    PtrList<surfaceVectorNode>& nodesOwn = nodesOwn_();
+    PtrList<surfaceNode>& nodesNei = nodesNei_();
+    PtrList<surfaceNode>& nodesOwn = nodesOwn_();
 
     forAll(nodes_, nodei)
     {
-        const volVectorNode& node(nodes_[nodei]);
-        surfaceVectorNode& nodeNei(nodesNei[nodei]);
-        surfaceVectorNode& nodeOwn(nodesOwn[nodei]);
+        const volNode& node(nodes_[nodei]);
+        surfaceNode& nodeNei(nodesNei[nodei]);
+        surfaceNode& nodeOwn(nodesOwn[nodei]);
 
         nodeOwn.primaryWeight() =
             fvc::interpolate(node.primaryWeight(), own_, "reconstruct(weight)");
 
-        nodeOwn.primaryAbscissa() =
-            fvc::interpolate
-            (
-                node.primaryAbscissa(),
-                own_,
-                "reconstruct(U)"
-            );
-
         nodeNei.primaryWeight() =
             fvc::interpolate(node.primaryWeight(), nei_, "reconstruct(weight)");
 
-        nodeNei.primaryAbscissa() =
-            fvc::interpolate
-            (
-                node.primaryAbscissa(),
-                nei_,
-                "reconstruct(U)"
-            );
+        forAll(momentOrders_[0], cmpt)
+        {
+            nodeOwn.primaryAbscissa(cmpt) =
+                fvc::interpolate
+                (
+                    node.primaryAbscissa(cmpt),
+                    own_,
+                    "reconstruct(abscissa)"
+                );
+
+            nodeNei.primaryAbscissa(cmpt) =
+                fvc::interpolate
+                (
+                    node.primaryAbscissa(cmpt),
+                    nei_,
+                    "reconstruct(abscissa)"
+                );
+        }
     }
 }
 
@@ -163,16 +191,16 @@ void Foam::velocityAdvection::firstOrderKinetic::updateWallCollisions()
 
             forAll(nodes_, nodei)
             {
-                const volVectorNode& node = nodes_[nodei];
-                surfaceVectorNode& nodeNei(nodesNei_()[nodei]);
-                surfaceVectorNode& nodeOwn(nodesOwn_()[nodei]);
+                const volNode& node = nodes_[nodei];
+                surfaceNode& nodeNei(nodesNei_()[nodei]);
+                surfaceNode& nodeOwn(nodesOwn_()[nodei]);
 
                 const volScalarField& weight = node.primaryWeight();
                 surfaceScalarField& weightOwn = nodeOwn.primaryWeight();
                 surfaceScalarField& weightNei = nodeNei.primaryWeight();
-                const volVectorField& U = node.primaryAbscissa();
-                surfaceVectorField& UOwn = nodeOwn.primaryAbscissa();
-                surfaceVectorField& UNei = nodeNei.primaryAbscissa();
+                volVectorField U(node.velocityAbscissae());
+                surfaceVectorField UOwn(nodeOwn.velocityAbscissae());
+                surfaceVectorField UNei(nodeNei.velocityAbscissae());
 
                 scalarField& bfwOwn = weightOwn.boundaryFieldRef()[patchi];
                 scalarField& bfwNei = weightNei.boundaryFieldRef()[patchi];
@@ -192,6 +220,8 @@ void Foam::velocityAdvection::firstOrderKinetic::updateWallCollisions()
                       - 2.0*(bfUOwn[facei] & bfNorm[facei])
                        *bfNorm[facei];
                 }
+                nodeOwn.setVelocityAbscissae(UOwn);
+                nodeNei.setVelocityAbscissae(UNei);
             }
         }
     }
@@ -218,7 +248,7 @@ Foam::scalar Foam::velocityAdvection::firstOrderKinetic::CoNum() const
                 (
                     fvc::surfaceSum
                     (
-                        mag(fvc::flux(nodes_[nodei].primaryAbscissa()))
+                        mag(fvc::flux(nodes_[nodei].velocityAbscissae()))
                     )().primitiveField()/mesh.V().field()
                 )*mesh.time().deltaTValue()
             );
@@ -251,13 +281,14 @@ void Foam::velocityAdvection::firstOrderKinetic::update()
 
     forAll(nodes_, nodei)
     {
-        const surfaceVectorNode& nodeNei(nodesNei_()[nodei]);
-        const surfaceVectorNode& nodeOwn(nodesOwn_()[nodei]);
+        const surfaceNode& nodeNei(nodesNei_()[nodei]);
+        const surfaceNode& nodeOwn(nodesOwn_()[nodei]);
 
         const surfaceScalarField& weightOwn = nodeOwn.primaryWeight();
         const surfaceScalarField& weightNei = nodeNei.primaryWeight();
-        const surfaceVectorField& UOwn = nodeOwn.primaryAbscissa();
-        const surfaceVectorField& UNei = nodeNei.primaryAbscissa();
+        surfaceVectorField UOwn(nodeOwn.velocityAbscissae());
+        surfaceVectorField UNei(nodeNei.velocityAbscissae());
+
 
         surfaceScalarField phiOwn(UOwn & mesh.Sf());
         surfaceScalarField phiNei(UNei & mesh.Sf());
@@ -273,10 +304,10 @@ void Foam::velocityAdvection::firstOrderKinetic::update()
             {
                 const label cmptMomentOrder = momentOrder[cmpti];
 
-                tmp<surfaceScalarField> abscissaOwnCmpt =
-                   UOwn.component(cmpti);
-                tmp<surfaceScalarField> abscissaNeiCmpt =
-                    UNei.component(cmpti);
+                const surfaceScalarField& abscissaOwnCmpt =
+                   nodeOwn.primaryAbscissa(cmpti);
+                const surfaceScalarField& abscissaNeiCmpt =
+                    nodeNei.primaryAbscissa(cmpti);
 
                 tmp<surfaceScalarField> mOwnPow =
                     momentCmptOwn
@@ -340,13 +371,11 @@ void Foam::velocityAdvection::firstOrderKinetic::update
 
     forAll(nodes_, nodei)
     {
-        const surfaceVectorNode& nodeNei(nodesNei_()[nodei]);
-        const surfaceVectorNode& nodeOwn(nodesOwn_()[nodei]);
+        const surfaceNode& nodeNei(nodesNei_()[nodei]);
+        const surfaceNode& nodeOwn(nodesOwn_()[nodei]);
 
         const surfaceScalarField& weightOwn = nodeOwn.primaryWeight();
         const surfaceScalarField& weightNei = nodeNei.primaryWeight();
-        const surfaceVectorField& abscissaOwn = nodeOwn.primaryAbscissa();
-        const surfaceVectorField& abscissaNei = nodeNei.primaryAbscissa();
 
         forAll(divMoments_, divi)
         {
@@ -359,10 +388,10 @@ void Foam::velocityAdvection::firstOrderKinetic::update
             {
                 const label cmptMomentOrder = momentOrder[cmpti];
 
-                tmp<surfaceScalarField> abscissaOwnCmpt =
-                   abscissaOwn.component(cmpti);
-                tmp<surfaceScalarField> abscissaNeiCmpt =
-                    abscissaNei.component(cmpti);
+                const surfaceScalarField& abscissaOwnCmpt =
+                   nodeOwn.primaryAbscissa(cmpti);
+                const surfaceScalarField& abscissaNeiCmpt =
+                    nodeNei.primaryAbscissa(cmpti);
 
                 tmp<surfaceScalarField> mOwnPow =
                     momentCmptOwn
@@ -429,13 +458,11 @@ void Foam::velocityAdvection::firstOrderKinetic::update
     {
 //         const labelList& nodeIndex = nodeIndexes_[nodei];
 
-        const surfaceVectorNode& nodeNei(nodesNei_()[nodei]);
-        const surfaceVectorNode& nodeOwn(nodesOwn_()[nodei]);
+        const surfaceNode& nodeNei(nodesNei_()[nodei]);
+        const surfaceNode& nodeOwn(nodesOwn_()[nodei]);
 
         const surfaceScalarField& weightOwn = nodeOwn.primaryWeight();
         const surfaceScalarField& weightNei = nodeNei.primaryWeight();
-        const surfaceVectorField& abscissaOwn = nodeOwn.primaryAbscissa();
-        const surfaceVectorField& abscissaNei = nodeNei.primaryAbscissa();
 
         surfaceVectorField UOwn
         (
@@ -460,10 +487,10 @@ void Foam::velocityAdvection::firstOrderKinetic::update
             {
                 const label cmptMomentOrder = momentOrder[cmpti];
 
-                tmp<surfaceScalarField> abscissaOwnCmpt =
-                   abscissaOwn.component(cmpti);
-                tmp<surfaceScalarField> abscissaNeiCmpt =
-                    abscissaNei.component(cmpti);
+                const surfaceScalarField& abscissaOwnCmpt =
+                   nodeOwn.primaryAbscissa(cmpti);
+                const surfaceScalarField& abscissaNeiCmpt =
+                    nodeNei.primaryAbscissa(cmpti);
 
                 tmp<surfaceScalarField> mOwnPow =
                     momentCmptOwn

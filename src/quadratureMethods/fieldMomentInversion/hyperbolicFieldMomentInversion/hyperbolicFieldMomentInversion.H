@@ -90,53 +90,27 @@ public:
 
     // Public member Functions
 
-        // Univariate moment inversions
+        // Moment inversions
 
             //- Invert moments in the entire computational domain
             virtual void invert
             (
-                const volUnivariateMomentFieldSet& moments,
-                mappedPtrList<volScalarNode>& nodes
+                const volMomentFieldSet& moments,
+                mappedPtrList<volNode>& nodes
             );
 
             //- Invert moments on boundaries
             virtual void invertBoundaryMoments
             (
-                const volUnivariateMomentFieldSet& moments,
-                mappedPtrList<volScalarNode>& nodes
+                const volMomentFieldSet& moments,
+                mappedPtrList<volNode>& nodes
             );
 
             //- Invert moments in a single cell
             virtual bool invertLocalMoments
             (
-                const volUnivariateMomentFieldSet& moments,
-                mappedPtrList<volScalarNode>& nodes,
-                const label celli,
-                const bool fatalErrorOnFailedRealizabilityTest = true
-            );
-
-
-        // Multivriate moment inversions
-
-            //- Invert moments in the entire computational domain
-            virtual void invert
-            (
-                const volVectorMomentFieldSet& moments,
-                mappedPtrList<volVectorNode>& nodes
-            );
-
-            //- Invert moments on boundaries
-            virtual void invertBoundaryMoments
-            (
-                const volVectorMomentFieldSet& moments,
-                mappedPtrList<volVectorNode>& nodes
-            );
-
-            //- Invert moments in a single cell
-            virtual bool invertLocalMoments
-            (
-                const volVectorMomentFieldSet& moments,
-                mappedPtrList<volVectorNode>& nodes,
+                const volMomentFieldSet& moments,
+                mappedPtrList<volNode>& nodes,
                 const label celli,
                 const bool fatalErrorOnFailedRealizabilityTest = true
             );

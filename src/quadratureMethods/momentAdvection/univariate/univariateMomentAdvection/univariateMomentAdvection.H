@@ -74,7 +74,7 @@ protected:
         const word name_;
 
         //- Reference to the moments to advect
-        const volUnivariateMomentFieldSet& moments_;
+        const volMomentFieldSet& moments_;
 
         //- Number of moments
         const label nMoments_;

@@ -114,7 +114,7 @@ Foam::tmp<Foam::fvScalarMatrix>
 Foam::PDFTransportModels::populationBalanceModels::velocityPopulationBalance
 ::implicitCollisionSource
 (
-    const volVectorMoment& moment
+    const volMoment& moment
 )
 {
     if (!collision_)

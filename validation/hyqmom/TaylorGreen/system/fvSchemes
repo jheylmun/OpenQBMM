@@ -37,9 +37,9 @@ laplacianSchemes
 
 interpolationSchemes
 {
-    default         linear;
+    default                 linear;
 
-    reconstruct(U)          upwind;
+    reconstruct(abscissa)   upwind;
     reconstruct(weight)     upwind;
 }
 

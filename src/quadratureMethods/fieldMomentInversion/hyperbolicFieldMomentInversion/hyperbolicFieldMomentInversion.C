@@ -81,42 +81,11 @@ Foam::hyperbolicFieldMomentInversion::~hyperbolicFieldMomentInversion()
 
 void Foam::hyperbolicFieldMomentInversion::invert
 (
-    const volUnivariateMomentFieldSet& moments,
-    mappedPtrList<volScalarNode>& nodes
+    const volMomentFieldSet& moments,
+    mappedPtrList<volNode>& nodes
 )
 {
-    NotImplemented;
-}
-
-void Foam::hyperbolicFieldMomentInversion::invertBoundaryMoments
-(
-    const volUnivariateMomentFieldSet& moments,
-    mappedPtrList<volScalarNode>& nodes
-)
-{
-    NotImplemented;
-}
-
-bool Foam::hyperbolicFieldMomentInversion::invertLocalMoments
-(
-    const volUnivariateMomentFieldSet& moments,
-    mappedPtrList<volScalarNode>& nodes,
-    const label celli,
-    const bool fatalErrorOnFailedRealizabilityTest
-)
-{
-    NotImplemented;
-
-    return true;
-}
-
-void Foam::hyperbolicFieldMomentInversion::invert
-(
-    const volVectorMomentFieldSet& moments,
-    mappedPtrList<volVectorNode>& nodes
-)
-{
-    const volVectorMoment& m0(moments[0]);
+    const volScalarField& m0(moments[0]);
 
     forAll(m0, celli)
     {
@@ -128,8 +97,8 @@ void Foam::hyperbolicFieldMomentInversion::invert
 
 void Foam::hyperbolicFieldMomentInversion::invertBoundaryMoments
 (
-    const volVectorMomentFieldSet& moments,
-    mappedPtrList<volVectorNode>& nodes
+    const volMomentFieldSet& moments,
+    mappedPtrList<volNode>& nodes
 )
 {
     // Recover reference to boundaryField of zero-order moment.
@@ -166,16 +135,21 @@ void Foam::hyperbolicFieldMomentInversion::invertBoundaryMoments
             forAll(weights, nodei)
             {
                 const labelList& nodeIndex = nodeIndexes_[nodei];
-                volVectorNode& node = nodes[nodei];
+                volNode& node = nodes[nodei];
 
                 volScalarField::Boundary& weightBf
                         = node.primaryWeight().boundaryFieldRef();
 
-                volVectorField::Boundary& abscissaBf
-                        = node.primaryAbscissa().boundaryFieldRef();
-
                 weightBf[patchi][facei] = weights(nodeIndex);
-                abscissaBf[patchi][facei] = abscissae(nodeIndex);
+
+                forAll(momentOrders_[0], cmpt)
+                {
+                    volScalarField::Boundary& abscissaBf
+                        = node.primaryAbscissa(cmpt).boundaryFieldRef();
+
+                    abscissaBf[patchi][facei] =
+                        component(abscissae(nodeIndex), cmpt);
+                }
             }
         }
     }
@@ -183,8 +157,8 @@ void Foam::hyperbolicFieldMomentInversion::invertBoundaryMoments
 
 bool Foam::hyperbolicFieldMomentInversion::invertLocalMoments
 (
-    const volVectorMomentFieldSet& moments,
-    mappedPtrList<volVectorNode>& nodes,
+    const volMomentFieldSet& moments,
+    mappedPtrList<volNode>& nodes,
     const label celli,
     const bool fatalErrorOnFailedRealizabilityTest
 )
@@ -221,10 +195,15 @@ bool Foam::hyperbolicFieldMomentInversion::invertLocalMoments
     forAll(weights, nodei)
     {
         const labelList& nodeIndex = nodeIndexes_[nodei];
-        volVectorNode& node(nodes[nodei]);
+        volNode& node(nodes[nodei]);
 
         node.primaryWeight()[celli] = weights(nodeIndex);
-        node.primaryAbscissa()[celli] = abscissae(nodeIndex);
+
+        forAll(momentOrders_[0], cmpt)
+        {
+            node.primaryAbscissa(cmpt)[celli] =
+                component(abscissae(nodeIndex), cmpt);
+        }
     }
 
     return true;

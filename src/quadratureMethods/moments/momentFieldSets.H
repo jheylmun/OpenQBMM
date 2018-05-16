@@ -43,17 +43,9 @@ SourceFiles
 namespace Foam
 {
 
-typedef momentFieldSet<volUnivariateMoment, volScalarNode>
-    volUnivariateMomentFieldSet;
+typedef momentFieldSet<volMoment, volNode> volMomentFieldSet;
 
-typedef momentFieldSet<surfaceUnivariateMoment, surfaceScalarNode>
-    surfaceUnivariateMomentFieldSet;
-
-typedef momentFieldSet<volVectorMoment, volVectorNode>
-    volVectorMomentFieldSet;
-
-typedef momentFieldSet<surfaceVectorMoment, surfaceVectorNode>
-    surfaceVectorMomentFieldSet;
+typedef momentFieldSet<surfaceMoment, surfaceNode> surfaceMomentFieldSet;
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 

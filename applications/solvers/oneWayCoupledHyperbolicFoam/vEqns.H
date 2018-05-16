@@ -1,17 +1,21 @@
+
 forAll(nodes, nodei)
 {
-    volVectorField& Upi = nodes[nodei].primaryAbscissa();
-    fvVectorMatrix UpiEqn
+    Ups[nodei] = nodes[nodei].velocityAbscissae();
+
+    fvVectorMatrix UpEqn
     (
-        fvm::ddt(Upi)
-      - fvc::ddt(Upi)
+        fvm::ddt(Ups[nodei])
+      - fvc::ddt(Ups[nodei])
      ==
         1.0/St*U
-      - fvm::Sp(1.0/St, Upi)
+      - fvm::Sp(1.0/St, Ups[nodei])
     );
 
-    UpiEqn.relax();
-    UpiEqn.solve();
+    UpEqn.relax();
+    UpEqn.solve();
+
+    nodes[nodei].setVelocityAbscissae(Ups[nodei]);
 }
 
 //- Update moments to include drag source

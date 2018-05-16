@@ -180,7 +180,7 @@ public:
         //- Return implicit collision source matrix
         virtual tmp<fvScalarMatrix> implicitCollisionSource
         (
-            const volVectorMoment& m
+            const volMoment& m
         ) const = 0;
 };
 

@@ -96,13 +96,13 @@ protected:
         //- Diffusion term
         virtual tmp<fvScalarMatrix> momentDiffusion
         (
-            const volUnivariateMoment& moment
+            const volMoment& moment
         ) = 0;
 
         //- Calculate implicit source terms
         virtual tmp<fvScalarMatrix> implicitMomentSource
         (
-            const volUnivariateMoment& moment
+            const volMoment& moment
         ) = 0;
 
         //- Calculate explicit source terms with realizable ODE solver

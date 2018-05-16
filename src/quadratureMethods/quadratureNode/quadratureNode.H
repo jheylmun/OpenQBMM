@@ -52,7 +52,7 @@ namespace Foam
 /*---------------------------------------------------------------------------*\
                        Class quadratureNode Declaration
 \*---------------------------------------------------------------------------*/
-template <class weightType, class abscissaType, class sigmaType>
+template <class weightType, class abscissaType, class sigmaType, class vType>
 class quadratureNode
 {
     // Private data
@@ -64,13 +64,13 @@ class quadratureNode
         weightType weight_;
 
         //- Primary abscissa of the node
-        abscissaType abscissa_;
+        PtrList<abscissaType> abscissa_;
 
         //- List of secondary weights of the node
         PtrList<weightType> secondaryWeights_;
 
         //- List of secondary abscissae of the node
-        PtrList<abscissaType> secondaryAbscissae_;
+        PtrList<PtrList<abscissaType>> secondaryAbscissae_;
 
         //- Parameter of the kernel density function used in EQMOM
         autoPtr<sigmaType> sigma_;
@@ -80,6 +80,9 @@ class quadratureNode
 
         //- Boolean variable to identify extended nodes
         bool extended_;
+
+        //- Indexes of velocity abscissae
+        labelList velocityIndexes_;
 
 public:
 
@@ -92,7 +95,7 @@ public:
             const word& distributionName,
             const fvMesh& mesh,
             const dimensionSet& weightDimensions,
-            const dimensionSet& abscissaDimensions,
+            const PtrList<dimensionSet>& abscissaDimensions,
             const wordList& boundaryTypes,
             const bool extended = false,
             const label nSecondaryNodes = 0
@@ -105,13 +108,13 @@ public:
             const word& distributionName,
             const fvMesh& mesh,
             const dimensionSet& weightDimensions,
-            const dimensionSet& abscissaDimensions,
+            const PtrList<dimensionSet>& abscissaDimensions,
             const bool extended = false,
             const label nSecondaryNodes = 0
         );
 
         //- Return clone
-        autoPtr<quadratureNode<weightType, abscissaType, sigmaType>>
+        autoPtr<quadratureNode<weightType, abscissaType, sigmaType, vType>>
             clone() const;
 
         //- Return a pointer to a new quadrature node created on freestore
@@ -121,7 +124,7 @@ public:
             const word distributionName_;
             const fvMesh& mesh_;
             const dimensionSet& weightDimensions_;
-            const dimensionSet& abscissaDimensions_;
+            const PtrList<dimensionSet>& abscissaDimensions_;
             const wordList& boundaryTypes_;
             const bool extended_;
             const label nSecondaryNodes_;
@@ -133,7 +136,7 @@ public:
                 const word& distributionName,
                 const fvMesh& mesh,
                 const dimensionSet& weightDimensions,
-                const dimensionSet& abscissaDimensions,
+                const PtrList<dimensionSet>& abscissaDimensions,
                 const wordList& boundaryTypes,
                 const bool extended,
                 const label nSecondaryNodes
@@ -150,7 +153,7 @@ public:
 
             autoPtr
             <
-                quadratureNode<weightType, abscissaType, sigmaType>
+                quadratureNode<weightType, abscissaType, sigmaType, vType>
             >
             operator()
             (
@@ -160,12 +163,12 @@ public:
                 labelList ent(is);
                 return autoPtr
                 <
-                    quadratureNode<weightType, abscissaType, sigmaType>
+                    quadratureNode<weightType, abscissaType, sigmaType, vType>
                 >
                 (
                     new quadratureNode
                     <
-                        weightType, abscissaType, sigmaType
+                        weightType, abscissaType, sigmaType, vType
                     >
                     (
                         "node" + mappedList<scalar>::listToWord(ent),
@@ -205,10 +208,13 @@ public:
             inline weightType& primaryWeight();
 
             //- Const access to the abscissa of the node
-            inline const abscissaType& primaryAbscissa() const;
+            inline const abscissaType& primaryAbscissa
+            (
+                const label cmpt = 0
+            ) const;
 
             //- Non-const access to the abscissa of the node
-            inline abscissaType& primaryAbscissa();
+            inline abscissaType& primaryAbscissa(const label cmpt = 0);
 
             //- Const access to the secondary weights of the node
             inline const PtrList<weightType>& secondaryWeights() const;
@@ -217,16 +223,38 @@ public:
             inline PtrList<weightType>& secondaryWeights();
 
             //- Const access to the list of secondary abscissae of the node
-            inline const PtrList<abscissaType>& secondaryAbscissae() const;
+            inline const PtrList<abscissaType>& secondaryAbscissae
+            (
+                const label cmpt = 0
+            ) const;
 
             //- Non-const access to the list of secondary abscissae of the node
-            inline PtrList<abscissaType>& secondaryAbscissae();
+            inline PtrList<abscissaType>& secondaryAbscissae
+            (
+                const label cmpt = 0
+            );
 
             //- Const access to sigma
             inline const sigmaType& sigma() const;
 
             //- Non-const access to sigma
             inline sigmaType& sigma();
+
+            //- Return vector of velocity abscissae
+            tmp<vType> velocityAbscissae() const;
+
+            //- Return vector of velocity abscissae in a given cell
+           vector velocityAbscissae(const label celli) const;
+
+            //- Set velocity abscissae given a velocity vector
+            void setVelocityAbscissae(const vType& U);
+
+            //- Set the velocity abscissa in a given cell
+            void setVelocityAbscissae
+            (
+                const label celli,
+                const vector& U
+            );
 };
 
 

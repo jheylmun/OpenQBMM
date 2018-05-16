@@ -41,23 +41,14 @@ SourceFiles
 namespace Foam
 {
 
-typedef quadratureNode<volScalarField, volScalarField, volScalarField>
-    volScalarNode;
+typedef quadratureNode<volScalarField, volScalarField, volScalarField, volVectorField>
+    volNode;
 
 typedef quadratureNode
 <
-    surfaceScalarField, surfaceScalarField, surfaceScalarField
+    surfaceScalarField, surfaceScalarField, surfaceScalarField, surfaceVectorField
 >
-surfaceScalarNode;
-
-typedef quadratureNode<volScalarField, volVectorField, volScalarField>
-    volVectorNode;
-
-typedef quadratureNode
-<
-    surfaceScalarField, surfaceVectorField, surfaceScalarField
->
-surfaceVectorNode;
+surfaceNode;
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 

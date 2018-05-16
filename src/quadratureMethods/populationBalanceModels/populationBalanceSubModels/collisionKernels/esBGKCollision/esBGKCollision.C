@@ -52,7 +52,7 @@ namespace collisionKernels
 void Foam::populationBalanceSubModels::collisionKernels::esBGKCollision
 ::updateCells1D(const label celli)
 {
-    const volVectorMomentFieldSet& moments = quadrature_.moments();
+    const volMomentFieldSet& moments = quadrature_.moments();
 
     scalar m0 = max(moments(0)[celli], SMALL);
 
@@ -74,7 +74,7 @@ void Foam::populationBalanceSubModels::collisionKernels::esBGKCollision
 void Foam::populationBalanceSubModels::collisionKernels::esBGKCollision
 ::updateCells2D(const label celli)
 {
-    const volVectorMomentFieldSet& moments = quadrature_.moments();
+    const volMomentFieldSet& moments = quadrature_.moments();
     scalar m00 = max(moments(0,0)[celli], SMALL);
 
     // Mean velocity
@@ -107,7 +107,7 @@ void Foam::populationBalanceSubModels::collisionKernels::esBGKCollision
 void Foam::populationBalanceSubModels::collisionKernels::esBGKCollision
 ::updateCells3D(const label celli)
 {
-    const volVectorMomentFieldSet& moments = quadrature_.moments();
+    const volMomentFieldSet& moments = quadrature_.moments();
     scalar m000 = max(moments(0,0,0)[celli], SMALL);
 
     // Mean velocity
@@ -153,7 +153,7 @@ void Foam::populationBalanceSubModels::collisionKernels::esBGKCollision
 void Foam::populationBalanceSubModels::collisionKernels::esBGKCollision
 ::updateFields1D()
 {
-    const volVectorMomentFieldSet& moments = quadrature_.moments();
+    const volMomentFieldSet& moments = quadrature_.moments();
     volScalarField m0(max(moments(0), SMALL));
 
     // Mean velocity
@@ -175,7 +175,7 @@ void Foam::populationBalanceSubModels::collisionKernels::esBGKCollision
 void Foam::populationBalanceSubModels::collisionKernels::esBGKCollision
 ::updateFields2D()
 {
-    const volVectorMomentFieldSet& moments = quadrature_.moments();
+    const volMomentFieldSet& moments = quadrature_.moments();
     volScalarField m00(max(moments(0,0), SMALL));
 
     // Mean velocity
@@ -209,7 +209,7 @@ void Foam::populationBalanceSubModels::collisionKernels::esBGKCollision
 void Foam::populationBalanceSubModels::collisionKernels::esBGKCollision
 ::updateFields3D()
 {
-    const volVectorMomentFieldSet& moments = quadrature_.moments();
+    const volMomentFieldSet& moments = quadrature_.moments();
     volScalarField m000(max(moments(0,0,0), SMALL));
 
     // Mean velocity
@@ -361,7 +361,7 @@ Foam::populationBalanceSubModels::collisionKernels::esBGKCollision
 
 Foam::tmp<Foam::fvScalarMatrix>
 Foam::populationBalanceSubModels::collisionKernels::esBGKCollision
-::implicitCollisionSource(const volVectorMoment& m) const
+::implicitCollisionSource(const volMoment& m) const
 {
     return
     (

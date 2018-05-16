@@ -83,8 +83,8 @@ Foam::extendedFieldMomentInversion::~extendedFieldMomentInversion()
 
 void Foam::extendedFieldMomentInversion::invert
 (
-    const volUnivariateMomentFieldSet& moments,
-    mappedPtrList<volScalarNode>& nodes
+    const volMomentFieldSet& moments,
+    mappedPtrList<volNode>& nodes
 )
 {
     const volScalarField& m0(moments[0]);
@@ -99,8 +99,8 @@ void Foam::extendedFieldMomentInversion::invert
 
 void Foam::extendedFieldMomentInversion::invertBoundaryMoments
 (
-    const volUnivariateMomentFieldSet& moments,
-    mappedPtrList<volScalarNode>& nodes
+    const volMomentFieldSet& moments,
+    mappedPtrList<volNode>& nodes
 )
 {
     // Recover reference to boundaryField of zero-order moment.
@@ -132,7 +132,7 @@ void Foam::extendedFieldMomentInversion::invertBoundaryMoments
             // Copying quadrature data to boundary face
             for (label pNodei = 0; pNodei < nodes.size(); pNodei++)
             {
-                volScalarNode& node = nodes[pNodei];
+                volNode& node = nodes[pNodei];
 
                 node.primaryWeight().boundaryFieldRef()[patchi][facei]
                         = momentInverter_->primaryWeights()[pNodei];
@@ -163,8 +163,8 @@ void Foam::extendedFieldMomentInversion::invertBoundaryMoments
 
 bool Foam::extendedFieldMomentInversion::invertLocalMoments
 (
-    const volUnivariateMomentFieldSet& moments,
-    mappedPtrList<volScalarNode>& nodes,
+    const volMomentFieldSet& moments,
+    mappedPtrList<volNode>& nodes,
     const label celli,
     const bool fatalErrorOnFailedRealizabilityTest
 )
@@ -203,7 +203,7 @@ bool Foam::extendedFieldMomentInversion::invertLocalMoments
     // Copying EQMOM quadrature to fields
     for (label pNodei = 0; pNodei < nodes.size(); pNodei++)
     {
-        volScalarNode& node(nodes[pNodei]);
+        volNode& node(nodes[pNodei]);
 
         // Copy primary node
         node.primaryWeight()[celli] = pWeights[pNodei];
@@ -237,37 +237,6 @@ bool Foam::extendedFieldMomentInversion::invertLocalMoments
         // Copy sigma
         node.sigma()[celli] = momentInverter_().sigma();
     }
-
-    return true;
-}
-
-void Foam::extendedFieldMomentInversion::invert
-(
-    const volVectorMomentFieldSet& moments,
-    mappedPtrList<volVectorNode>& nodes
-)
-{
-    NotImplemented;
-}
-
-void Foam::extendedFieldMomentInversion::invertBoundaryMoments
-(
-    const volVectorMomentFieldSet& moments,
-    mappedPtrList<volVectorNode>& nodes
-)
-{
-    NotImplemented;
-}
-
-bool Foam::extendedFieldMomentInversion::invertLocalMoments
-(
-    const volVectorMomentFieldSet& moments,
-    mappedPtrList<volVectorNode>& nodes,
-    const label celli,
-    const bool fatalErrorOnFailedRealizabilityTest
-)
-{
-    NotImplemented;
 
     return true;
 }

@@ -91,17 +91,17 @@ Foam::tmp<Foam::volScalarField> Foam::pdPhaseModel::coalescenceSource
     }
 
     volScalarField& cSource = tmpCSource.ref();
-    const PtrList<volScalarNode>& nodes = quadrature_.nodes();
+    const PtrList<volNode>& nodes = quadrature_.nodes();
 
     forAll(nodes, nodei)
     {
-        const volScalarNode& node1 = nodes[nodei];
+        const volNode& node1 = nodes[nodei];
         const volScalarField& weight1 = node1.primaryWeight();
         const volScalarField& abscissa1 = node1.primaryAbscissa();
 
         forAll(nodes, nodej)
         {
-            const volScalarNode& node2 = nodes[nodej];
+            const volNode& node2 = nodes[nodej];
             const volScalarField& weight2 = node2.primaryWeight();
             const volScalarField& abscissa2 = node2.primaryAbscissa();
 
@@ -160,11 +160,11 @@ Foam::tmp<Foam::volScalarField> Foam::pdPhaseModel::breakupSource
         return bSource;
     }
 
-    const PtrList<volScalarNode>& nodes = quadrature_.nodes();
+    const PtrList<volNode>& nodes = quadrature_.nodes();
 
     forAll(nodes, nodei)
     {
-        const volScalarNode& node = nodes[nodei];
+        const volNode& node = nodes[nodei];
 
         //- Diameter is used to calculate the breakup kernel in place
         //  of the abscissa
@@ -569,7 +569,7 @@ void Foam::pdPhaseModel::correct()
 
     forAll(quadrature_.nodes(), nodei)
     {
-        const volScalarNode& node = quadrature_.nodes()[nodei];
+        const volNode& node = quadrature_.nodes()[nodei];
 
         // Set alpha values such that the moment.1 is equal to the bounded
         // alpha
@@ -632,8 +632,8 @@ void Foam::pdPhaseModel::relativeTransport()
     Info<< "Transporting moments based on relative flux" << endl;
 
     quadrature_.interpolateNodes();
-    const PtrList<surfaceScalarNode>& nodesOwn = quadrature_.nodesOwn();
-    const PtrList<surfaceScalarNode>& nodesNei = quadrature_.nodesNei();
+    const PtrList<surfaceNode>& nodesOwn = quadrature_.nodesOwn();
+    const PtrList<surfaceNode>& nodesNei = quadrature_.nodesNei();
 
     // Transport moments with relative flux
     forAll(quadrature_.moments(), mEqni)
@@ -772,8 +772,8 @@ void Foam::pdPhaseModel::averageTransport(const PtrList<fvVectorMatrix>& AEqns)
 
     // Mean moment advection
     Info<< "Transporting moments with average velocity" << endl;
-    const PtrList<surfaceScalarNode>& nodesOwn = quadrature_.nodesOwn();
-    const PtrList<surfaceScalarNode>& nodesNei = quadrature_.nodesNei();
+    const PtrList<surfaceNode>& nodesOwn = quadrature_.nodesOwn();
+    const PtrList<surfaceNode>& nodesNei = quadrature_.nodesNei();
 
     forAll(quadrature_.moments(), mEqni)
     {

@@ -24,61 +24,63 @@ License
 
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
 
-template <class weightType, class abscissaType, class sigmaType>
+template <class weightType, class abscissaType, class sigmaType, class vType>
 const Foam::word&
-Foam::quadratureNode<weightType, abscissaType, sigmaType>::name() const
+Foam::quadratureNode<weightType, abscissaType, sigmaType, vType>::name() const
 {
     return name_;
 }
 
-template <class weightType, class abscissaType, class sigmaType>
-inline bool Foam::quadratureNode<weightType, abscissaType, sigmaType>::
+template <class weightType, class abscissaType, class sigmaType, class vType>
+inline bool Foam::quadratureNode<weightType, abscissaType, sigmaType, vType>::
 extended() const
 {
     return extended_;
 }
 
-template <class weightType, class abscissaType, class sigmaType>
+template <class weightType, class abscissaType, class sigmaType, class vType>
 Foam::label
-Foam::quadratureNode<weightType, abscissaType, sigmaType>::
+Foam::quadratureNode<weightType, abscissaType, sigmaType, vType>::
 nSecondaryNodes() const
 {
     return nSecondaryNodes_;
 }
 
-template <class weightType, class abscissaType, class sigmaType>
+template <class weightType, class abscissaType, class sigmaType, class vType>
 const weightType&
-Foam::quadratureNode<weightType, abscissaType, sigmaType>::
+Foam::quadratureNode<weightType, abscissaType, sigmaType, vType>::
 primaryWeight() const
 {
     return weight_;
 }
 
-template <class weightType, class abscissaType, class sigmaType>
+template <class weightType, class abscissaType, class sigmaType, class vType>
 weightType&
-Foam::quadratureNode<weightType, abscissaType, sigmaType>::primaryWeight()
+Foam::quadratureNode<weightType, abscissaType, sigmaType, vType>::
+primaryWeight()
 {
     return weight_;
 }
 
-template <class weightType, class abscissaType, class sigmaType>
+template <class weightType, class abscissaType, class sigmaType, class vType>
 const abscissaType&
-Foam::quadratureNode<weightType, abscissaType, sigmaType>::
-primaryAbscissa() const
+Foam::quadratureNode<weightType, abscissaType, sigmaType, vType>::
+primaryAbscissa(const label cmpt) const
 {
-    return abscissa_;
+    return abscissa_[cmpt];
 }
 
-template <class weightType, class abscissaType, class sigmaType>
+template <class weightType, class abscissaType, class sigmaType, class vType>
 abscissaType&
-Foam::quadratureNode<weightType, abscissaType, sigmaType>::primaryAbscissa()
+Foam::quadratureNode<weightType, abscissaType, sigmaType, vType>::
+primaryAbscissa(const label cmpt)
 {
-    return abscissa_;
+    return abscissa_[cmpt];
 }
 
-template <class weightType, class abscissaType, class sigmaType>
+template <class weightType, class abscissaType, class sigmaType, class vType>
 const Foam::PtrList<weightType>&
-Foam::quadratureNode<weightType, abscissaType, sigmaType>::
+Foam::quadratureNode<weightType, abscissaType, sigmaType, vType>::
 secondaryWeights() const
 {
     if (!extended_)
@@ -92,9 +94,9 @@ secondaryWeights() const
     return secondaryWeights_;
 }
 
-template <class weightType, class abscissaType, class sigmaType>
+template <class weightType, class abscissaType, class sigmaType, class vType>
 Foam::PtrList<weightType>&
-Foam::quadratureNode<weightType, abscissaType, sigmaType>::
+Foam::quadratureNode<weightType, abscissaType, sigmaType, vType>::
 secondaryWeights()
 {
     if (!extended_)
@@ -107,10 +109,10 @@ secondaryWeights()
     return secondaryWeights_;
 }
 
-template <class weightType, class abscissaType, class sigmaType>
+template <class weightType, class abscissaType, class sigmaType, class vType>
 const Foam::PtrList<abscissaType>&
-Foam::quadratureNode<weightType, abscissaType, sigmaType>
-::secondaryAbscissae() const
+Foam::quadratureNode<weightType, abscissaType, sigmaType, vType>
+::secondaryAbscissae(const label cmpt) const
 {
     if (!extended_)
     {
@@ -120,13 +122,13 @@ Foam::quadratureNode<weightType, abscissaType, sigmaType>
             << abort(FatalError);
     }
 
-    return secondaryAbscissae_;
+    return secondaryAbscissae_[cmpt];
 }
 
-template <class weightType, class abscissaType, class sigmaType>
+template <class weightType, class abscissaType, class sigmaType, class vType>
 Foam::PtrList<abscissaType>&
-Foam::quadratureNode<weightType, abscissaType, sigmaType>
-::secondaryAbscissae()
+Foam::quadratureNode<weightType, abscissaType, sigmaType, vType>
+::secondaryAbscissae(const label cmpt)
 {
     if (!extended_)
     {
@@ -136,12 +138,12 @@ Foam::quadratureNode<weightType, abscissaType, sigmaType>
             << abort(FatalError);
     }
 
-    return secondaryAbscissae_;
+    return secondaryAbscissae_[cmpt];
 }
 
-template <class weightType, class abscissaType, class sigmaType>
+template <class weightType, class abscissaType, class sigmaType, class vType>
 const sigmaType&
-Foam::quadratureNode<weightType, abscissaType, sigmaType>
+Foam::quadratureNode<weightType, abscissaType, sigmaType, vType>
 ::sigma() const
 {
     if (!extended_)
@@ -155,9 +157,9 @@ Foam::quadratureNode<weightType, abscissaType, sigmaType>
     return sigma_();
 }
 
-template <class weightType, class abscissaType, class sigmaType>
+template <class weightType, class abscissaType, class sigmaType, class vType>
 sigmaType&
-Foam::quadratureNode<weightType, abscissaType, sigmaType>::sigma()
+Foam::quadratureNode<weightType, abscissaType, sigmaType, vType>::sigma()
 {
     if (!extended_)
     {

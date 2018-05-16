@@ -106,7 +106,7 @@ protected:
         //- Calculate implicit source terms
         virtual tmp<fvScalarMatrix> implicitCollisionSource
         (
-            const volVectorMoment& moment
+            const volMoment& moment
         ) = 0;
 
         virtual scalar explicitCollisionSource

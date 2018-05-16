@@ -34,16 +34,15 @@ volVectorField dragSource
 
     forAll(nodes, nodei)
     {
-        const volVectorNode& node = nodes[nodei];
+        const volNode& node = nodes[nodei];
         const volScalarField& alphapi = node.primaryWeight();
-        const volVectorField& Upi = node.primaryAbscissa();
 
         // WenYu drag
         volScalarField alphafi
         (
             max(scalar(1) - alphapi, residualAlpha)
         );
-        volScalarField Re(mag(Upi - U)*dp/nuf);
+        volScalarField Re(mag(Ups[nodei] - U)*dp/nuf);
         volScalarField Res(alphafi*Re);
         volScalarField CdsRes
         (
@@ -67,7 +66,7 @@ volVectorField dragSource
            /sqr(dp)
         );
         Kds.set(nodei, new volScalarField(Kdi*rhof));
-        dragSource += Kdi*Upi;
+        dragSource += Kdi*Ups[nodei];
         Kd += Kdi;
     }
 }

@@ -44,10 +44,10 @@ SourceFiles
 namespace Foam
 {
 
-typedef quadratureApproximation<volUnivariateMomentFieldSet, volScalarNode>
+typedef quadratureApproximation<volMomentFieldSet, volNode>
     univariateQuadratureApproximation;
 
-typedef quadratureApproximation<volVectorMomentFieldSet, volVectorNode>
+typedef quadratureApproximation<volMomentFieldSet, volNode>
     velocityQuadratureApproximation;
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //

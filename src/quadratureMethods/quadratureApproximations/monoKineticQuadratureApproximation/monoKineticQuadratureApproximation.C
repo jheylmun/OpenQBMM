@@ -113,18 +113,34 @@ Foam::monoKineticQuadratureApproximation::monoKineticQuadratureApproximation
             )
         );
     }
-    nodesNei_ = autoPtr<PtrList<surfaceScalarNode>>
+    nodesNei_ = autoPtr<PtrList<surfaceNode>>
     (
-        new PtrList<surfaceScalarNode>(nNodes_)
+        new PtrList<surfaceNode>(nNodes_)
     );
-    nodesOwn_ = autoPtr<PtrList<surfaceScalarNode>>
+    nodesOwn_ = autoPtr<PtrList<surfaceNode>>
     (
-        new PtrList<surfaceScalarNode>(nNodes_)
+        new PtrList<surfaceNode>(nNodes_)
     );
 
-    PtrList<surfaceScalarNode>& nodesNei = nodesNei_();
-    PtrList<surfaceScalarNode>& nodesOwn = nodesOwn_();
+    PtrList<surfaceNode>& nodesNei = nodesNei_();
+    PtrList<surfaceNode>& nodesOwn = nodesOwn_();
 
+
+    PtrList<dimensionSet> abscissaeDimensions(momentOrders_[0].size());
+    labelList orderZero(nDimensions_, 0);
+    dimensionSet m0Dimensions(moments_(orderZero).dimensions());
+
+    forAll(abscissaeDimensions, cmpt)
+    {
+        labelList orderOne(orderZero);
+        orderOne[cmpt] = 1;
+
+        abscissaeDimensions.set
+        (
+            cmpt,
+            new dimensionSet(moments_(orderOne).dimensions()/m0Dimensions)
+        );
+    }
 
     // Populating interpolated nodes
     forAll(nodes_(), nodei)
@@ -157,13 +173,13 @@ Foam::monoKineticQuadratureApproximation::monoKineticQuadratureApproximation
         nodesNei.set
         (
             nodei,
-            new surfaceScalarNode
+            new surfaceNode
             (
                 "node" + Foam::name(nodei) + "Nei",
                 name_,
                 mesh_,
-                moments_[0].dimensions(),
-                moments_[1].dimensions()/moments_[0].dimensions(),
+                m0Dimensions,
+                abscissaeDimensions,
                 false,
                 0
             )
@@ -196,13 +212,13 @@ Foam::monoKineticQuadratureApproximation::monoKineticQuadratureApproximation
         nodesOwn.set
         (
             nodei,
-            new surfaceScalarNode
+            new surfaceNode
             (
                 "node" + Foam::name(nodei) + "Own",
                 name_,
                 mesh_,
-                moments_[0].dimensions(),
-                moments_[1].dimensions()/moments_[0].dimensions(),
+                m0Dimensions,
+                abscissaeDimensions,
                 false,
                 0
             )
@@ -272,15 +288,15 @@ void Foam::monoKineticQuadratureApproximation::interpolateNodes()
         dimensionedScalar("own", dimless, 1.0)
     );
 
-    const PtrList<volScalarNode>& nodes = nodes_();
-    PtrList<surfaceScalarNode>& nodesNei = nodesNei_();
-    PtrList<surfaceScalarNode>& nodesOwn = nodesOwn_();
+    const PtrList<volNode>& nodes = nodes_();
+    PtrList<surfaceNode>& nodesNei = nodesNei_();
+    PtrList<surfaceNode>& nodesOwn = nodesOwn_();
 
     forAll(nodes, nodei)
     {
-        const volScalarNode& node(nodes[nodei]);
-        surfaceScalarNode& nodeNei(nodesNei[nodei]);
-        surfaceScalarNode& nodeOwn(nodesOwn[nodei]);
+        const volNode& node(nodes[nodei]);
+        surfaceNode& nodeNei(nodesNei[nodei]);
+        surfaceNode& nodeOwn(nodesOwn[nodei]);
 
         nodeOwn.primaryWeight() =
             fvc::interpolate(node.primaryWeight(), own, "reconstruct(weight)");

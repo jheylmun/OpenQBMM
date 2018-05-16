@@ -87,7 +87,7 @@ Foam::populationBalanceSubModels::collisionKernels::noCollision
 
 Foam::tmp<Foam::fvScalarMatrix>
 Foam::populationBalanceSubModels::collisionKernels::noCollision
-::implicitCollisionSource(const volVectorMoment& m) const
+::implicitCollisionSource(const volMoment& m) const
 {
     return tmp<fvScalarMatrix>
     (
