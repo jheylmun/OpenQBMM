@@ -301,8 +301,8 @@ void Foam::momentAdvectionSchemes::firstOrderKineticMultivariate::update
         const surfaceScalarField& weightOwn = nodeOwn.primaryWeight();
         const surfaceScalarField& weightNei = nodeNei.primaryWeight();
 
-        tmp<surfaceScalarField> phiOwn;
-        tmp<surfaceScalarField> phiNei;
+        tmp<surfaceScalarField> phiOwnTmp;
+        tmp<surfaceScalarField> phiNeiTmp;
 
         if (!localPhi)
         {
@@ -310,14 +310,16 @@ void Foam::momentAdvectionSchemes::firstOrderKineticMultivariate::update
             surfaceVectorField UNei(nodeNei.velocityAbscissae());
 
 
-            phiOwn = UOwn & mesh.Sf();
-            phiNei = UNei & mesh.Sf();
+            phiOwnTmp = UOwn & mesh.Sf();
+            phiNeiTmp = UNei & mesh.Sf();
         }
         else
         {
-            phiOwn = tmp<surfaceScalarField>(this->phi_);
-            phiNei = tmp<surfaceScalarField>(this->phi_);
+            phiOwnTmp = tmp<surfaceScalarField>(this->phi_);
+            phiNeiTmp = tmp<surfaceScalarField>(this->phi_);
         }
+        const surfaceScalarField& phiOwn = phiOwnTmp();
+        const surfaceScalarField& phiNei = phiNeiTmp();
 
         forAll(divMoments_, divi)
         {

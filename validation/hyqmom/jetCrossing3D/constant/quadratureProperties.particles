@@ -28,7 +28,7 @@ basicMomentInversion
 
 momentAdvection
 {
-    velocityMomentAdvection   firstOrderKinetic;
+    momentAdvection   firstOrderKineticMultivariate;
 }
 
 moments
