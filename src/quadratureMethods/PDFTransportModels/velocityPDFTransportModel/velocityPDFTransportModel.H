@@ -37,7 +37,7 @@ SourceFiles
 #define velocityPDFTransportModel_H
 
 #include "PDFTransportModel.H"
-#include "velocityMomentAdvection.H"
+#include "momentAdvection.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
@@ -59,7 +59,7 @@ protected:
     // Protected data
 
         //- Moment advection
-        autoPtr<velocityMomentAdvection> momentAdvection_;
+        autoPtr<momentAdvection> momentAdvection_;
 
     // Protected member functions
 
@@ -95,6 +95,7 @@ public:
             const word& name,
             const dictionary& dict,
             const fvMesh& mesh,
+            const surfaceScalarField& phi,
             const word& support
         );
 
@@ -120,11 +121,7 @@ public:
             virtual void solve();
 
             //- Solve mean tranport
-            virtual void meanTransport
-            (
-                const surfaceScalarField& phi,
-                const bool wallCollisions
-            );
+            virtual void meanTransport(const bool wallCollisions);
 
             //- Solve relative transport
             virtual void relativeTransport

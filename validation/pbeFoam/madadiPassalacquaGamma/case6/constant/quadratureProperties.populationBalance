@@ -34,7 +34,7 @@ extendedMomentInversion
 
 momentAdvection
 {
-    univariateMomentAdvection   noAdvection;
+    momentAdvection   noAdvection;
 }
 
 moments

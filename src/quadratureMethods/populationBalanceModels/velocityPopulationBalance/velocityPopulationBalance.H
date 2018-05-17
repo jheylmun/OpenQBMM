@@ -135,11 +135,7 @@ public:
         virtual void solve();
 
         //- Solve mean tranport
-        virtual void meanTransport
-        (
-            const surfaceScalarField& phi,
-            const bool wallCollisions
-        );
+        virtual void meanTransport(const bool wallCollisions);
 
         //- Solve relative transport
         virtual void relativeTransport

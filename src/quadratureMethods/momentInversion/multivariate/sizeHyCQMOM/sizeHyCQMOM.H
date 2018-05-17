@@ -72,9 +72,6 @@ class sizeHyCQMOM
         //- Number of size moments
         const label nSizeMoments_;
 
-        //- Number of velocity moments
-        const label nVelocityMoments_;
-
         //- Moment orders of full distribution
         const labelListList& momentOrders_;
 
@@ -83,9 +80,6 @@ class sizeHyCQMOM
 
         //- Total number of nodes
         const label nNodes_;
-
-        //-Number of nodes in size direction
-        const label nSizeNodes_;
 
         //- Node indexes of full distribution
         const labelListList& nodeIndexes_;

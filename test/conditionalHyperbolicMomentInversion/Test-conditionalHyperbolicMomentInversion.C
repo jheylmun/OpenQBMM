@@ -7,34 +7,29 @@
 -------------------------------------------------------------------------------
 License
     This file is derivative work of OpenFOAM.
-
     OpenFOAM is free software: you can redistribute it and/or modify it
     under the terms of the GNU General Public License as published by
     the Free Software Foundation, either version 3 of the License, or
     (at your option) any later version.
-
     OpenFOAM is distributed in the hope that it will be useful, but WITHOUT
     ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or
     FITNESS FOR A PARTICULAR PURPOSE.  See the GNU General Public License
     for more details.
-
     You should have received a copy of the GNU General Public License
     along with OpenFOAM.  If not, see <http://www.gnu.org/licenses/>.
-
 Application
     Test-ExtendedMomentInversion.C
-
 Description
     Test the extendedMomentInversion class and its subclasses.
-
 \*---------------------------------------------------------------------------*/
 
 #include "fvCFD.H"
 #include "IOmanip.H"
 #include "IFstream.H"
 #include "OFstream.H"
+#include "scalarMatrices.H"
 #include "mappedList.H"
-#include "sizeHyCQMOM.H"
+#include "hyperbolicConditionalMomentInversion.H"
 #include "Random.H"
 
 using namespace Foam;
@@ -47,27 +42,38 @@ int main(int argc, char *argv[])
 
     Random rand(clock::getTime());
 
-    mappedList<scalarList> x
-    (
-        nNodes,
-        nodeIndexes,
-        scalarField(nDims, 0)
-    );
     mappedList<scalar> w(nNodes, nodeIndexes, 0.0);
+    mappedList<vector> u(nNodes, nodeIndexes, Zero);
 
-    forAll(x, nodei)
+    forAll(nodeIndexes, nodei)
     {
-        w[nodei] = 10000*rand.scalar01();
-        forAll(x[nodei], dimi)
+        const labelList& nodeIndex = nodeIndexes[nodei];
+
+        w(nodeIndex) = rand.scalar01();
+        if (nDims == 1)
         {
-            if (dimi == 0)
-            {
-                x[nodei][dimi] = 15.0*rand.scalar01();
-            }
-            else
-            {
-                x[nodei][dimi] = -0.5 + rand.scalar01();
-            }
+            u(nodeIndex) =
+                vector(rand.scalar01() - 0.5, 0.0, 0.0)*10.0;
+        }
+        else if (nDims == 2)
+        {
+            u(nodeIndex) =
+                vector
+                (
+                    rand.scalar01() - 0.5,
+                    rand.scalar01() - 0.5,
+                    0.0
+                )*10;
+        }
+        else
+        {
+            u(nodeIndex) =
+                vector
+                (
+                    rand.scalar01() - 0.5,
+                    rand.scalar01() - 0.5,
+                    rand.scalar01() - 0.5
+                )*10;
         }
     }
 
@@ -84,25 +90,35 @@ int main(int argc, char *argv[])
             scalar cmpt = w(nodeIndex);
             forAll(nodeIndex, dimi)
             {
-                cmpt *= pow(x(nodeIndex)[dimi], momentOrder[dimi]);
+                cmpt *= pow(u(nodeIndex)[dimi], momentOrder[dimi]);
             }
             moments(momentOrder) += cmpt;
         }
     }
+//     moments(0,0) = 5.1441;
+//     moments(1,0) = -2.3417;
+//     moments(0,1) = 4.0371;
+//     moments(2,0) = 35.8806;
+//     moments(1,1) = -25.7800;
+//     moments(0,2) = 43.6027;
+//     moments(3,0) = 11.0056;
+//     moments(0,3) = 111.2670;
+//     moments(4,0) = 368.2310;
+//     moments(0,4) = 764.4060;
 
-    sizeHyCQMOM momentInverter
+    hyperbolicConditionalMomentInversion momentInverter
     (
-        quadratureProperties, momentOrders, nodeIndexes
+        quadratureProperties, nDims
     );
 
     Info<< "\nInverting moments" << endl;
 
     momentInverter.invert(moments);
 
-    Info<< "\nReconstructing moments:" << nl << endl;
+    Info<< "\nReconstructed moments:" << endl;
 
     const mappedList<scalar>& weights = momentInverter.weights();
-    const mappedList<scalarList>& abscissae = momentInverter.abscissae();
+    const mappedList<vector>& abscissae = momentInverter.abscissae();
 
     mappedList<scalar> newMoments(nMoments, momentOrders);
     forAll(momentOrders, mi)
@@ -132,8 +148,7 @@ int main(int argc, char *argv[])
             << ",\terror: "
             << (mag(moments(momentOrder) - newMoments(momentOrder))/moments(momentOrder))<< endl;
     }
-
-    Info << "\nEnd\n" << endl;
+    Info << nl << "\nEnd\n" << endl;
 
     return 0;
 }

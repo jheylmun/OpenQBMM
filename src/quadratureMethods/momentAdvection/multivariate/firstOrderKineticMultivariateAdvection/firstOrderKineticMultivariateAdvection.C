@@ -23,7 +23,7 @@ License
 
 \*---------------------------------------------------------------------------*/
 
-#include "firstOrderKineticVelocityAdvection.H"
+#include "firstOrderKineticMultivariateAdvection.H"
 #include "wallFvPatch.H"
 #include "addToRunTimeSelectionTable.H"
 
@@ -31,14 +31,14 @@ License
 
 namespace Foam
 {
-namespace velocityAdvection
+namespace momentAdvectionSchemes
 {
-    defineTypeNameAndDebug(firstOrderKinetic, 0);
+    defineTypeNameAndDebug(firstOrderKineticMultivariate, 0);
 
     addToRunTimeSelectionTable
     (
-        velocityMomentAdvection,
-        firstOrderKinetic,
+        momentAdvection,
+        firstOrderKineticMultivariate,
         dictionary
     );
 }
@@ -46,14 +46,16 @@ namespace velocityAdvection
 
 // * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
 
-Foam::velocityAdvection::firstOrderKinetic::firstOrderKinetic
+Foam::momentAdvectionSchemes::firstOrderKineticMultivariate::
+firstOrderKineticMultivariate
 (
     const dictionary& dict,
     const quadratureApproximation& quadrature,
+    const surfaceScalarField& phi,
     const word& support
 )
 :
-    velocityMomentAdvection(dict, quadrature, support),
+    momentAdvection(dict, quadrature, phi, support),
     nodes_(quadrature.nodes()),
     nodesNei_(),
     nodesOwn_()
@@ -133,13 +135,15 @@ Foam::velocityAdvection::firstOrderKinetic::firstOrderKinetic
 
 // * * * * * * * * * * * * * * * * Destructor  * * * * * * * * * * * * * * * //
 
-Foam::velocityAdvection::firstOrderKinetic::~firstOrderKinetic()
+Foam::momentAdvectionSchemes::firstOrderKineticMultivariate::
+~firstOrderKineticMultivariate()
 {}
 
 
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
 
-void Foam::velocityAdvection::firstOrderKinetic::interpolateNodes()
+void
+Foam::momentAdvectionSchemes::firstOrderKineticMultivariate::interpolateNodes()
 {
     PtrList<surfaceNode>& nodesNei = nodesNei_();
     PtrList<surfaceNode>& nodesOwn = nodesOwn_();
@@ -177,7 +181,8 @@ void Foam::velocityAdvection::firstOrderKinetic::interpolateNodes()
     }
 }
 
-void Foam::velocityAdvection::firstOrderKinetic::updateWallCollisions()
+void Foam::momentAdvectionSchemes::firstOrderKineticMultivariate::
+updateWallCollisions()
 {
     const fvMesh& mesh = own_.mesh();
 
@@ -229,12 +234,14 @@ void Foam::velocityAdvection::firstOrderKinetic::updateWallCollisions()
 
 
 Foam::scalar
-Foam::velocityAdvection::firstOrderKinetic::realizableCo() const
+Foam::momentAdvectionSchemes::firstOrderKineticMultivariate::
+realizableCo() const
 {
     return 1.0;
 }
 
-Foam::scalar Foam::velocityAdvection::firstOrderKinetic::CoNum() const
+Foam::scalar
+Foam::momentAdvectionSchemes::firstOrderKineticMultivariate::CoNum() const
 {
     scalar CoNum = 0.0;
     const fvMesh& mesh = own_.mesh();
@@ -256,7 +263,11 @@ Foam::scalar Foam::velocityAdvection::firstOrderKinetic::CoNum() const
     return CoNum;
 }
 
-void Foam::velocityAdvection::firstOrderKinetic::update()
+void Foam::momentAdvectionSchemes::firstOrderKineticMultivariate::update
+(
+    const bool localPhi,
+    const bool wallCollisions
+)
 {
     const fvMesh& mesh = own_.mesh();
     dimensionedScalar zeroPhi("zero", dimVolume/dimTime, 0.0);
@@ -265,7 +276,10 @@ void Foam::velocityAdvection::firstOrderKinetic::update()
     interpolateNodes();
 
     // Set velocities at boundaries for rebounding
-    updateWallCollisions();
+    if (wallCollisions)
+    {
+        updateWallCollisions();
+    }
 
     // Zero moment flux
     forAll(divMoments_, divi)
@@ -286,12 +300,24 @@ void Foam::velocityAdvection::firstOrderKinetic::update()
 
         const surfaceScalarField& weightOwn = nodeOwn.primaryWeight();
         const surfaceScalarField& weightNei = nodeNei.primaryWeight();
-        surfaceVectorField UOwn(nodeOwn.velocityAbscissae());
-        surfaceVectorField UNei(nodeNei.velocityAbscissae());
+
+        tmp<surfaceScalarField> phiOwn;
+        tmp<surfaceScalarField> phiNei;
+
+        if (!localPhi)
+        {
+            surfaceVectorField UOwn(nodeOwn.velocityAbscissae());
+            surfaceVectorField UNei(nodeNei.velocityAbscissae());
 
 
-        surfaceScalarField phiOwn(UOwn & mesh.Sf());
-        surfaceScalarField phiNei(UNei & mesh.Sf());
+            phiOwn = UOwn & mesh.Sf();
+            phiNei = UNei & mesh.Sf();
+        }
+        else
+        {
+            phiOwn = tmp<surfaceScalarField>(this->phi_);
+            phiNei = tmp<surfaceScalarField>(this->phi_);
+        }
 
         forAll(divMoments_, divi)
         {
@@ -340,91 +366,7 @@ void Foam::velocityAdvection::firstOrderKinetic::update()
     }
 }
 
-void Foam::velocityAdvection::firstOrderKinetic::update
-(
-    const surfaceScalarField& phi,
-    const bool wallCollisions
-)
-{
-    dimensionedScalar zeroPhi("zero", dimVolume/dimTime, 0.0);
-
-    // Interpolate weights and abscissae
-    interpolateNodes();
-
-    // Set velocities at boundaries for rebounding
-    if (wallCollisions)
-    {
-        updateWallCollisions();
-    }
-
-    // Zero moment fluxes
-    forAll(divMoments_, divi)
-    {
-        divMoments_[divi] =
-            dimensionedScalar
-            (
-                "0",
-                moments_[divi].dimensions()/dimTime,
-                0.0
-            );
-    }
-
-    forAll(nodes_, nodei)
-    {
-        const surfaceNode& nodeNei(nodesNei_()[nodei]);
-        const surfaceNode& nodeOwn(nodesOwn_()[nodei]);
-
-        const surfaceScalarField& weightOwn = nodeOwn.primaryWeight();
-        const surfaceScalarField& weightNei = nodeNei.primaryWeight();
-
-        forAll(divMoments_, divi)
-        {
-            const labelList& momentOrder = momentOrders_[divi];
-
-            surfaceScalarField momentCmptOwn(weightOwn);
-            surfaceScalarField momentCmptNei(weightNei);
-
-            forAll(momentOrder, cmpti)
-            {
-                const label cmptMomentOrder = momentOrder[cmpti];
-
-                const surfaceScalarField& abscissaOwnCmpt =
-                   nodeOwn.primaryAbscissa(cmpti);
-                const surfaceScalarField& abscissaNeiCmpt =
-                    nodeNei.primaryAbscissa(cmpti);
-
-                tmp<surfaceScalarField> mOwnPow =
-                    momentCmptOwn
-                   *pow
-                    (
-                        abscissaOwnCmpt,
-                        cmptMomentOrder
-                    );
-                tmp<surfaceScalarField> mNeiPow =
-                    momentCmptNei
-                   *pow
-                    (
-                        abscissaNeiCmpt,
-                        cmptMomentOrder
-                    );
-                momentCmptOwn.dimensions().reset(mOwnPow().dimensions());
-                momentCmptOwn == mOwnPow;
-
-                momentCmptNei.dimensions().reset(mNeiPow().dimensions());
-                momentCmptNei == mNeiPow;
-            }
-
-            divMoments_[divi] +=
-                fvc::surfaceIntegrate
-                (
-                    momentCmptOwn*max(phi, zeroPhi)
-                  + momentCmptNei*min(phi, zeroPhi)
-                );
-        }
-    }
-}
-
-void Foam::velocityAdvection::firstOrderKinetic::update
+void Foam::momentAdvectionSchemes::firstOrderKineticMultivariate::update
 (
     const mappedPtrList<volVectorField>& Us,
     const bool wallCollisions

@@ -40,13 +40,6 @@ Foam::sizeHyCQMOM::sizeHyCQMOM
     nGeometricDimensions_(nDistributionDims_ - 1),
     nMoments_(momentOrders.size()),
     nSizeMoments_(calcNSizeMoments(momentOrders)),
-    nVelocityMoments_
-    (
-        hyperbolicConditionalMomentInversion::nHyperbolicMoments
-        (
-            nGeometricDimensions_
-        )
-    ),
     momentOrders_(momentOrders),
     velocityMomentOrders_
     (
@@ -56,7 +49,6 @@ Foam::sizeHyCQMOM::sizeHyCQMOM
         )
     ),
     nNodes_(nodeIndexes.size()),
-    nSizeNodes_(nSizeMoments_/2),
     nodeIndexes_(nodeIndexes),
     velocityNodeIndexes_
     (
@@ -162,7 +154,7 @@ void Foam::sizeHyCQMOM::invert
             sNodei,
             new mappedList<scalar>
             (
-                nVelocityMoments_,
+                velocityMomentOrders_.size(),
                 velocityMomentOrders_,
                 0.0
             )
@@ -196,7 +188,7 @@ void Foam::sizeHyCQMOM::invert
     {
         multivariateMomentSet momentsToInvert
         (
-            nVelocityMoments_,
+            velocityMomentOrders_.size(),
             velocityMomentOrders_,
             "R"
         );

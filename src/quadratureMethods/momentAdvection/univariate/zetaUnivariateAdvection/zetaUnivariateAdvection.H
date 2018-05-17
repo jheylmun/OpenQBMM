@@ -44,23 +44,23 @@ SourceFiles
 #ifndef zetaUnivariateAdvection_H
 #define zetaUnivariateAdvection_H
 
-#include "univariateMomentAdvection.H"
+#include "momentAdvection.H"
 
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
 namespace Foam
 {
-namespace univariateAdvection
+namespace momentAdvectionSchemes
 {
 
 /*---------------------------------------------------------------------------*\
                             Class zeta Declaration
 \*---------------------------------------------------------------------------*/
 
-class zeta
+class zetaUnivariate
 :
-    public univariateMomentAdvection
+    public momentAdvection
 {
     // Private data
 
@@ -164,13 +164,13 @@ protected:
 public:
 
     //- Runtime type information
-    TypeName("zeta");
+    TypeName("zetaUnivariate");
 
 
     // Constructors
 
         //- Construct from univariateMomentSet
-        zeta
+        zetaUnivariate
         (
             const dictionary& dict,
             const quadratureApproximation& quadrature,
@@ -180,7 +180,7 @@ public:
 
 
     //- Destructor
-    virtual ~zeta();
+    virtual ~zetaUnivariate();
 
 
     // Public member functions
@@ -188,14 +188,28 @@ public:
         //- Return the maximum Courant number ensuring moment realizability
         virtual scalar realizableCo() const;
 
+        //- Return the maximum Courant number based on velocities
+        virtual scalar CoNum() const;
+
         //- Update moment advection
-        virtual void update();
+        virtual void update
+        (
+            const bool localPhi = true,
+            const bool wallCollisions = false
+        );
+
+        //- Update moment advection using a specified list of velocity fields
+        virtual void update
+        (
+            const mappedPtrList<volVectorField>& Us,
+            const bool wallCollisions = false
+        );
 };
 
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
-} // End namespace univariateAdvection
+} // End namespace momentAdvectionSchemes
 } // End namespace Foam
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //

@@ -30,14 +30,14 @@ License
 
 namespace Foam
 {
-namespace univariateAdvection
+namespace momentAdvectionSchemes
 {
-    defineTypeNameAndDebug(firstOrderKinetic, 0);
+    defineTypeNameAndDebug(firstOrderKineticUnivariate, 0);
 
     addToRunTimeSelectionTable
     (
-        univariateMomentAdvection,
-        firstOrderKinetic,
+        momentAdvection,
+        firstOrderKineticUnivariate,
         dictionary
     );
 }
@@ -45,7 +45,8 @@ namespace univariateAdvection
 
 // * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
 
-Foam::univariateAdvection::firstOrderKinetic::firstOrderKinetic
+Foam::momentAdvectionSchemes::firstOrderKineticUnivariate::
+firstOrderKineticUnivariate
 (
     const dictionary& dict,
     const quadratureApproximation& quadrature,
@@ -53,7 +54,7 @@ Foam::univariateAdvection::firstOrderKinetic::firstOrderKinetic
     const word& support
 )
 :
-    univariateMomentAdvection(dict, quadrature, phi, support),
+    momentAdvection(dict, quadrature, phi, support),
     nodes_(),
     nodesNei_(),
     nodesOwn_(),
@@ -210,13 +211,15 @@ Foam::univariateAdvection::firstOrderKinetic::firstOrderKinetic
 
 // * * * * * * * * * * * * * * * * Destructor  * * * * * * * * * * * * * * * //
 
-Foam::univariateAdvection::firstOrderKinetic::~firstOrderKinetic()
+Foam::momentAdvectionSchemes::firstOrderKineticUnivariate::
+~firstOrderKineticUnivariate()
 {}
 
 
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
 
-void Foam::univariateAdvection::firstOrderKinetic::interpolateNodes()
+void
+Foam::momentAdvectionSchemes::firstOrderKineticUnivariate::interpolateNodes()
 {
     const PtrList<volNode>& nodes = nodes_();
     PtrList<surfaceNode>& nodesNei = nodesNei_();
@@ -253,14 +256,24 @@ void Foam::univariateAdvection::firstOrderKinetic::interpolateNodes()
 }
 
 Foam::scalar
-Foam::univariateAdvection::firstOrderKinetic::realizableCo() const
+Foam::momentAdvectionSchemes::firstOrderKineticUnivariate::realizableCo() const
 {
     // Returning 1 because the restriction of this scheme is the same CFL
     // condition of the main scheme.
     return 1.0;
 }
 
-void Foam::univariateAdvection::firstOrderKinetic::update()
+Foam::scalar
+Foam::momentAdvectionSchemes::firstOrderKineticUnivariate::CoNum() const
+{
+    return 0;
+}
+
+void Foam::momentAdvectionSchemes::firstOrderKineticUnivariate::update
+(
+    const bool localPhi,
+    const bool wallCollisions
+)
 {
     momentFieldInverter_().invert(moments_, nodes_());
     interpolateNodes();
@@ -297,6 +310,16 @@ void Foam::univariateAdvection::firstOrderKinetic::update()
 
         divMoments_[divi].replace(0, divMoment);
     }
+}
+
+void Foam::momentAdvectionSchemes::firstOrderKineticUnivariate::update
+(
+    const mappedPtrList<volVectorField>& Us,
+    const bool wallCollisions
+)
+{
+    NotImplemented;
+    return;
 }
 
 // ************************************************************************* //

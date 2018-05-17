@@ -41,7 +41,7 @@ extendedMomentInversion
 
 momentAdvection
 {
-    univariateMomentAdvection   firstOrderKinetic;
+    momentAdvection   firstOrderKineticUnivariate;
 
     basicMomentInversion
     {

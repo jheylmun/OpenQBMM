@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2014-2018 Alberto Passalacqua
+    \\  /    A nd           | Copyright (C) 2018 Alberto Passalacqua
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -22,47 +22,74 @@ License
     along with OpenFOAM.  If not, see <http://www.gnu.org/licenses/>.
 
 Class
-    Foam::noAdvection
+    Foam::firstOrderKineticMultivariate
 
 Description
-    Empty scheme for cases without moment advection.
+    First-order moment advection with kinetic scheme for multivariate momet
+    sets.
 
 SourceFiles
-    noUnivariateAdvection.C
+    firstOrderKineticMultivariateAdvection.C
 
 \*---------------------------------------------------------------------------*/
 
-#ifndef noUnivariateAdvection_H
-#define noUnivariateAdvection_H
+#ifndef firstOrderKineticMultivariateAdvection_H
+#define firstOrderKineticMultivariateAdvection_H
 
-#include "univariateMomentAdvection.H"
+#include "momentAdvection.H"
 
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
 namespace Foam
 {
-namespace univariateAdvection
+namespace momentAdvectionSchemes
 {
 
 /*---------------------------------------------------------------------------*\
-                        Class noAdvection Declaration
+               Class firstOrderKineticMultivariate Declaration
 \*---------------------------------------------------------------------------*/
 
-class noAdvection
+class firstOrderKineticMultivariate
 :
-    public univariateMomentAdvection
+    public momentAdvection
 {
+    // Private data
+
+        //- List of quadrature nodes used for moment advection
+        const PtrList<volNode>& nodes_;
+
+        //- List of interpolated nodes (neighbour)
+        autoPtr<PtrList<surfaceNode>> nodesNei_;
+
+        //- List of interpolated nodes (owner)
+        autoPtr<PtrList<surfaceNode>> nodesOwn_;
+
+        //- Flux moment inversion method
+//         autoPtr<hyperbolicFieldMomentInversion> momentFieldInverter_;
+
+
+protected:
+
+    // Protected member functions
+
+        // Interpolate weights and abscissae
+        void interpolateNodes();
+
+        //- Compute collisions with walls
+        void updateWallCollisions();
+
+
 public:
 
     //- Runtime type information
-    TypeName("noAdvection");
+    TypeName("firstOrderKineticMultivariate");
 
 
     // Constructors
 
-        //- Construct from univariateMomentSet
-        noAdvection
+        //- Construct from velocityMomentSet
+        firstOrderKineticMultivariate
         (
             const dictionary& dict,
             const quadratureApproximation& quadrature,
@@ -72,7 +99,7 @@ public:
 
 
     //- Destructor
-    virtual ~noAdvection();
+    virtual ~firstOrderKineticMultivariate();
 
 
     // Public member functions
@@ -80,14 +107,28 @@ public:
         //- Return the maximum Courant number ensuring moment realizability
         virtual scalar realizableCo() const;
 
+        //- Return the maximum Courant number based on velocities
+        virtual scalar CoNum() const;
+
         //- Update moment advection
-        virtual void update();
+        virtual void update
+        (
+            const bool localPhi = true,
+            const bool wallCollisions = false
+        );
+
+        //- Update moment advection using a specified list of velocity fields
+        virtual void update
+        (
+            const mappedPtrList<volVectorField>& Us,
+            const bool wallCollisions = false
+        );
 };
 
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
-} // End namespace univariateAdvection
+} // End namespace momentAdvectionSchemes
 } // End namespace Foam
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //

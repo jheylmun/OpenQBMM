@@ -40,7 +40,7 @@ Foam::PDFTransportModels::univariatePDFTransportModel
     PDFTransportModel(name, dict, mesh, support),
     momentAdvection_
     (
-        univariateMomentAdvection::New
+        momentAdvection::New
         (
             this->quadrature_.subDict("momentAdvection"),
             this->quadrature_,

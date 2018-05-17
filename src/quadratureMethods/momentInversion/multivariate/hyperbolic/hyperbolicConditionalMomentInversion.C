@@ -349,8 +349,8 @@ void Foam::hyperbolicConditionalMomentInversion::invert1D
     // Store univariate quadrature in first direction
     forAll(weights1D, wi)
     {
-        weights1D[wi] = univariateInverter_().weights()[wi];
-        abscissae1D[wi] = univariateInverter_().abscissae()[wi];
+        weights1D[wi] = univariateInverter_().weights()[wi]*m0;
+        abscissae1D[wi] = univariateInverter_().abscissae()[wi] + meanU;
     }
 }
 
@@ -1133,29 +1133,15 @@ void Foam::hyperbolicConditionalMomentInversion::invert
     }
     else if (nDimensions_ == 2)
     {
-        mappedList<scalar> w
-        (
-            nNodes_,
-            twoDimNodeIndexes
-        );
-        mappedList<vector2D> u
-        (
-            nNodes_,
-            twoDimNodeIndexes
-        );
+        mappedList<scalar> w(nNodes_, twoDimNodeIndexes);
+        mappedList<vector2D> u(nNodes_, twoDimNodeIndexes);
 
         invert2D(moments, w, u);
 
         forAll(u, nodei)
         {
             weights_[nodei] = w[nodei];
-            abscissae_[nodei] =
-                vector
-                (
-                    u[nodei].x(),
-                    u[nodei].y(),
-                    0.0
-                );
+            abscissae_[nodei] = vector(u[nodei].x(), u[nodei].y(), 0.0);
         }
     }
     else
@@ -1165,17 +1151,10 @@ void Foam::hyperbolicConditionalMomentInversion::invert
 
         invert1D(moments, w, u);
 
-        // Compute multivariate quadrature
-        scalar meanU = 0.0;
-        if (moments(0) > SMALL)
-        {
-            meanU = moments(1)/moments(0);
-        }
-
         forAll(u, nodei)
         {
             weights_[nodei] = w[nodei];
-            abscissae_[nodei] = vector(u[nodei] + meanU, 0.0, 0.0);
+            abscissae_[nodei] = vector(u[nodei], 0.0, 0.0);
         }
     }
 }

@@ -31,14 +31,14 @@ License
 
 namespace Foam
 {
-namespace univariateAdvection
+namespace momentAdvectionSchemes
 {
-    defineTypeNameAndDebug(zeta, 0);
+    defineTypeNameAndDebug(zetaUnivariate, 0);
 
     addToRunTimeSelectionTable
     (
-        univariateMomentAdvection,
-        zeta,
+        momentAdvection,
+        zetaUnivariate,
         dictionary
     );
 }
@@ -46,7 +46,7 @@ namespace univariateAdvection
 
 // * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
 
-Foam::univariateAdvection::zeta::zeta
+Foam::momentAdvectionSchemes::zetaUnivariate::zetaUnivariate
 (
     const dictionary& dict,
     const quadratureApproximation& quadrature,
@@ -54,7 +54,7 @@ Foam::univariateAdvection::zeta::zeta
     const word& support
 )
 :
-    univariateMomentAdvection(dict, quadrature, phi, support),
+    momentAdvection(dict, quadrature, phi, support),
     m0_(moments_[0]),
     m0Own_
     (
@@ -281,13 +281,13 @@ Foam::univariateAdvection::zeta::zeta
 
 // * * * * * * * * * * * * * * * * Destructor  * * * * * * * * * * * * * * * //
 
-Foam::univariateAdvection::zeta::~zeta()
+Foam::momentAdvectionSchemes::zetaUnivariate::~zetaUnivariate()
 {}
 
 
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
 
-void Foam::univariateAdvection::zeta::interpolateFields()
+void Foam::momentAdvectionSchemes::zetaUnivariate::interpolateFields()
 {
     m0Own_ = fvc::interpolate(moments_[0], own_, "reconstruct(m0)");
     m0Nei_ = fvc::interpolate(moments_[0], nei_, "reconstruct(m0)");
@@ -311,7 +311,7 @@ void Foam::univariateAdvection::zeta::interpolateFields()
     }
 }
 
-void Foam::univariateAdvection::zeta::zetaToMoments
+void Foam::momentAdvectionSchemes::zetaUnivariate::zetaToMoments
 (
     const scalarList& zetaf,
     scalarList& mf,
@@ -366,7 +366,7 @@ void Foam::univariateAdvection::zeta::zetaToMoments
     }
 }
 
-void Foam::univariateAdvection::zeta::computeZetaFields()
+void Foam::momentAdvectionSchemes::zetaUnivariate::computeZetaFields()
 {
     // Cell-center values
     forAll(m0_, celli)
@@ -431,7 +431,7 @@ void Foam::univariateAdvection::zeta::computeZetaFields()
     }
 }
 
-void Foam::univariateAdvection::zeta::countFacesWithOutgoingFlux()
+void Foam::momentAdvectionSchemes::zetaUnivariate::countFacesWithOutgoingFlux()
 {
     const fvMesh& mesh(phi_.mesh());
     const labelList& own = mesh.faceOwner();
@@ -470,7 +470,7 @@ void Foam::univariateAdvection::zeta::countFacesWithOutgoingFlux()
     }
 }
 
-void Foam::univariateAdvection::zeta::limitZetas()
+void Foam::momentAdvectionSchemes::zetaUnivariate::limitZetas()
 {
     const labelUList& owner = phi_.mesh().owner();
     const labelUList& neighb = phi_.mesh().neighbour();
@@ -736,7 +736,7 @@ void Foam::univariateAdvection::zeta::limitZetas()
     }
 }
 
-Foam::scalar Foam::univariateAdvection::zeta::realizableCo() const
+Foam::scalar Foam::momentAdvectionSchemes::zetaUnivariate::realizableCo() const
 {
     const fvMesh& mesh(phi_.mesh());
     const labelList& own = mesh.faceOwner();
@@ -761,7 +761,16 @@ Foam::scalar Foam::univariateAdvection::zeta::realizableCo() const
     return gMin(internalCo);
 }
 
-void Foam::univariateAdvection::zeta::update()
+Foam::scalar Foam::momentAdvectionSchemes::zetaUnivariate::CoNum() const
+{
+    return 0;
+}
+
+void Foam::momentAdvectionSchemes::zetaUnivariate::update
+(
+    const bool localPhi,
+    const bool wallCollisions
+)
 {
     // Compute zeta fields
     computeZetaFields();
@@ -813,7 +822,17 @@ void Foam::univariateAdvection::zeta::update()
     }
 }
 
-void Foam::univariateAdvection::zeta::updateMomentFieldsFromZetas
+void Foam::momentAdvectionSchemes::zetaUnivariate::update
+(
+    const mappedPtrList<volVectorField>& Us,
+    const bool wallCollisions
+)
+{
+    NotImplemented;
+    return;
+}
+
+void Foam::momentAdvectionSchemes::zetaUnivariate::updateMomentFieldsFromZetas
 (
     const surfaceScalarField m0f,
     const PtrList<surfaceScalarField>& zetaf,

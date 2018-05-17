@@ -37,7 +37,7 @@ SourceFiles
 #define univariatePDFTransportModel_H
 
 #include "PDFTransportModel.H"
-#include "univariateMomentAdvection.H"
+#include "momentAdvection.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
@@ -59,7 +59,7 @@ protected:
     // Protected data
 
         //- Moment advection
-        autoPtr<univariateMomentAdvection> momentAdvection_;
+        autoPtr<momentAdvection> momentAdvection_;
 
     // Protected member functions
 

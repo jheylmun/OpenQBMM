@@ -23,29 +23,20 @@ License
 
 \*---------------------------------------------------------------------------*/
 
-#include "noUnivariateAdvection.H"
-#include "addToRunTimeSelectionTable.H"
+#include "momentAdvection.H"
+#include "IOmanip.H"
 
 // * * * * * * * * * * * * * * Static Data Members * * * * * * * * * * * * * //
 
 namespace Foam
 {
-namespace univariateAdvection
-{
-    defineTypeNameAndDebug(noAdvection, 0);
-
-    addToRunTimeSelectionTable
-    (
-        univariateMomentAdvection,
-        noAdvection,
-        dictionary
-    );
-}
+    defineTypeNameAndDebug(momentAdvection, 0);
+    defineRunTimeSelectionTable(momentAdvection, dictionary);
 }
 
 // * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
 
-Foam::univariateAdvection::noAdvection::noAdvection
+Foam::momentAdvection::momentAdvection
 (
     const dictionary& dict,
     const quadratureApproximation& quadrature,
@@ -53,26 +44,73 @@ Foam::univariateAdvection::noAdvection::noAdvection
     const word& support
 )
 :
-    univariateMomentAdvection(dict, quadrature, phi, support)
-{}
+    name_(quadrature.name()),
+    moments_(quadrature.moments()),
+    nMoments_(moments_.size()),
+    divMoments_(nMoments_, quadrature.moments().map()),
+    own_
+    (
+        IOobject
+        (
+            "own",
+            moments_[0].mesh().time().timeName(),
+            moments_[0].mesh()
+        ),
+        moments_[0].mesh(),
+        dimensionedScalar("own", dimless, 1.0)
+    ),
+    nei_
+    (
+        IOobject
+        (
+            "nei",
+            moments_[0].mesh().time().timeName(),
+            moments_[0].mesh()
+        ),
+        moments_[0].mesh(),
+        dimensionedScalar("nei", dimless, -1.0)
+    ),
+    phi_(phi),
+    support_(support),
+    momentOrders_(quadrature.momentOrders()),
+    nodeIndexes_(quadrature.nodeIndexes()),
+    nDimensions_(momentOrders_[0].size())
+{
+    forAll(divMoments_, momenti)
+    {
+        divMoments_.set
+        (
+            momenti,
+            new volScalarField
+            (
+                IOobject
+                (
+                    "divMoment" + Foam::name(momenti) + name_,
+                    moments_[0].mesh().time().timeName(),
+                    moments_[0].mesh(),
+                    IOobject::NO_READ,
+                    IOobject::NO_WRITE,
+                    false
+                ),
+                moments_[0].mesh(),
+                dimensionedScalar
+                (
+                    "zero", moments_[momenti].dimensions()/dimTime, 0
+                )
+            )
+        );
+    }
+}
 
 
 // * * * * * * * * * * * * * * * * Destructor  * * * * * * * * * * * * * * * //
 
-Foam::univariateAdvection::noAdvection::~noAdvection()
+Foam::momentAdvection::~momentAdvection()
 {}
 
 
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
 
-Foam::scalar Foam::univariateAdvection::noAdvection::realizableCo() const
-{
-    return scalar(1);
-}
 
-void Foam::univariateAdvection::noAdvection::update()
-{
-    return;
-}
 
 // ************************************************************************* //

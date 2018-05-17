@@ -32,16 +32,18 @@ Foam::PDFTransportModels::velocityPDFTransportModel::velocityPDFTransportModel
     const word& name,
     const dictionary& dict,
     const fvMesh& mesh,
+    const surfaceScalarField& phi,
     const word& support
 )
 :
     PDFTransportModel(name, dict, mesh, support),
     momentAdvection_
     (
-        velocityMomentAdvection::New
+        momentAdvection::New
         (
             quadrature_.subDict("momentAdvection"),
             quadrature_,
+            phi,
             support
         )
     )
@@ -56,7 +58,7 @@ Foam::PDFTransportModels::velocityPDFTransportModel::~velocityPDFTransportModel(
 
 void Foam::PDFTransportModels::velocityPDFTransportModel::solve()
 {
-    momentAdvection_().update();
+    momentAdvection_().update(false, true);
 
     // List of moment transport equations
     PtrList<fvScalarMatrix> momentEqns(this->quadrature_.nMoments());
@@ -131,13 +133,12 @@ void Foam::PDFTransportModels::velocityPDFTransportModel::solve()
 
 void Foam::PDFTransportModels::velocityPDFTransportModel::meanTransport
 (
-    const surfaceScalarField& phi,
     const bool wallCollisions
 )
 {
     Info<< "Solving mean transport" << endl;
 
-    momentAdvection_().update(phi, wallCollisions);
+    momentAdvection_().update(true, wallCollisions);
 
     // Solve moment transport equations
     forAll(this->quadrature_.moments(), momenti)

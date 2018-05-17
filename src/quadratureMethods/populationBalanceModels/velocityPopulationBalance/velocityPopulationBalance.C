@@ -55,7 +55,7 @@ Foam::PDFTransportModels::populationBalanceModels::velocityPopulationBalance
     const surfaceScalarField& phi
 )
 :
-    velocityPDFTransportModel(name, dict, phi.mesh(), "R"),
+    velocityPDFTransportModel(name, dict, phi.mesh(), phi, "R"),
     populationBalanceModel(name, dict, phi),
     name_(name),
     collision_(dict.lookup("collision")),
@@ -175,13 +175,9 @@ void Foam::PDFTransportModels::populationBalanceModels
 }
 
 void Foam::PDFTransportModels::populationBalanceModels
-::velocityPopulationBalance::meanTransport
-(
-    const surfaceScalarField& phi,
-    const bool wallCollisions
-)
+::velocityPopulationBalance::meanTransport(const bool wallCollisions)
 {
-    velocityPDFTransportModel::meanTransport(phi, wallCollisions);
+    velocityPDFTransportModel::meanTransport(wallCollisions);
 }
 
 void Foam::PDFTransportModels::populationBalanceModels

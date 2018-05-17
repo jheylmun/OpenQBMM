@@ -22,19 +22,19 @@ License
     along with OpenFOAM.  If not, see <http://www.gnu.org/licenses/>.
 
 Class
-    Foam::univariateMomentAdvection
+            Foam::momentAdvection
 
 Description
-    Abstract class for the advection of a univariate moment set.
+    Abstract class for the advection of a moment set.
 
 SourceFiles
-    univariateMomentAdvection.C
-    univariateMomentAdvectionI.H
+    momentAdvection.C
+    momentAdvectionI.H
 
 \*---------------------------------------------------------------------------*/
 
-#ifndef univariateMomentAdvection_H
-#define univariateMomentAdvection_H
+#ifndef momentAdvection_H
+#define momentAdvection_H
 
 #include "fvCFD.H"
 #include "IOdictionary.H"
@@ -52,18 +52,18 @@ SourceFiles
 namespace Foam
 {
 /*---------------------------------------------------------------------------*\
-                    Class univariateMomentAdvection Declaration
+                    Class momentAdvection Declaration
 \*---------------------------------------------------------------------------*/
 
-class univariateMomentAdvection
+class momentAdvection
 {
     // Private member functions
 
         //- Disallow default bitwise copy construct
-        univariateMomentAdvection(const univariateMomentAdvection&);
+        momentAdvection(const momentAdvection&);
 
         //- Disallow default bitwise assignment
-        void operator=(const univariateMomentAdvection&);
+        void operator=(const momentAdvection&);
 
 
 protected:
@@ -94,6 +94,12 @@ protected:
         //- Support of the distribution function
         word support_;
 
+         //- Moment indicies ues to map moments
+        labelListList momentOrders_;
+
+        //- Node indicies used to map nodes
+        labelListList nodeIndexes_;
+
         //- Dimensions of the underlying distribution
         label nDimensions_;
 
@@ -101,7 +107,7 @@ protected:
 public:
 
     //- Runtime type information
-    TypeName("univariateMomentAdvection");
+    TypeName("momentAdvection");
 
 
     // Declare runtime construction
@@ -109,7 +115,7 @@ public:
         declareRunTimeSelectionTable
         (
             autoPtr,
-            univariateMomentAdvection,
+            momentAdvection,
             dictionary,
             (
                 const dictionary& dict,
@@ -124,7 +130,7 @@ public:
     // Constructors
 
         //- Construct from univariateMomentSet
-        univariateMomentAdvection
+        momentAdvection
         (
             const dictionary& dict,
             const quadratureApproximation& quadrature,
@@ -134,12 +140,12 @@ public:
 
 
     //- Destructor
-    virtual ~univariateMomentAdvection();
+    virtual ~momentAdvection();
 
 
     // Selectors
 
-        static autoPtr<univariateMomentAdvection> New
+        static autoPtr<momentAdvection> New
         (
             const dictionary& dict,
             const quadratureApproximation& quadrature,
@@ -156,8 +162,22 @@ public:
         //- Return the maximum Courant number ensuring moment realizability
         virtual scalar realizableCo() const = 0;
 
+        //- Return the maximum Courant number based on velocities
+        virtual scalar CoNum() const = 0;
+
         //- Update moment advection
-        virtual void update() = 0;
+        virtual void update
+        (
+            const bool localPhi = true,
+            const bool wallCollisions = false
+        ) = 0;
+
+        //- Update moment advection using a specified list of velocity fields
+        virtual void update
+        (
+            const mappedPtrList<volVectorField>& Us,
+            const bool wallCollisions = false
+        ) = 0;
 
 };
 
@@ -168,7 +188,7 @@ public:
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
-#include "univariateMomentAdvectionI.H"
+#include "momentAdvectionI.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 

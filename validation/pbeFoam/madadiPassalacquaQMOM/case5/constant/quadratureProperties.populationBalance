@@ -24,7 +24,7 @@ basicMomentInversion
 
 momentAdvection
 {
-    univariateMomentAdvection   noAdvection;
+    momentAdvection   noAdvection;
 }
 
 moments

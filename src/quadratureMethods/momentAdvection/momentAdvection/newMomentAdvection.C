@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2018 Alberto Passalacqua
+    \\  /    A nd           | Copyright (C) 2014-2018 Alberto Passalacqua
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -23,12 +23,42 @@ License
 
 \*---------------------------------------------------------------------------*/
 
-// * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
+#include "momentAdvection.H"
 
-const Foam::PtrList<Foam::volScalarField>&
-Foam::velocityMomentAdvection::divMoments() const
+// * * * * * * * * * * * * * * * * Selector  * * * * * * * * * * * * * * * * //
+
+Foam::autoPtr<Foam::momentAdvection>
+Foam::momentAdvection::New
+(
+    const dictionary& dict,
+    const quadratureApproximation& quadrature,
+    const surfaceScalarField& phi,
+    const word& support
+)
 {
-    return divMoments_;
+    word momentAdvectionType
+    (
+        dict.lookup("momentAdvection")
+    );
+
+    Info<< "Selecting momentAdvection: "
+        << momentAdvectionType << endl;
+
+    dictionaryConstructorTable::iterator cstrIter =
+        dictionaryConstructorTablePtr_->find(momentAdvectionType);
+
+    if (cstrIter == dictionaryConstructorTablePtr_->end())
+    {
+        FatalErrorInFunction
+            << "Unknown momentAdvection type "
+            << momentAdvectionType << endl << endl
+            << "Valid momentAdvection types are : " << endl
+            << dictionaryConstructorTablePtr_->sortedToc()
+            << exit(FatalError);
+    }
+
+    return cstrIter()(dict, quadrature, phi, support);
 }
+
 
 // ************************************************************************* //
