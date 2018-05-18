@@ -22,79 +22,113 @@ License
     along with OpenFOAM.  If not, see <http://www.gnu.org/licenses/>.
 
 Class
-    Foam::multivariateMomentInversions::sizeHyCQMOM
+    Foam::multivariateMomentInversion
 
 Description
     Implementation of the hyperbolic conditional quadrature method of moment
-    for velocity with conditioning on size.
+    for velocity. Three nodes are used in each direction. Moment realizability
+    is verified analytically.
 
 SourceFiles
-    sizeHyCQMOM.C
-    sizeHyCQMOMI.H
+    multivariateMomentInversion.C
+    multivariateMomentInversion.C
 
 \*---------------------------------------------------------------------------*/
 
-#ifndef sizeHyCQMOM_H
-#define sizeHyCQMOM_H
+#ifndef multivariateMomentInversion_H
+#define multivariateMomentInversion_H
 
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
 #include "dictionary.H"
-#include "Vandermonde.H"
-#include "hyperbolicConditionalMomentInversion.H"
+#include "mappedLists.H"
+#include "multivariateMomentSet.H"
+#include "runTimeSelectionTables.H"
 
 
 namespace Foam
 {
-namespace multivariateMomentInversions
-{
 
 /*---------------------------------------------------------------------------*\
-                        Class sizeHyCQMOM Declaration
+                 Class multivariateMomentInversion Declaration
 \*---------------------------------------------------------------------------*/
-class sizeHyCQMOM
-:
-    public multivariateMomentInversion
+class multivariateMomentInversion
 {
-    // Private member data
+protected:
+
+    // Protected member data
 
         //- Number of dimensions in velocity space
-        const label nGeometricDimensions_;
+        const label nDimensions_;
 
-        //- Number of size moments
-        const label nSizeMoments_;
+        //- Number of moments
+        const label nMoments_;
 
-        //- Moment orders of conditional velocity distribution
-        const labelListList velocityMomentOrders_;
-
-        //- Node indexes of conditional velocity distribution
-        const labelListList velocityNodeIndexes_;
+        //- List of the number of nodes
+        const label nNodes_;
 
         //- Support of the NDF
-        const wordList supports_;
+        const word support_;
 
-        //- Univariate moment inversion method
-        autoPtr<univariateMomentInversion> sizeInverter_;
+        //- Moment orders
+        const labelListList& momentOrders_;
 
-        //- Velocity moment inversion method
-        hyperbolicConditionalMomentInversion velocityInverter_;
+        //- Node indexes
+        const labelListList& nodeIndexes_;
+
+        //- Moments
+        mappedList<scalar> moments_;
+
+        //- Quadratrure weights
+        mappedList<scalar> weights_;
+
+        //- Quadratrure abscissae
+        mappedList<scalarList> abscissae_;
 
 
-    // Private member functions
+    // Protected member functions
 
-        //- Calculate the number of pure size moments
-        label calcNSizeMoments(const labelListList& momentOrders);
+        //- Reset inverter
+        void reset();
+
+// private:
+//
+//     // Private member functions
+//
+//         //- Disallow default bitwise copy construct
+//         multivariateMomentInversion(const multivariateMomentInversion&);
+//
+//         //- Disallow default bitwise assignment
+//         void operator=(const multivariateMomentInversion&);
 
 
 public:
 
-    TypeName("sizeHyCQMOM");
+    //- Runtime type information
+    TypeName("multivariateMomentInversion");
+
+
+    // Declare runtime construction
+
+        declareRunTimeSelectionTable
+        (
+            autoPtr,
+            multivariateMomentInversion,
+            dictionary,
+            (
+                const dictionary& dict,
+                const labelListList& momentOrders,
+                const labelListList& nodeIndexes
+            ),
+            (dict, momentOrders, nodeIndexes)
+        );
+
 
     // Constructors
 
-        // Construct from nMoments, momentMap, nNodes, and support type
-        sizeHyCQMOM
+        //- Construct from univariateMomentSet
+        multivariateMomentInversion
         (
             const dictionary& dict,
             const labelListList& momentOrders,
@@ -103,13 +137,23 @@ public:
 
 
     //- Destructor
-    virtual ~sizeHyCQMOM();
+    virtual ~multivariateMomentInversion();
+
+
+    // Selectors
+
+        static autoPtr<multivariateMomentInversion> New
+        (
+            const dictionary& dict,
+            const labelListList& momentOrders,
+            const labelListList& nodeIndexes
+        );
 
 
     // Member Functions
 
         //- Invert moments to find weights and  abscissae
-        void invert(const multivariateMomentSet& moments);
+        virtual void invert(const multivariateMomentSet& moments) = 0;
 
         //- Return number of moments
         inline label nMoments();
@@ -127,11 +171,12 @@ public:
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
-} // End namespace multivariateMomentInversions
 } // End namespace Foam
 
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
+
+#include "multivariateMomentInversionI.H"
 
 #endif
 

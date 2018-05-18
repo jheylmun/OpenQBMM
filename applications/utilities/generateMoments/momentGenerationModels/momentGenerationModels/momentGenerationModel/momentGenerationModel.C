@@ -65,7 +65,7 @@ void Foam::momentGenerationModel::reset()
 {
     forAll(abscissae_, nodei)
     {
-        abscissae_[nodei] = scalarList(nDims_, 0.0);
+        abscissae_[nodei] = scalarList(momentOrders_[0].size(), 0.0);
         weights_[nodei] = 0.0;
     }
     forAll(moments_, mi)
@@ -81,17 +81,21 @@ Foam::momentGenerationModel::momentGenerationModel
 (
     const dictionary& dict,
     const labelListList& momentOrders,
+    const labelListList& nodeIndexes,
     const label nNodes
 )
 :
     dict_(dict),
-    nDims_(momentOrders[0].size()),
-    nNodes_(nNodes),
-    nMoments_(momentOrders.size()),
     momentOrders_(momentOrders),
-    weights_(nNodes_, 0.0),
-    abscissae_(nNodes_, scalarList(nDims_, 0.0)),
-    moments_(nMoments_, momentOrders_)
+    nodeIndexes_(nodeIndexes),
+    weights_(nodeIndexes_.size(), nodeIndexes_, 0.0),
+    abscissae_
+    (
+        nodeIndexes_.size(),
+        nodeIndexes_,
+        scalarList(momentOrders_[0].size(), 0.0)
+    ),
+    moments_(momentOrders_.size(), momentOrders_, 0.0)
 {
     dimensionSet wDims(dict.lookup("weightDimension"));
     forAll(moments_, mi)
@@ -100,7 +104,7 @@ Foam::momentGenerationModel::momentGenerationModel
         dimensionSet absCmptDims(dimless);
         forAll(momentOrders_[mi], cmpti)
         {
-            word absName ="abscissaeDim" + Foam::name(cmpti) + "Dimensions";
+            word absName = "abscissa" + Foam::name(cmpti) + "Dimension";
             dimensionSet absDim
             (
                 (

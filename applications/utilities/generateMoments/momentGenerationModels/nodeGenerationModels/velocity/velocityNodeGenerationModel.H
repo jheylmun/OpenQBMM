@@ -22,66 +22,74 @@ License
     along with OpenFOAM.  If not, see <http://www.gnu.org/licenses/>.
 
 Class
-    Foam::momentGenerationSubModels::weightsAndAbscissae
+    Foam::nodeGenerationModels::velocityNodeGenerationModel
 
 Description
-    Constructs moments given weights and abscissae
+    Moment generation done using volume fraction, density, and bubble diameter.
 
 SourceFiles
-    weightsAndAbscissae.C
+    velocityNodeGenerationModel.C
 
 \*---------------------------------------------------------------------------*/
 
-#ifndef weightsAndAbscissae_H
-#define weightsAndAbscissae_H
+#ifndef velocityNodeGenerationModel_H
+#define velocityNodeGenerationModel_H
 
-#include "momentGenerationModel.H"
+#include "nodeGenerationModel.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
 namespace Foam
 {
-namespace momentGenerationSubModels
+namespace nodeGenerationModels
 {
+
 /*---------------------------------------------------------------------------*\
-                    Class weightsAndAbscissae Declaration
+                    Class velocityNodeGenerationModel Declaration
 \*---------------------------------------------------------------------------*/
 
-class weightsAndAbscissae
+class velocityNodeGenerationModel
 :
-    public momentGenerationModel
+    public nodeGenerationModel
 {
+    //-
 public:
 
         //- Runtime type information
-        TypeName("weightsAndAbscissae");
+        TypeName("velocity");
 
 
     // Constructors
 
         //- Construct from components
-        weightsAndAbscissae
+        velocityNodeGenerationModel
         (
-            const dictionary& dict,
-            const labelListList& momentsOrders,
-            const label nNodes
+            const word& nodeGenerationType,
+            const labelListList& nodeIndexes,
+            mappedList<scalar>& weights,
+            mappedList<scalarList>& abscissae,
+            const label cmpt
         );
 
 
     //- Destructor
-    virtual ~weightsAndAbscissae();
+    virtual ~velocityNodeGenerationModel();
 
 
     // Public member functions
 
-        //- Update quadrature given a dictionary
-        virtual void updateQuadrature(const dictionary&);
+        //- Update weights and abscissae given a node index and dictionary
+        virtual void updateNodes
+        (
+            const dictionary& dict,
+            const label vCmpt
+        );
 };
 
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
-} // End namespace momentGenerationSubModels
+} // End namespace nodeGenerationModels
 } // End namespace Foam
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //

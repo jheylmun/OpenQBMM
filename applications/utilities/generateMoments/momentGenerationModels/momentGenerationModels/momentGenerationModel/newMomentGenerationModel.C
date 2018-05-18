@@ -31,6 +31,7 @@ Foam::autoPtr<Foam::momentGenerationModel> Foam::momentGenerationModel::New
 (
     const dictionary& dict,
     const labelListList& momentOrders,
+    const labelListList& nodeIndexes,
     const label nNodes
 )
 {
@@ -64,6 +65,7 @@ Foam::autoPtr<Foam::momentGenerationModel> Foam::momentGenerationModel::New
         (
             dict,
             momentOrders,
+            nodeIndexes,
             nNodes
         )
     );

@@ -1,9 +1,12 @@
-momentGenerationModel/momentGenerationModel.C
-momentGenerationModel/newMomentGenerationModel.C
+nodeGenerationModels/nodeGenerationModel/nodeGenerationModel.C
+nodeGenerationModels/nodeGenerationModel/newNodeGenerationModel.C
+nodeGenerationModels/alphaRhoD/alphaRhoDNodeGenerationModel.C
+nodeGenerationModels/velocity/velocityNodeGenerationModel.C
 
-noMomentGeneration/noMomentGeneration.C
-weightsAndAbscissae/weightsAndAbscissae.C
-alphaAndDiameter/alphaAndDiameter.C
-velocity/velocity.C
+momentGenerationModels/momentGenerationModel/momentGenerationModel.C
+momentGenerationModels/momentGenerationModel/newMomentGenerationModel.C
+momentGenerationModels/none/noneMomentGenerationModel.C
+momentGenerationModels/weightsAndAbscissae/weightsAndAbscissaeMomentGenerationModel.C
+momentGenerationModels/derived/derivedMomentGenerationModel.C
 
 LIB = $(FOAM_USER_LIBBIN)/libmomentGenerationModels

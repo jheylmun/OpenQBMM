@@ -90,8 +90,14 @@ int main(int argc, char *argv[])
         label nMoments = momentOrders.size();
         label nNodes = nodeIndexes.size();
 
-        autoPtr<momentGenerationModel> momentGenerator
-            = momentGenerationModel::New(phaseDict, momentOrders, nNodes);
+        autoPtr<momentGenerationModel> momentGenerator =
+            momentGenerationModel::New
+            (
+                phaseDict,
+                momentOrders,
+                nodeIndexes,
+                nNodes
+            );
 
 
         mappedPtrList<volScalarField> moments(nMoments, momentOrders);
@@ -151,7 +157,7 @@ int main(int argc, char *argv[])
                   ? mesh.boundaryMesh()[bi].name()
                   : "default"
                 );
-                dictionary dict = phaseDict.subDict(bName);
+                const dictionary& dict = phaseDict.subDict(bName);
 
                 momentGenerator().updateQuadrature(dict);
 

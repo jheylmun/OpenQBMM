@@ -23,7 +23,7 @@ License
 
 \*---------------------------------------------------------------------------*/
 
-#include "velocity.H"
+#include "velocityNodeGenerationModel.H"
 #include "constants.H"
 #include "addToRunTimeSelectionTable.H"
 
@@ -31,14 +31,14 @@ License
 
 namespace Foam
 {
-namespace momentGenerationSubModels
+namespace nodeGenerationModels
 {
-    defineTypeNameAndDebug(velocity, 0);
+    defineTypeNameAndDebug(velocityNodeGenerationModel, 0);
 
     addToRunTimeSelectionTable
     (
-        momentGenerationModel,
-        velocity,
+        nodeGenerationModel,
+        velocityNodeGenerationModel,
         dictionary
     );
 }
@@ -47,55 +47,54 @@ namespace momentGenerationSubModels
 
 // * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
 
-Foam::momentGenerationSubModels::velocity::velocity
+Foam::nodeGenerationModels::velocityNodeGenerationModel::
+velocityNodeGenerationModel
 (
-    const dictionary& dict,
-    const labelListList& momentOrders,
-    const label nNodes
+    const word& nodeGenerationType,
+    const labelListList& nodeIndexes,
+    mappedList<scalar>& weights,
+    mappedList<scalarList>& abscissae,
+    const label cmpt
 )
 :
-    momentGenerationModel(dict, momentOrders, nNodes)
+    nodeGenerationModel
+    (
+        nodeGenerationType,
+        nodeIndexes,
+        weights,
+        abscissae,
+        cmpt
+    )
 {}
 
 
 // * * * * * * * * * * * * * * * * Destructor  * * * * * * * * * * * * * * * //
 
-Foam::momentGenerationSubModels::velocity::~velocity()
+Foam::nodeGenerationModels::velocityNodeGenerationModel::
+~velocityNodeGenerationModel()
 {}
 
 
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
 
-void Foam::momentGenerationSubModels::velocity::updateQuadrature
+void Foam::nodeGenerationModels::velocityNodeGenerationModel::updateNodes
 (
-    const dictionary& dict
+    const dictionary& dict,
+    const label vCmpt
 )
 {
-    reset();
     forAll(weights_, nodei)
     {
-        word nodeName = "node" + Foam::name(nodei);
+        const labelList& nodeIndex = nodeIndexes_[nodei];
+        word nodeName = "node" + mappedList<scalar>::listToWord(nodeIndex);
         if(dict.found(nodeName))
         {
             dictionary nodeDict(dict.subDict(nodeName));
-            scalar dia(readScalar(nodeDict.lookup("dia")));
-            scalar alpha(readScalar(nodeDict.lookup("alpha")));
-            scalar rho(readScalar(nodeDict.lookup("rho")));
             vector U(nodeDict.lookup("U"));
 
-            scalar mass =
-                (4.0/3.0)*Foam::constant::mathematical::pi*rho*pow3(dia/2.0);
-
-            weights_[nodei] = rho*alpha/mass;
-
-            forAll(abscissae_[nodei], cmpti)
-            {
-                abscissae_[nodei][cmpti] = U.component(cmpti);
-            }
+            abscissae_(nodeIndex)[cmpt_] = U.component(vCmpt);
         }
     }
-
-    updateMoments();
 }
 
 

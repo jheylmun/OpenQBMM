@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2016-2017 Alberto Passalacqua
+    \\  /    A nd           | Copyright (C) 2014-2017 Alberto Passalacqua
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -23,60 +23,40 @@ License
 
 \*---------------------------------------------------------------------------*/
 
-#include "noMomentGeneration.H"
-#include "constants.H"
-#include "addToRunTimeSelectionTable.H"
+#include "multivariateMomentInversion.H"
 
-// * * * * * * * * * * * * * * Static Data Members * * * * * * * * * * * * * //
+// * * * * * * * * * * * * * * * * Selector  * * * * * * * * * * * * * * * * //
 
-namespace Foam
-{
-namespace momentGenerationSubModels
-{
-    defineTypeNameAndDebug(noMomentGeneration, 0);
-
-    addToRunTimeSelectionTable
-    (
-        momentGenerationModel,
-        noMomentGeneration,
-        dictionary
-    );
-}
-}
-
-
-// * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
-
-Foam::momentGenerationSubModels::noMomentGeneration::noMomentGeneration
+Foam::autoPtr<Foam::multivariateMomentInversion>
+Foam::multivariateMomentInversion::New
 (
     const dictionary& dict,
     const labelListList& momentOrders,
-    const label nNodes
-)
-:
-    momentGenerationModel(dict, momentOrders, nNodes)
-{}
-
-
-// * * * * * * * * * * * * * * * * Destructor  * * * * * * * * * * * * * * * //
-
-Foam::momentGenerationSubModels::noMomentGeneration::~noMomentGeneration()
-{}
-
-
-// * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
-
-void Foam::momentGenerationSubModels::noMomentGeneration::updateQuadrature
-(
-    const dictionary& dict
+    const labelListList& nodeIndexes
 )
 {
-    reset();
-    forAll(moments_, mi)
+    word univariateMomentInversionType
+    (
+        dict.lookup("multivariateMomentInversion")
+    );
+
+    Info<< "Selecting multivariateMomentInversion: "
+        << univariateMomentInversionType << endl;
+
+    dictionaryConstructorTable::iterator cstrIter =
+        dictionaryConstructorTablePtr_->find(univariateMomentInversionType);
+
+    if (cstrIter == dictionaryConstructorTablePtr_->end())
     {
-        moments_[mi] =
-            dict.lookupType<scalar>("moment." + Foam::name(mi));
+        FatalErrorInFunction
+            << "Unknown multivariateMomentInversion type "
+            << univariateMomentInversionType << endl << endl
+            << "Valid multivariateMomentInversion types are : " << endl
+            << dictionaryConstructorTablePtr_->sortedToc()
+            << exit(FatalError);
     }
+
+    return cstrIter()(dict, momentOrders, nodeIndexes);
 }
 
 

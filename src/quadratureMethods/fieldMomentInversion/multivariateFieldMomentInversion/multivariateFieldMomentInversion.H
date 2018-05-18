@@ -22,23 +22,22 @@ License
     along with OpenFOAM.  If not, see <http://www.gnu.org/licenses/>.
 
 Class
-    Foam::hyperbolicFieldMomentInversion
+    Foam::multivariateFieldMomentInversion
 
 Description
-    Invert volVectorMomentFieldSet using basic hyperbolic conditional
-    moment inversion.
+    Invert a multivariate moment set
 
 SourceFiles
-    hyperbolicFieldMomentInversion.C
+    multivariateFieldMomentInversion.C
 
 \*---------------------------------------------------------------------------*/
 
-#ifndef hyperbolicFieldMomentInversion_H
-#define hyperbolicFieldMomentInversion_H
+#ifndef multivariateFieldMomentInversion_H
+#define multivariateFieldMomentInversion_H
 
 #include "fieldMomentInversion.H"
 #include "multivariateMomentSet.H"
-#include "hyperbolicConditionalMomentInversion.H"
+#include "multivariateMomentInversion.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
@@ -46,35 +45,38 @@ namespace Foam
 {
 
 /*---------------------------------------------------------------------------*\
-                Class hyperbolicFieldMomentInversion Declaration
+                Class multivariateFieldMomentInversion Declaration
 \*---------------------------------------------------------------------------*/
 
-class hyperbolicFieldMomentInversion
+class multivariateFieldMomentInversion
 :
     public fieldMomentInversion
 {
     // Private Member Functions
 
         //- Moment inverter
-        autoPtr<hyperbolicConditionalMomentInversion> momentInverter_;
+        autoPtr<multivariateMomentInversion> momentInverter_;
 
         //- Disallow default bitwise copy construct
-        hyperbolicFieldMomentInversion(const hyperbolicFieldMomentInversion&);
+        multivariateFieldMomentInversion
+        (
+            const multivariateFieldMomentInversion&
+        );
 
         //- Disallow default bitwise assignment
-        void operator=(const hyperbolicFieldMomentInversion&);
+        void operator=(const multivariateFieldMomentInversion&);
 
 
 public:
 
     //- Runtime type information
-    TypeName("hyperbolicFieldMomentInversion");
+    TypeName("multivariateFieldMomentInversion");
 
 
     // Constructors
 
         //- Construct from dictionary
-        hyperbolicFieldMomentInversion
+        multivariateFieldMomentInversion
         (
             const dictionary& dict,
             const fvMesh& mesh,
@@ -85,7 +87,7 @@ public:
 
 
     //- Destructor
-        ~hyperbolicFieldMomentInversion();
+        ~multivariateFieldMomentInversion();
 
 
     // Public member Functions

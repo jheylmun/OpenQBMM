@@ -29,144 +29,70 @@ Description
     for all node. Moments are constructed outside of class.
 
 SourceFiles
-    momentGenetationModel.C
-    momentGenerationModelnew.C
+    derivedMomentGenerationModel.C
 
 \*---------------------------------------------------------------------------*/
 
-#ifndef momentGeneration_H
-#define momentGeneration_H
+#ifndef derivedMomentGenerationModel_H
+#define derivedMomentGenerationModel_H
 
 #include "dictionary.H"
 #include "mappedLists.H"
 #include "dimensionedTypes.H"
 #include "runTimeSelectionTables.H"
+#include "momentGenerationModel.H"
+#include "nodeGenerationModel.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
 namespace Foam
 {
-
-class momentGenerationModel
+namespace momentGenerationModels
 {
 
-    // Private member functions
+class derivedMomentGenerationModel
+:
+    public momentGenerationModel
+{
+    // Private data
 
-        //- Disallow default bitwise copy construct
-        momentGenerationModel(const momentGenerationModel&);
-
-        //- Disallow default bitwise assignment
-        void operator=(const momentGenerationModel&);
-
-        //- Create map for velocity nodes
-        labelListList createNodeIndexes() const;
-
-
-protected:
-
-    // Protected data
-
-        //- Constant refrence to dictionary
-        const dictionary& dict_;
-
-        //- Number of dimensions in distribution
-        const label nDims_;
-
-        //- Number of nodes
-        const label nNodes_;
-
-        //- Number of moments
-        const label nMoments_;
-
-        //- Node indexes
-        labelListList nodeIndexes_;
-
-        //- Moment orders
-        labelListList momentOrders_;
-
-        //- List of weights
-        List<scalar> weights_;
-
-        //- List of abscissae
-        List<scalarList> abscissae_;
-
-        //- List of moments
-        mappedList<dimensionedScalar> moments_;
-
-
-    // Protected member functions
-
-        //- Update moments
-        void updateMoments();
-
-        //- Zero weights, abscissae and moments
-        void reset();
+        PtrList<nodeGenerationModel> nodeGenerators_;
 
 
 public:
 
     //- Runtime information
-    TypeName("momentGenerationModel");
-
-    //- Declare runtime constructor selection table
-    declareRunTimeSelectionTable
-    (
-        autoPtr,
-        momentGenerationModel,
-        dictionary,
-        (
-            const dictionary& dict,
-            const labelListList& momentOrders,
-            const label nNodes
-        ),
-        (dict, momentOrders, nNodes)
-    );
+    TypeName("derived");
 
 
     // Constructor
 
         //- Construct from dictionary and number of nodes
-        momentGenerationModel
+        derivedMomentGenerationModel
         (
             const dictionary& dict,
             const labelListList& momentsOrders,
-            const label nNodes
-        );
-
-
-    // Selector
-
-        static autoPtr<momentGenerationModel> New
-        (
-            const dictionary& dict,
-            const labelListList& momentsOrders,
+            const labelListList& nodeIndexes,
             const label nNodes
         );
 
 
     //- Destructor
-    virtual ~momentGenerationModel();
+    virtual ~derivedMomentGenerationModel();
 
 
     // Public Functions
 
-        // Access
-
-            //- Return constant access to moments
-            const mappedList<dimensionedScalar>& moments() const
-            {
-                return moments_;
-            }
-
         // Member Functions
 
             //- Update weights and abscissae given a dictionary
-            virtual void updateQuadrature(const dictionary&) = 0;
+            virtual void updateQuadrature(const dictionary&);
 };
 
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
+} // End namespace momentGenerationModels
 } // End namespace Foam
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //

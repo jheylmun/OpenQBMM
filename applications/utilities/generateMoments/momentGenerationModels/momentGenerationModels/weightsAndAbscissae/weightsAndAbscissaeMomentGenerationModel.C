@@ -23,21 +23,21 @@ License
 
 \*---------------------------------------------------------------------------*/
 
-#include "weightsAndAbscissae.H"
+#include "weightsAndAbscissaeMomentGenerationModel.H"
 #include "addToRunTimeSelectionTable.H"
 
 // * * * * * * * * * * * * * * Static Data Members * * * * * * * * * * * * * //
 
 namespace Foam
 {
-namespace momentGenerationSubModels
+namespace momentGenerationModels
 {
-    defineTypeNameAndDebug(weightsAndAbscissae, 0);
+    defineTypeNameAndDebug(weightsAndAbscissaeMomentGenerationModel, 0);
 
     addToRunTimeSelectionTable
     (
         momentGenerationModel,
-        weightsAndAbscissae,
+        weightsAndAbscissaeMomentGenerationModel,
         dictionary
     );
 }
@@ -46,41 +46,45 @@ namespace momentGenerationSubModels
 
 // * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
 
-Foam::momentGenerationSubModels::weightsAndAbscissae
-::weightsAndAbscissae
+Foam::momentGenerationModels::weightsAndAbscissaeMomentGenerationModel
+::weightsAndAbscissaeMomentGenerationModel
 (
     const dictionary& dict,
     const labelListList& momentOrders,
+    const labelListList& nodeIndexes,
     const label nNodes
 )
 :
-    momentGenerationModel(dict, momentOrders, nNodes)
+    momentGenerationModel(dict, momentOrders, nodeIndexes, nNodes)
 {}
 
 
 // * * * * * * * * * * * * * * * * Destructor  * * * * * * * * * * * * * * * //
 
-Foam::momentGenerationSubModels::weightsAndAbscissae
-::~weightsAndAbscissae()
+Foam::momentGenerationModels::weightsAndAbscissaeMomentGenerationModel
+::~weightsAndAbscissaeMomentGenerationModel()
 {}
 
 
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
 
-void Foam::momentGenerationSubModels::weightsAndAbscissae::updateQuadrature
+void Foam::momentGenerationModels::weightsAndAbscissaeMomentGenerationModel::
+updateQuadrature
 (
     const dictionary& dict
 )
 {
     reset();
-    forAll(weights_, nodei)
+    forAll(nodeIndexes_, nodei)
     {
-        word nodeName = "node" + Foam::name(nodei);
+        const labelList& nodeIndex = nodeIndexes_[nodei];
+        word nodeName = "node" + mappedList<scalar>::listToWord(nodeIndex);
+        Info<<nodeName<<endl;
         if(dict.found(nodeName))
         {
             dictionary nodeDict(dict.subDict(nodeName));
-            abscissae_[nodei] = nodeDict.lookupType<scalarList>("abscissa");
-            weights_[nodei] = nodeDict.lookupType<scalar>("weight");
+            abscissae_(nodeIndex) = nodeDict.lookupType<scalarList>("abscissa");
+            weights_(nodeIndex) = nodeDict.lookupType<scalar>("weight");
         }
     }
 

@@ -11,6 +11,8 @@ univariate/extended/gamma/gammaEQMOM.C
 univariate/extended/lognormal/lognormalEQMOM.C
 univariate/extended/beta/betaEQMOM.C
 
+multivariate/multivariateMomentInversion/multivariateMomentInversion.C
+multivariate/multivariateMomentInversion/newMultivariateMomentInversion.C
 multivariate/conditional/conditionalMomentInversion.C
 multivariate/hyperbolic/hyperbolicConditionalMomentInversion.C
 multivariate/sizeHyCQMOM/sizeHyCQMOM.C

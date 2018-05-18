@@ -105,7 +105,7 @@ class sizeVelocityPopulationBalance
 public:
 
     //- Runtime type information
-    TypeName("velocity");
+    TypeName("sizeVelocity");
 
 
     // Constructors

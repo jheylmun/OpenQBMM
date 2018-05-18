@@ -22,18 +22,18 @@ License
     along with OpenFOAM.  If not, see <http://www.gnu.org/licenses/>.
 
 Class
-    Foam::momentGenerationSubModels::alphaAndDiameter
+    Foam::momentGenerationModels::weightsAndAbscissaeMomentGenerationModel
 
 Description
-    Moment generation done using volume fraction, density, and bubble diameter.
+    Constructs moments given weights and abscissae
 
 SourceFiles
-    alphaAndDiameter.C
+    weightsAndAbscissaeMomentGenerationModel.C
 
 \*---------------------------------------------------------------------------*/
 
-#ifndef alphaAndDiameter_H
-#define alphaAndDiameter_H
+#ifndef weightsAndAbscissae_H
+#define weightsAndAbscissae_H
 
 #include "momentGenerationModel.H"
 
@@ -41,36 +41,36 @@ SourceFiles
 
 namespace Foam
 {
-namespace momentGenerationSubModels
+namespace momentGenerationModels
 {
-
 /*---------------------------------------------------------------------------*\
-                    Class alphaAndDiameter Declaration
+           Class weightsAndAbscissaeMomentGenerationModel Declaration
 \*---------------------------------------------------------------------------*/
 
-class alphaAndDiameter
+class weightsAndAbscissaeMomentGenerationModel
 :
     public momentGenerationModel
 {
 public:
 
         //- Runtime type information
-        TypeName("alphaAndDiameter");
+        TypeName("weightsAndAbscissae");
 
 
     // Constructors
 
         //- Construct from components
-        alphaAndDiameter
+        weightsAndAbscissaeMomentGenerationModel
         (
             const dictionary& dict,
             const labelListList& momentsOrders,
+            const labelListList& nodeIndexes,
             const label nNodes
         );
 
 
     //- Destructor
-    virtual ~alphaAndDiameter();
+    virtual ~weightsAndAbscissaeMomentGenerationModel();
 
 
     // Public member functions
@@ -82,7 +82,7 @@ public:
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
-} // End namespace momentGenerationSubModels
+} // End namespace momentGenerationModels
 } // End namespace Foam
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //

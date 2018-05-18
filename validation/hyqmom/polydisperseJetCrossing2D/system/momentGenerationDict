@@ -48,29 +48,48 @@ boundaries
 
 particles
 {
-    type                weightsAndAbscissae;
-    abscissaeTypes      (velocity velocity velocity);
+    type                derived;
+    abscissaeTypes      (alphaRhoD velocity velocity);
+
     weightDimension     [0 0 0 0 0 0 0];
-    abscissaDimension   [0 1 -1 0 0 0 0];
+    abscissa0Dimension  [1 0 0 0 0 0 0];
+    abscissa1Dimension  [0 1 -1 0 0 0 0];
+    abscissa2Dimension  [0 1 -1 0 0 0 0];
 
     internal
     {}
     inlet1
     {
-        node11
+        node111
         {
-            U        (1 0.25 0);
-            weight   0.01;
-            abscissa (1 0.5);
+            U        (1 0.5 0);
+            alpha    0.01;
+            rho      2000;
+            d        250e-6;
+        }
+        node211
+        {
+            U        (1 0.5 0);
+            alpha    0.01;
+            rho      2000;
+            d        350e-6;
         }
     }
     inlet2
     {
-        node12
+        node111
         {
-            U        (-1 0.25 0);
-            weight   0.01;
-            abscissa (-1 0.5);
+            U        (-1 0.5 0);
+            alpha    0.01;
+            rho      2000;
+            d        250e-6;
+        }
+        node211
+        {
+            U        (-1 0.5 0);
+            alpha    0.01;
+            rho      2000;
+            d        350e-6;
         }
     }
 }

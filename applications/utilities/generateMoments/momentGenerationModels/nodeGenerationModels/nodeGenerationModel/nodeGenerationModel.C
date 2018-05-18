@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2015-2018 Alberto Passalacqua
+    \\  /    A nd           | Copyright (C) 2016-2017 Alberto Passalacqua
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -23,32 +23,38 @@ License
 
 \*---------------------------------------------------------------------------*/
 
+#include "nodeGenerationModel.H"
 
-// * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
+// * * * * * * * * * * * * * * Static Data Members * * * * * * * * * * * * * //
 
-//- Return the total number of moments
-Foam::label Foam::sizeHyCQMOM::nMoments()
+namespace Foam
 {
-    return nMoments_;
+    defineTypeNameAndDebug(nodeGenerationModel, 0);
+    defineRunTimeSelectionTable(nodeGenerationModel, dictionary);
 }
 
-//- Return the list of nNodes
-Foam::label Foam::sizeHyCQMOM::nNodes()
-{
-    return nNodes_;
-}
+// * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
 
-//- Return mapped list of weights
-const Foam::mappedList<Foam::scalar>& Foam::sizeHyCQMOM::weights() const
-{
-    return weights_;
-}
+Foam::nodeGenerationModel::nodeGenerationModel
+(
+    const word& nodeGenerationType,
+    const labelListList& nodeIndexes,
+    mappedList<scalar>& weights,
+    mappedList<scalarList>& abscissae,
+    const label cmpt
+)
+:
+    nodeIndexes_(nodeIndexes),
+    weights_(weights),
+    abscissae_(abscissae),
+    cmpt_(cmpt)
+{}
 
-//- Return mapped list of abscissae
-const Foam::mappedList<Foam::scalarList>& Foam::sizeHyCQMOM::abscissae() const
-{
-    return abscissae_;
-}
+
+// * * * * * * * * * * * * * * * * Destructor  * * * * * * * * * * * * * * * //
+
+Foam::nodeGenerationModel::~nodeGenerationModel()
+{}
 
 
 // ************************************************************************* //

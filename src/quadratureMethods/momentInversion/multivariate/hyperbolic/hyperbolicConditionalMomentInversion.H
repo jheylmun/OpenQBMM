@@ -22,7 +22,7 @@ License
     along with OpenFOAM.  If not, see <http://www.gnu.org/licenses/>.
 
 Class
-    Foam::hyperbolicConditionalMomentInversion
+    Foam::multivariateMomentInversions::hyperbolicConditionalMomentInversion
 
 Description
     Implementation of the hyperbolic conditional quadrature method of moment
@@ -43,45 +43,26 @@ SourceFiles
 
 #include "scalar.H"
 #include "vector2D.H"
-#include "vector.H"
 #include "scalarMatrices.H"
 #include "dictionary.H"
-#include "mappedList.H"
 #include "univariateMomentSet.H"
-#include "multivariateMomentSet.H"
+#include "multivariateMomentInversion.H"
 #include "hyperbolicMomentInversion.H"
 
 
 namespace Foam
+{
+namespace multivariateMomentInversions
 {
 
 /*---------------------------------------------------------------------------*\
             Class hyperbolicConditionalMomentInversion Declaration
 \*---------------------------------------------------------------------------*/
 class hyperbolicConditionalMomentInversion
+:
+    public multivariateMomentInversion
 {
     // Private member data
-
-        //- Number of dimensions in velocity space
-        const label nDimensions_;
-
-        //- Number of moments
-        const label nMoments_;
-
-        //- List of the number of nodes
-        const label nNodes_;
-
-        //- Support of the NDF
-        const word support_;
-
-        //- Moments
-        mappedList<scalar> moments_;
-
-        //- Quadratrure abscissae
-        mappedList<vector> abscissae_;
-
-        //- Quadratrure weights
-        mappedList<scalar> weights_;
 
         //- Univariate moment inversion method
         autoPtr<hyperbolicMomentInversion> univariateInverter_;
@@ -137,17 +118,10 @@ class hyperbolicConditionalMomentInversion
             const multivariateMomentSet& moments
         );
 
-        //- Reset inverter
-        void reset();
-
-        //- Disallow default bitwise copy construct
-        //hyperbolicConditionalMomentInversion(const hyperbolicConditionalMomentInversion&);
-
-        //- Disallow default bitwise assignment
-        //void operator=(const hyperbolicConditionalMomentInversion&);
-
 
 public:
+
+    TypeName("HyCQMOM");
 
     // Constructors
 
@@ -155,7 +129,8 @@ public:
         hyperbolicConditionalMomentInversion
         (
             const dictionary& dict,
-            const label nDimensions
+            const labelListList& momentOrders,
+            const labelListList& nodeIndexes
         );
 
 
@@ -163,18 +138,6 @@ public:
     virtual ~hyperbolicConditionalMomentInversion();
 
     // Static data
-
-        //- List of moment orders in two dimensions
-        static const labelListList twoDimMomentOrders;
-
-        //- List of moment orders in three dimensions
-        static const labelListList threeDimMomentOrders;
-
-        //- List of node indexes in two dimensions
-        static const labelListList twoDimNodeIndexes;
-
-        //- List of node indexes in three dimensions
-        static const labelListList threeDimNodeIndexes;
 
         //- Return the number of nodes needed
         static label nHyperbolicNodes(const label nDims);
@@ -192,30 +155,17 @@ public:
     // Member Functions
 
         //- Invert moments to find weights and  abscissae
-        void invert(const multivariateMomentSet& moments);
-
-        //- Return number of moments
-        inline label nMoments();
-
-        //- Return number of number of nodes in each dimension
-        inline label nNodes();
-
-        //- Return mapped quadrature weights for each dimension
-        inline const mappedList<scalar>& weights() const;
-
-        //- Return mapped quadrature abscissae for each dimension
-        inline const mappedList<vector>& abscissae() const;
+        virtual void invert(const multivariateMomentSet& moments);
 };
 
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
+} // End namespace multivariateMomentInversions
 } // End namespace Foam
 
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
-
-#include "hyperbolicConditionalMomentInversionI.H"
 
 #endif
 

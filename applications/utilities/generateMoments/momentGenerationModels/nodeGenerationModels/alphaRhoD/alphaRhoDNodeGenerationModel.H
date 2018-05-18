@@ -22,67 +22,73 @@ License
     along with OpenFOAM.  If not, see <http://www.gnu.org/licenses/>.
 
 Class
-    Foam::momentGenerationSubModels::velocity
+    Foam::momentGenerationSubModels::alphaAndDiameter
 
 Description
     Moment generation done using volume fraction, density, and bubble diameter.
 
 SourceFiles
-    velocity.C
+    alphaRhoDNodeGenerationModel.C
 
 \*---------------------------------------------------------------------------*/
 
-#ifndef velocity_H
-#define velocity_H
+#ifndef alphaRhoDNodeGenerationModel_H
+#define alphaRhoDNodeGenerationModel_H
 
-#include "momentGenerationModel.H"
+#include "nodeGenerationModel.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
 namespace Foam
 {
-namespace momentGenerationSubModels
+namespace nodeGenerationModels
 {
 
 /*---------------------------------------------------------------------------*\
-                    Class velocity Declaration
+                 Class alphaRhoDNodeGenerationModel Declaration
 \*---------------------------------------------------------------------------*/
 
-class velocity
+class alphaRhoDNodeGenerationModel
 :
-    public momentGenerationModel
+    public nodeGenerationModel
 {
 public:
 
         //- Runtime type information
-        TypeName("velocity");
+        TypeName("alphaRhoD");
 
 
     // Constructors
 
         //- Construct from components
-        velocity
+        alphaRhoDNodeGenerationModel
         (
-            const dictionary& dict,
-            const labelListList& momentsOrders,
-            const label nNodes
+            const word& nodeGenerationType,
+            const labelListList& nodeIndexes,
+            mappedList<scalar>& weights,
+            mappedList<scalarList>& abscissae,
+            const label cmpt
         );
 
 
     //- Destructor
-    virtual ~velocity();
+    virtual ~alphaRhoDNodeGenerationModel();
 
 
     // Public member functions
 
-        //- Update quadrature given a dictionary
-        virtual void updateQuadrature(const dictionary&);
+        //- Update weights and abscissae given a node index and dictionary
+        virtual void updateNodes
+        (
+            const dictionary& dict,
+            const label vCmpt
+        );
 };
 
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
-} // End namespace momentGenerationSubModels
+} // End namespace nodeGenerationModels
 } // End namespace Foam
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
