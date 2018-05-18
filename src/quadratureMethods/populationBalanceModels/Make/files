@@ -51,5 +51,6 @@ populationBalanceSubModels/collisionKernels/noCollision/noCollision.C
 noPopulationBalance/noPopulationBalance.C
 univariatePopulationBalance/univariatePopulationBalance.C
 velocityPopulationBalance/velocityPopulationBalance.C
+sizeVelocityPopulationBalance/sizeVelocityPopulationBalance.C
 
 LIB = $(FOAM_USER_LIBBIN)/libpopulationBalance

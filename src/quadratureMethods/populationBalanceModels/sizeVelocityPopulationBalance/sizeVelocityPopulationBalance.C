@@ -1,0 +1,200 @@
+/*---------------------------------------------------------------------------*\
+  =========                 |
+  \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
+   \\    /   O peration     |
+    \\  /    A nd           | Copyright (C) 2018 Alberto Passalacqua
+     \\/     M anipulation  |
+-------------------------------------------------------------------------------
+License
+    This file is derivative work of OpenFOAM.
+
+    OpenFOAM is free software: you can redistribute it and/or modify it
+    under the terms of the GNU General Public License as published by
+    the Free Software Foundation, either version 3 of the License, or
+    (at your option) any later version.
+
+    OpenFOAM is distributed in the hope that it will be useful, but WITHOUT
+    ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or
+    FITNESS FOR A PARTICULAR PURPOSE.  See the GNU General Public License
+    for more details.
+
+    You should have received a copy of the GNU General Public License
+    along with OpenFOAM.  If not, see <http://www.gnu.org/licenses/>.
+
+\*---------------------------------------------------------------------------*/
+
+    #include "sizeVelocityPopulationBalance.H"
+#include "addToRunTimeSelectionTable.H"
+
+// * * * * * * * * * * * * * * Static Data Members * * * * * * * * * * * * * //
+
+namespace Foam
+{
+namespace PDFTransportModels
+{
+namespace populationBalanceModels
+{
+    defineTypeNameAndDebug(sizeVelocityPopulationBalance, 0);
+    addToRunTimeSelectionTable
+    (
+        populationBalanceModel,
+        sizeVelocityPopulationBalance,
+        dictionary
+    );
+}
+}
+}
+
+// * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
+
+Foam::PDFTransportModels::populationBalanceModels::
+sizeVelocityPopulationBalance::sizeVelocityPopulationBalance
+(
+    const word& name,
+    const dictionary& dict,
+    const surfaceScalarField& phi
+)
+:
+    velocityPDFTransportModel(name, dict, phi.mesh(), phi, "R"),
+    populationBalanceModel(name, dict, phi),
+    name_(name),
+    collision_(false)//dict.lookup("collision")),
+//     collisionKernel_
+//     (
+//         Foam::populationBalanceSubModels::collisionKernel::New
+//         (
+//             dict.subDict("collisionKernel"),
+//             phi_.mesh(),
+//             quadrature_,
+//             dict.subDict("odeCoeffs").lookupOrDefault("solveODESource", false)
+//         )
+//     )
+{}
+
+
+// * * * * * * * * * * * * * * * * Destructor  * * * * * * * * * * * * * * * //
+
+Foam::PDFTransportModels::populationBalanceModels::
+sizeVelocityPopulationBalance::~sizeVelocityPopulationBalance()
+{}
+
+
+// * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * * //
+
+bool
+Foam::PDFTransportModels::populationBalanceModels::
+sizeVelocityPopulationBalance::collision() const
+{
+    return collision_;
+}
+
+void
+Foam::PDFTransportModels::populationBalanceModels::
+sizeVelocityPopulationBalance::updateImplicitCollisionSource()
+{
+    NotImplemented;
+
+    if (!collision_)
+    {
+        return;
+    }
+
+//     collisionKernel_->updateFields();
+}
+
+void
+Foam::PDFTransportModels::populationBalanceModels::
+sizeVelocityPopulationBalance::updateExplicitCollisionSource
+(
+    const label celli
+)
+{
+    if (!collision_)
+    {
+        return;
+    }
+
+//     collisionKernel_->updateCells(celli);
+}
+
+Foam::tmp<Foam::fvScalarMatrix>
+Foam::PDFTransportModels::populationBalanceModels::
+sizeVelocityPopulationBalance::implicitCollisionSource
+(
+    const volMoment& moment
+)
+{
+//     if (!collision_)
+    {
+        return tmp<fvScalarMatrix>
+        (
+            new fvScalarMatrix
+            (
+                moment,
+                moment.dimensions()*dimVolume/dimTime
+            )
+        );
+    }
+//     return collisionKernel_->implicitCollisionSource(moment);
+}
+
+Foam::scalar
+Foam::PDFTransportModels::populationBalanceModels::
+sizeVelocityPopulationBalance::explicitCollisionSource
+(
+    const label momenti,
+    const label celli
+)
+{
+//     if (!collision_)
+    {
+        return 0.0;
+    }
+    return collisionKernel_->explicitCollisionSource(momenti, celli);
+}
+
+Foam::scalar Foam::PDFTransportModels::populationBalanceModels
+::sizeVelocityPopulationBalance::cellMomentSource
+(
+    const label momenti,
+    const label celli
+)
+{
+    return explicitCollisionSource(momenti, celli);
+}
+
+Foam::scalar Foam::PDFTransportModels::populationBalanceModels
+::sizeVelocityPopulationBalance::realizableCo() const
+{
+    return velocityPDFTransportModel::realizableCo();
+}
+
+Foam::scalar Foam::PDFTransportModels::populationBalanceModels
+::sizeVelocityPopulationBalance::CoNum() const
+{
+    return velocityPDFTransportModel::CoNum();
+}
+
+void Foam::PDFTransportModels::populationBalanceModels
+::sizeVelocityPopulationBalance::solve()
+{
+    velocityPDFTransportModel::solve();
+}
+
+void Foam::PDFTransportModels::populationBalanceModels
+::sizeVelocityPopulationBalance::meanTransport(const bool wallCollisions)
+{
+    velocityPDFTransportModel::meanTransport(wallCollisions);
+}
+
+void Foam::PDFTransportModels::populationBalanceModels
+::sizeVelocityPopulationBalance::relativeTransport
+(
+    const mappedPtrList<volVectorField>& Vs,
+    const bool wallCollisions
+)
+{
+    velocityPDFTransportModel::relativeTransport(Vs, wallCollisions);
+}
+
+// ************************************************************************* //
