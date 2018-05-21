@@ -79,7 +79,7 @@ updateQuadrature
     {
         const labelList& nodeIndex = nodeIndexes_[nodei];
         word nodeName = "node" + mappedList<scalar>::listToWord(nodeIndex);
-        Info<<nodeName<<endl;
+
         if(dict.found(nodeName))
         {
             dictionary nodeDict(dict.subDict(nodeName));

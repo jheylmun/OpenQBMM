@@ -145,12 +145,6 @@ Foam::multivariateMomentInversions::sizeHyCQMOM::invert
     boolList nonZeroNodes(sizeInverter_->nNodes(), false);
     forAll(sizeWeights, nodei)
     {
-        // Check if bubble moments are large enough.
-        //  If yes make matricies 1 component larger,
-        //  if no the rest of the nodes are assumed to
-        //  be too small as well.
-        //  This is done to avoid a divide by 0 error,
-        //  and to reduce unneeded computation time
         if
         (
             sizeWeights[nodei] > 0
@@ -182,7 +176,7 @@ Foam::multivariateMomentInversions::sizeHyCQMOM::invert
         scalarSquareMatrix invVR = invR*V.inv();
 
         // Compute conditional velocity moments and invert
-        PtrList<mappedList<scalar>> conditionalMoments(sizeInverter_->nNodes());
+        PtrList<mappedList<scalar>> conditionalMoments(nNonZeroNodes);
         forAll(conditionalMoments, sNodei)
         {
             conditionalMoments.set
@@ -237,7 +231,8 @@ Foam::multivariateMomentInversions::sizeHyCQMOM::invert
 
             forAll(velocityNodeIndexes_, nodei)
             {
-                const labelList& velocityNodeIndex = velocityNodeIndexes_[nodei];
+                const labelList& velocityNodeIndex =
+                    velocityNodeIndexes_[nodei];
                 labelList nodeIndex(nDimensions_, 0);
                 nodeIndex[0] = sNodei + 1;
                 for (label dimi = 1; dimi < nDimensions_; dimi++)

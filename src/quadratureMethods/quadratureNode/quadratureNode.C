@@ -98,6 +98,7 @@ quadratureNode
             )
         );
     }
+
     if (extended_)
     {
         // Allocating secondary abscissae

@@ -109,7 +109,6 @@ Foam::momentGenerationModels::derivedMomentGenerationModel::updateQuadrature
     label vCmpt = 0;
     forAll(abscissae_[0], cmpt)
     {
-        Info<<dict.parent()<<endl;
         word absName = "abscissa" + Foam::name(cmpt) + "Dimension";
         if (dict.parent().found(absName))
         {
@@ -141,7 +140,6 @@ Foam::momentGenerationModels::derivedMomentGenerationModel::updateQuadrature
         {
             vCmpt = 0;
         }
-        Info<<vCmpt<<endl;
         nodeGenerators_[cmpt].updateNodes(dict, vCmpt);
     }
 
