@@ -155,6 +155,12 @@ public:
 
             //- Recalculate the moments from the quadrature nodes in an element
             void updateLocalMoments(label elemi);
+
+            //- Const ref to the zero order moment
+            inline const volScalarField& zeroOrderMoment() const;
+
+            //- Non-const ref to the zero order moment
+            inline volScalarField& zeroOrderMoment();
 };
 
 

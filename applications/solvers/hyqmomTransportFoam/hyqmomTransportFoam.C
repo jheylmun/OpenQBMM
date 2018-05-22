@@ -66,7 +66,6 @@ int main(int argc, char *argv[])
         Info<< "Time = " << runTime.timeName() << nl << endl;
         {
             populationBalance->solve();
-            alphap = quadrature.moments()(labelList(momentOrders[0].size(), 0));
         }
 
         runTime.write();

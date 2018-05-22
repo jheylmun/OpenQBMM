@@ -40,4 +40,18 @@ const Foam::word Foam::momentFieldSet<momentType, nodeType>::support() const
     return support_;
 }
 
+template <class momentType, class nodeType>
+const Foam::volScalarField&
+Foam::momentFieldSet<momentType, nodeType>::zeroOrderMoment() const
+{
+    return this->operator()(labelList(nDimensions_, 0));
+}
+
+template <class momentType, class nodeType>
+Foam::volScalarField&
+Foam::momentFieldSet<momentType, nodeType>::zeroOrderMoment()
+{
+    return this->operator()(labelList(nDimensions_, 0));
+}
+
 // ************************************************************************* //

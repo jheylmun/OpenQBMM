@@ -1,3 +1,4 @@
+alphap = moments.zeroOrderMoment();
 Thetap = dimensionedScalar("zero", sqr(dimVelocity), 0.0);
 
 forAll(momentOrders[0], cmpti)

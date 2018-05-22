@@ -112,7 +112,6 @@ const quadratureApproximation& quadrature =
             particleName
         )
     );
-const labelListList& momentOrders = quadrature.momentOrders();
 
 
 
