@@ -38,6 +38,7 @@ SourceFiles
 
 #include "collisionKernel.H"
 #include "mappedPtrList.H"
+#include "radialModel.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
@@ -58,9 +59,6 @@ class esBGKCollision
 {
     // Private data
 
-        //- Collisional time scale
-        dimensionedScalar tauCollisional_;
-
         //- Coefficient of restitution
         scalar e_;
 
@@ -69,6 +67,27 @@ class esBGKCollision
 
         //- Coefficients
         scalar a1_, b1_;
+
+        //- Minimum volume fraction where frictional pressure is present
+        dimensionedScalar alphaMinFriction_;
+
+        //- Packing limit
+        dimensionedScalar alphaMax_;
+
+        //- Particle volume fraction
+        const volScalarField& alpha_;
+
+        //- Particle diameter
+        const volScalarField& d_;
+
+        //- Particle granular temperature
+        const volScalarField& Theta_;
+
+        //- Radial distribution model
+        autoPtr<radialModel> radialModel_;
+
+        //- Collisional time scale
+        volScalarField tauCollisional_;
 
 
 protected:

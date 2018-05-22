@@ -75,10 +75,11 @@ Foam::populationBalanceSubModels::collisionKernel::variance
     const volScalarField& m0,
     const volScalarField& sqrM1,
     const volScalarField& m2
-)
+) const
 {
     return max(m2/m0 - sqrM1, dimensionedScalar("zero", sqr(dimVelocity), 0.0));
 }
+
 
 // * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
 

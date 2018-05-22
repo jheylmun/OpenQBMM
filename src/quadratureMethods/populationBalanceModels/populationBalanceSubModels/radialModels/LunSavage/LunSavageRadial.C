@@ -1,0 +1,120 @@
+/*---------------------------------------------------------------------------*\
+  =========                 |
+  \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
+   \\    /   O peration     |
+    \\  /    A nd           | Copyright (C) 2018 OpenFOAM Foundation
+     \\/     M anipulation  |
+-------------------------------------------------------------------------------
+2018-05-22 Jeff Heylmun:    Added the return of one cell
+-------------------------------------------------------------------------------
+License
+    This file is derivative work of OpenFOAM.
+
+    OpenFOAM is free software: you can redistribute it and/or modify it
+    under the terms of the GNU General Public License as published by
+    the Free Software Foundation, either version 3 of the License, or
+    (at your option) any later version.
+
+    OpenFOAM is distributed in the hope that it will be useful, but WITHOUT
+    ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or
+    FITNESS FOR A PARTICULAR PURPOSE.  See the GNU General Public License
+    for more details.
+
+    You should have received a copy of the GNU General Public License
+    along with OpenFOAM.  If not, see <http://www.gnu.org/licenses/>.
+
+\*---------------------------------------------------------------------------*/
+
+#include "LunSavageRadial.H"
+#include "addToRunTimeSelectionTable.H"
+
+// * * * * * * * * * * * * * * Static Data Members * * * * * * * * * * * * * //
+
+namespace Foam
+{
+namespace populationBalanceSubModels
+{
+namespace radialModels
+{
+    defineTypeNameAndDebug(LunSavage, 0);
+
+    addToRunTimeSelectionTable
+    (
+        radialModel,
+        LunSavage,
+        dictionary
+    );
+}
+}
+}
+
+
+// * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
+
+Foam::populationBalanceSubModels::radialModels::LunSavage::LunSavage
+(
+    const dictionary& dict
+)
+:
+    radialModel(dict)
+{}
+
+
+// * * * * * * * * * * * * * * * * Destructor  * * * * * * * * * * * * * * * //
+
+Foam::populationBalanceSubModels::radialModels::LunSavage::~LunSavage()
+{}
+
+
+// * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
+
+Foam::tmp<Foam::volScalarField>
+Foam::populationBalanceSubModels::radialModels::LunSavage::g0
+(
+    const volScalarField& alpha,
+    const dimensionedScalar& alphaMinFriction,
+    const dimensionedScalar& alphaMax
+) const
+{
+
+    return pow(1.0 - alpha/alphaMax, -2.5*alphaMax);
+}
+
+
+Foam::tmp<Foam::volScalarField>
+Foam::populationBalanceSubModels::radialModels::LunSavage::g0prime
+(
+    const volScalarField& alpha,
+    const dimensionedScalar& alphaMinFriction,
+    const dimensionedScalar& alphaMax
+) const
+{
+    return 2.5*pow(1.0 - alpha/alphaMax, -2.5*alphaMax - 1);
+}
+
+
+Foam::scalar
+Foam::populationBalanceSubModels::radialModels::LunSavage::g0
+(
+    const scalar& alpha,
+    const scalar& alphaMinFriction,
+    const scalar& alphaMax
+) const
+{
+
+    return pow(1.0 - alpha/alphaMax, -2.5*alphaMax);
+}
+
+
+Foam::scalar
+Foam::populationBalanceSubModels::radialModels::LunSavage::g0prime
+(
+    const scalar& alpha,
+    const scalar& alphaMinFriction,
+    const scalar& alphaMax
+) const
+{
+    return 2.5*pow(1.0 - alpha/alphaMax, -2.5*alphaMax - 1);
+}
+
+// ************************************************************************* //

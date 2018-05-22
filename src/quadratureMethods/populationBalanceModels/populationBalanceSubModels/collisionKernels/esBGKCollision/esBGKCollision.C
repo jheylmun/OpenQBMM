@@ -188,7 +188,7 @@ void Foam::populationBalanceSubModels::collisionKernels::esBGKCollision
     dimensionedScalar zeroVar("zero", sqr(dimVelocity), 0.0);
     volScalarField sigma1(max(moments(2,0)/m00 - uSqr, zeroVar));
     volScalarField sigma2(max(moments(0,2)/m00 - vSqr, zeroVar));
-    volScalarField Theta((sigma1 + sigma2)/2.0);
+    volScalarField Theta((sigma1 + sigma2)/3.0);
 
     volScalarField sigma11(a1_*Theta + b1_*sigma1);
     volScalarField sigma22(a1_*Theta + b1_*sigma2);
@@ -265,9 +265,49 @@ Foam::populationBalanceSubModels::collisionKernels::esBGKCollision
 )
 :
     collisionKernel(dict, mesh, quadrature, ode),
-    tauCollisional_(dict.lookup("tau")),
     e_(dict.lookupType<scalar>("e")),
     b_(dict.lookupOrDefault<scalar>("b", 0)),
+    alphaMinFriction_("alphaMinFriction", dimless, dict),
+    alphaMax_("alphaMax", dimless, dict),
+    alpha_
+    (
+        mesh.lookupObject<volScalarField>
+        (
+            IOobject::groupName("alpha", quadrature.name())
+        )
+    ),
+    d_
+    (
+        mesh.lookupObject<volScalarField>
+        (
+            IOobject::groupName("d", quadrature.name())
+        )
+    ),
+    Theta_
+    (
+        mesh.lookupObject<volScalarField>
+        (
+            IOobject::groupName("Theta", quadrature.name())
+        )
+    ),
+    radialModel_(radialModel::New(dict)),
+    tauCollisional_
+    (
+        IOobject
+        (
+            IOobject::groupName
+            (
+                "collision:tauCollisional",
+                quadrature_.name()
+            ),
+            mesh.time().timeName(),
+            mesh,
+            IOobject::NO_READ,
+            IOobject::NO_WRITE
+        ),
+        mesh,
+        dimensionedScalar("HUGE", dimTime, HUGE)
+    ),
     Meqf_(quadrature.moments().size(), momentOrders_),
     Meq_(quadrature.moments().size(), momentOrders_)
 {
@@ -333,6 +373,18 @@ void Foam::populationBalanceSubModels::collisionKernels::esBGKCollision
     {
         updateCells3D(celli);
     }
+    tauCollisional_[celli] =
+        sqrt(Foam::constant::mathematical::pi)*d_[celli]
+       /(
+            12.0*alpha_[celli]*sqrt(Theta_[celli])
+           *radialModel_->g0
+            (
+                alpha_[celli],
+                alphaMinFriction_.value(),
+                alphaMax_.value()
+            )
+          + 1e-10
+        );
 }
 
 void Foam::populationBalanceSubModels::collisionKernels::esBGKCollision
@@ -350,13 +402,29 @@ void Foam::populationBalanceSubModels::collisionKernels::esBGKCollision
     {
         updateFields3D();
     }
+    tauCollisional_ =
+        sqrt(Foam::constant::mathematical::pi)*d_
+       /(
+            12.0*alpha_*sqrt(Theta_)
+           *radialModel_->g0
+            (
+                alpha_,
+                alphaMinFriction_,
+                alphaMax_
+            )
+          + dimensionedScalar("small", dimVelocity, 1e-10)
+        );
 }
 
 Foam::scalar
 Foam::populationBalanceSubModels::collisionKernels::esBGKCollision
 ::explicitCollisionSource(const label mi, const label celli) const
 {
-    return (Meq_[mi] - quadrature_.moments()[mi][celli])/tauCollisional_.value();
+    return
+    (
+        Meq_[mi]
+      - quadrature_.moments()[mi][celli]
+    )/tauCollisional_[celli];
 }
 
 Foam::tmp<Foam::fvScalarMatrix>

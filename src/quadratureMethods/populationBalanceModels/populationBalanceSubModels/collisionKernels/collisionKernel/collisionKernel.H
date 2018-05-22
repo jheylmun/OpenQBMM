@@ -111,7 +111,7 @@ protected:
             const volScalarField& m0,
             const volScalarField& sqrM1,
             const volScalarField& m2
-        );
+        ) const;
 
 
 public:

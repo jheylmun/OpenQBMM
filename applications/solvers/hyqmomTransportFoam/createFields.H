@@ -12,20 +12,74 @@ surfaceScalarField phi
 );
 
 Info<< "Reading phaseProperties\n" << endl;
+IOdictionary phaseProperties
+(
+    IOobject
+    (
+        "phaseProperties",
+        runTime.constant(),
+        mesh,
+        IOobject::MUST_READ,
+        IOobject::NO_WRITE
+    )
+);
+word particleName(phaseProperties.lookup("particleName"));
+scalar residualAlpha(phaseProperties.lookupType<scalar>("residualAlpha"));
 
-// Default field used for Boltzmann collision
 volScalarField dp
 (
     IOobject
     (
-        IOobject::groupName("d", "particles"),
+        IOobject::groupName("d", particleName),
         runTime.timeName(),
         mesh,
         IOobject::NO_READ,
         IOobject::NO_WRITE
     ),
     mesh,
-    dimensionedScalar("d", dimLength, 3e-4)
+    dimensionedScalar("d", dimLength, phaseProperties)
+);
+
+volScalarField alphap
+(
+    IOobject
+    (
+        IOobject::groupName("alpha", particleName),
+        runTime.timeName(),
+        mesh,
+        IOobject::NO_READ,
+        IOobject::NO_WRITE
+    ),
+    mesh,
+    dimensionedScalar("Zero", dimless, 0.0)
+);
+
+volVectorField Up
+(
+    IOobject
+    (
+        IOobject::groupName("U", particleName),
+        runTime.timeName(),
+        mesh,
+        IOobject::NO_READ,
+        IOobject::AUTO_WRITE
+    ),
+    mesh,
+    dimensionedVector("Zero", dimVelocity, Zero)
+);
+
+volScalarField Thetap
+(
+    IOobject
+    (
+        IOobject::groupName("Theta", particleName),
+        runTime.timeName(),
+        mesh,
+        IOobject::NO_READ,
+        IOobject::AUTO_WRITE
+    ),
+    mesh,
+    dimensionedScalar("zero", sqr(dimVelocity), 0.0)
 );
 
 Info<< "Reading populationBalanceProperties\n" << endl;
@@ -48,5 +102,17 @@ autoPtr<populationBalanceModel> populationBalance
         "particles", populationBalanceProperties, phi
     )
 );
+
+const quadratureApproximation& quadrature =
+    mesh.lookupObject<quadratureApproximation>
+    (
+        IOobject::groupName
+        (
+            "quadratureProperties",
+            particleName
+        )
+    );
+const labelListList& momentOrders = quadrature.momentOrders();
+
 
 

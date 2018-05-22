@@ -37,7 +37,10 @@ velocityCoeffs
     {
         collisionKernel esBGK;
         e           0.9;
-        tau         tau     [0 0 1 0 0 0 0]     5.0;
+
+        radialModel CarnahanStarling;
+        alphaMinFriction 0.5;
+        alphaMax 0.63;
     }
 }
 
