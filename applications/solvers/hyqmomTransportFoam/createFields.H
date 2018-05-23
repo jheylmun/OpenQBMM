@@ -48,7 +48,7 @@ volScalarField alphap
         runTime.timeName(),
         mesh,
         IOobject::NO_READ,
-        IOobject::NO_WRITE
+        IOobject::AUTO_WRITE
     ),
     mesh,
     dimensionedScalar("Zero", dimless, 0.0)
@@ -112,6 +112,10 @@ const quadratureApproximation& quadrature =
             particleName
         )
     );
+const volMomentFieldSet& moments = quadrature.moments();
+const labelListList& momentOrders = quadrature.momentOrders();
+label nDims = momentOrders[0].size();
 
 
+#include "computeParticleFields.H"
 

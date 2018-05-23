@@ -67,6 +67,7 @@ int main(int argc, char *argv[])
         {
             populationBalance->solve();
         }
+        #include "computeParticleFields.H"
 
         runTime.write();
 

@@ -8,13 +8,13 @@ forAll(momentOrders[0], cmpti)
     order1[cmpti] = 1;
     order2[cmpti] = 2;
 
-    volScalarField meanU("meanU", moments(order1)/max(alpha, residualAlpha));
+    volScalarField meanU("meanU", moments(order1)/max(alphap, residualAlpha));
     Up.replace(cmpti, meanU);
 
     Thetap +=
         max
         (
-            moments(order2)/max(alpha, residualAlpha) - sqr(meanU),
+            moments(order2)/max(alphap, residualAlpha) - sqr(meanU),
             dimensionedScalar("zero", sqr(dimVelocity), 0.0)
         );
 }
