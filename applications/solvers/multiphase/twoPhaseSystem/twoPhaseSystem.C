@@ -617,7 +617,11 @@ Foam::tmp<Foam::fvVectorMatrix> Foam::twoPhaseSystem::divDevRhoReff1()
     {
         volScalarField rhoNuEff1
         (
-            "rhoNuEff1",
+            IOobject::groupName
+            (
+                "rhoNuEff",
+                phase1_->name()
+            ),
             phase1_()
            *phase1_().d()
            *mag(phase1_().U() - phase2_().U())
@@ -644,7 +648,11 @@ Foam::tmp<Foam::fvVectorMatrix> Foam::twoPhaseSystem::divDevRhoReff2()
     {
         volScalarField rhoNuEff2
         (
-            "rhoNuEff2",
+            IOobject::groupName
+            (
+                "rhoNuEff",
+                phase2_->name()
+            ),
             phase2_().rho()
            *phase2_()
            *(
