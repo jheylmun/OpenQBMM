@@ -43,7 +43,8 @@ boundaries
 
 air
 {
-    type                alphaAndDiameter;
+    type                derived;
+    abscissaeTypes      (alphaRhoD);
     weightDimension     [0 -3 0 0 0 0 0];
     abscissaDimension   [1 0 0 0 0 0 0];
 

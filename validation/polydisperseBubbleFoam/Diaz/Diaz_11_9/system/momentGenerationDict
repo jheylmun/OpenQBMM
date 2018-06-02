@@ -43,7 +43,8 @@ boundaries
 
 air
 {
-    type                alphaAndDiameter;
+    type                derived;
+    abscissaeTypes      (alphaRhoD);
     weightDimension     [0 -3 0 0 0 0 0];
     abscissaDimension   [1 0 0 0 0 0 0];
 
@@ -52,19 +53,19 @@ air
         node0
         {
             rho     1.40;
-            dia     3.5e-3;
+            d       3.5e-3;
             alpha   0.33;
         }
         node1
         {
             rho     1.40;
-            dia     5.0e-3;
+            d       5.0e-3;
             alpha   0.34;
         }
         node2
         {
             rho     1.40;
-            dia     6.5e-3;
+            d       6.5e-3;
             alpha   0.33;
         }
     }
@@ -73,19 +74,19 @@ air
         node0
         {
             rho     1.40;
-            dia     3.5e-3;
+            d       3.5e-3;
             alpha   0.33;
         }
         node1
         {
             rho     1.40;
-            dia     5.0e-3;
+            d       5.0e-3;
             alpha   0.34;
         }
         node2
         {
             rho     1.40;
-            dia     6.5e-3;
+            d       6.5e-3;
             alpha   0.33;
         }
     }
