@@ -760,13 +760,13 @@ void Foam::pdPhaseModel::relativeTransport()
     quadrature_.updateAllQuadrature();
     this->updateVelocity();
     correct();
-
-    quadrature_.interpolateNodes();
 }
 
 
 void Foam::pdPhaseModel::averageTransport(const PtrList<fvVectorMatrix>& AEqns)
 {
+    quadrature_.interpolateNodes();
+
     // Update moments based source terms for breakup and coalescence
     solveSourceOde();
 
@@ -838,7 +838,6 @@ void Foam::pdPhaseModel::averageTransport(const PtrList<fvVectorMatrix>& AEqns)
             quadrature_.velocityMoments()[mi] = U_*quadrature_.moments()[mi];
             quadrature_.velocityMoments()[mi].correctBoundaryConditions();
         }
-
         quadrature_.updateAllQuadrature();
         return;
     }

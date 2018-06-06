@@ -54,7 +54,7 @@ air
         node0
         {
             rho     1.40;
-            dia     2.0e-3;
+            d       2.0e-3;
             alpha   1.0;
         }
     }
@@ -63,7 +63,7 @@ air
         node0
         {
             rho     1.40;
-            dia     2.0e-3;
+            d       2.0e-3;
             alpha   1.0;
         }
     }

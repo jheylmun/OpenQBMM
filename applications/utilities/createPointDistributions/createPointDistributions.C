@@ -210,13 +210,21 @@ int main(int argc, char *argv[])
 
             //- COnstruct sample distribution
             scalarField x(nSamples, 0.0);
-            scalar xMax = phaseDict.lookupOrDefault("xMax", max(sAbscissae));
-            scalar xMin = phaseDict.lookupOrDefault("xMin", min(sAbscissae));
-            scalar dx = (xMax - xMin)/(nSamples - 1);
 
-            forAll(x, i)
+            if (phaseDict.found("x"))
             {
-                x[i] = xMin + dx*i;
+                x = phaseDict.lookupType<scalarField>("x");
+            }
+            else
+            {
+                scalar xMax = phaseDict.lookupOrDefault("xMax", max(sAbscissae));
+                scalar xMin = phaseDict.lookupOrDefault("xMin", min(sAbscissae));
+                scalar dx = (xMax - xMin)/(nSamples - 1);
+
+                forAll(x, i)
+                {
+                    x[i] = xMin + dx*i;
+                }
             }
 
             scalarField w(EQMOM->f(x)/moments[labelList(1, 0)[0]]);

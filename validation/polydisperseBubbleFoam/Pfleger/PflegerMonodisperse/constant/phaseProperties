@@ -23,6 +23,7 @@ air
     residualAlpha   1e-4;
     minD            1e-4;
     maxD            1e-2;
+    d    2e-3;
 }
 
 water
@@ -40,8 +41,6 @@ blending
     default
     {
         type                            linear;
-        continuousPhase                 water;
-        dispersedPhase                  air;
 
         maxFullyDispersedAlpha.air      0.3;
         maxPartlyDispersedAlpha.air     0.5;
