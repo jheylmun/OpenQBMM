@@ -286,7 +286,7 @@ Foam::tmp<Foam::scalarField> Foam::gammaEQMOM::f(const scalarField& x) const
 
         y +=
             pow(x, lambda - 1.0)*exp(-x/theta)
-           /(gamma(lambda)*pow(theta, lambda) + VSMALL)
+           /max(tgamma(lambda)*pow(theta, lambda), SMALL)
            *primaryWeights_[pNodei];
     }
 
