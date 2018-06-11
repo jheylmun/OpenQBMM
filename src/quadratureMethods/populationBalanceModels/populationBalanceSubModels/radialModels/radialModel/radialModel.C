@@ -29,7 +29,7 @@ License
 
 namespace Foam
 {
-namespace populationBalanceSubModels
+namespace kineticTheoryModels
 {
     defineTypeNameAndDebug(radialModel, 0);
 
@@ -40,7 +40,7 @@ namespace populationBalanceSubModels
 
 // * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
 
-Foam::populationBalanceSubModels::radialModel::radialModel
+Foam::kineticTheoryModels::radialModel::radialModel
 (
     const dictionary& dict
 )
@@ -51,7 +51,7 @@ Foam::populationBalanceSubModels::radialModel::radialModel
 
 // * * * * * * * * * * * * * * * * Destructor  * * * * * * * * * * * * * * * //
 
-Foam::populationBalanceSubModels::radialModel::~radialModel()
+Foam::kineticTheoryModels::radialModel::~radialModel()
 {}
 
 

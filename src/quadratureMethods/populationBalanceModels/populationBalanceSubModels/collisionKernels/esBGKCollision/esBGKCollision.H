@@ -84,7 +84,7 @@ class esBGKCollision
         const volScalarField& Theta_;
 
         //- Radial distribution model
-        autoPtr<radialModel> radialModel_;
+        autoPtr<kineticTheoryModels::radialModel> radialModel_;
 
         //- Collisional time scale
         volScalarField tauCollisional_;

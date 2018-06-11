@@ -24,7 +24,7 @@ License
     along with OpenFOAM.  If not, see <http://www.gnu.org/licenses/>.
 
 Class
-    Foam::populationBalanceSubModels::radialModel
+    Foam::kineticTheoryModels::radialModel
 
 SourceFiles
     radialModel.C
@@ -43,7 +43,7 @@ SourceFiles
 
 namespace Foam
 {
-namespace populationBalanceSubModels
+namespace kineticTheoryModels
 {
 
 /*---------------------------------------------------------------------------*\
@@ -147,7 +147,7 @@ public:
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
-} // End namespace populationBalanceSubModels
+} // End namespace kineticTheoryModels
 } // End namespace Foam
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //

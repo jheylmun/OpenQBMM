@@ -24,7 +24,7 @@ License
     along with OpenFOAM.  If not, see <http://www.gnu.org/licenses/>.
 
 Class
-    Foam::populationBalanceSubModels::radialModels::CarnahanStarling
+    Foam::kineticTheoryModels::radialModels::CarnahanStarling
 
 Description
 
@@ -42,7 +42,7 @@ SourceFiles
 
 namespace Foam
 {
-namespace populationBalanceSubModels
+namespace kineticTheoryModels
 {
 namespace radialModels
 {
@@ -112,7 +112,7 @@ public:
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
 } // End namespace radialModels
-} // End namespace populationBalanceSubModels
+} // End namespace kineticTheoryModels
 } // End namespace Foam
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //

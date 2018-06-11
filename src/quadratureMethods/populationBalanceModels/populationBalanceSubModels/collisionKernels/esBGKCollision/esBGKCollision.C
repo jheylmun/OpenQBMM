@@ -290,7 +290,7 @@ Foam::populationBalanceSubModels::collisionKernels::esBGKCollision
             IOobject::groupName("Theta", quadrature.name())
         )
     ),
-    radialModel_(radialModel::New(dict)),
+    radialModel_(kineticTheoryModels::radialModel::New(dict)),
     tauCollisional_
     (
         IOobject

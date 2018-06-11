@@ -32,7 +32,7 @@ License
 
 namespace Foam
 {
-namespace populationBalanceSubModels
+namespace kineticTheoryModels
 {
 namespace radialModels
 {
@@ -51,7 +51,7 @@ namespace radialModels
 
 // * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
 
-Foam::populationBalanceSubModels::radialModels::CarnahanStarling::CarnahanStarling
+Foam::kineticTheoryModels::radialModels::CarnahanStarling::CarnahanStarling
 (
     const dictionary& dict
 )
@@ -62,14 +62,14 @@ Foam::populationBalanceSubModels::radialModels::CarnahanStarling::CarnahanStarli
 
 // * * * * * * * * * * * * * * * * Destructor  * * * * * * * * * * * * * * * //
 
-Foam::populationBalanceSubModels::radialModels::CarnahanStarling::~CarnahanStarling()
+Foam::kineticTheoryModels::radialModels::CarnahanStarling::~CarnahanStarling()
 {}
 
 
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
 
 Foam::tmp<Foam::volScalarField>
-Foam::populationBalanceSubModels::radialModels::CarnahanStarling::g0
+Foam::kineticTheoryModels::radialModels::CarnahanStarling::g0
 (
     const volScalarField& alpha,
     const dimensionedScalar& alphaMinFriction,
@@ -85,7 +85,7 @@ Foam::populationBalanceSubModels::radialModels::CarnahanStarling::g0
 
 
 Foam::tmp<Foam::volScalarField>
-Foam::populationBalanceSubModels::radialModels::CarnahanStarling::g0prime
+Foam::kineticTheoryModels::radialModels::CarnahanStarling::g0prime
 (
     const volScalarField& alpha,
     const dimensionedScalar& alphaMinFriction,
@@ -99,7 +99,7 @@ Foam::populationBalanceSubModels::radialModels::CarnahanStarling::g0prime
 }
 
 Foam::scalar
-Foam::populationBalanceSubModels::radialModels::CarnahanStarling::g0
+Foam::kineticTheoryModels::radialModels::CarnahanStarling::g0
 (
     const scalar& alpha,
     const scalar& alphaMinFriction,
@@ -115,7 +115,7 @@ Foam::populationBalanceSubModels::radialModels::CarnahanStarling::g0
 
 
 Foam::scalar
-Foam::populationBalanceSubModels::radialModels::CarnahanStarling::g0prime
+Foam::kineticTheoryModels::radialModels::CarnahanStarling::g0prime
 (
     const scalar& alpha,
     const scalar& alphaMinFriction,

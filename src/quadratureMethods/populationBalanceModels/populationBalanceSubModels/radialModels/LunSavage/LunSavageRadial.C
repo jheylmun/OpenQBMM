@@ -32,7 +32,7 @@ License
 
 namespace Foam
 {
-namespace populationBalanceSubModels
+namespace kineticTheoryModels
 {
 namespace radialModels
 {
@@ -51,7 +51,7 @@ namespace radialModels
 
 // * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
 
-Foam::populationBalanceSubModels::radialModels::LunSavage::LunSavage
+Foam::kineticTheoryModels::radialModels::LunSavage::LunSavage
 (
     const dictionary& dict
 )
@@ -62,14 +62,14 @@ Foam::populationBalanceSubModels::radialModels::LunSavage::LunSavage
 
 // * * * * * * * * * * * * * * * * Destructor  * * * * * * * * * * * * * * * //
 
-Foam::populationBalanceSubModels::radialModels::LunSavage::~LunSavage()
+Foam::kineticTheoryModels::radialModels::LunSavage::~LunSavage()
 {}
 
 
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
 
 Foam::tmp<Foam::volScalarField>
-Foam::populationBalanceSubModels::radialModels::LunSavage::g0
+Foam::kineticTheoryModels::radialModels::LunSavage::g0
 (
     const volScalarField& alpha,
     const dimensionedScalar& alphaMinFriction,
@@ -82,7 +82,7 @@ Foam::populationBalanceSubModels::radialModels::LunSavage::g0
 
 
 Foam::tmp<Foam::volScalarField>
-Foam::populationBalanceSubModels::radialModels::LunSavage::g0prime
+Foam::kineticTheoryModels::radialModels::LunSavage::g0prime
 (
     const volScalarField& alpha,
     const dimensionedScalar& alphaMinFriction,
@@ -94,7 +94,7 @@ Foam::populationBalanceSubModels::radialModels::LunSavage::g0prime
 
 
 Foam::scalar
-Foam::populationBalanceSubModels::radialModels::LunSavage::g0
+Foam::kineticTheoryModels::radialModels::LunSavage::g0
 (
     const scalar& alpha,
     const scalar& alphaMinFriction,
@@ -107,7 +107,7 @@ Foam::populationBalanceSubModels::radialModels::LunSavage::g0
 
 
 Foam::scalar
-Foam::populationBalanceSubModels::radialModels::LunSavage::g0prime
+Foam::kineticTheoryModels::radialModels::LunSavage::g0prime
 (
     const scalar& alpha,
     const scalar& alphaMinFriction,
