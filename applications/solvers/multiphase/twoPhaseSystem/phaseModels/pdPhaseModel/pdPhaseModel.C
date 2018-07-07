@@ -778,11 +778,82 @@ void Foam::pdPhaseModel::averageTransport
     Info<< "Transporting moments with average velocity" << endl;
     const PtrList<surfaceScalarNode>& nodesOwn = quadrature_.nodesOwn();
     const PtrList<surfaceScalarNode>& nodesNei = quadrature_.nodesNei();
+    dimensionedScalar zeroPhi("zero", phiPtr_().dimensions(), 0.0);
+
+    // Correct flux to keep moments and volume fraction consistent
+    const volScalarField& m1 = quadrature_.moments()[1];
+    label nCorrectors =
+        fluid_.mesh().solverDict
+        (
+            m1.name()
+        ).lookupOrDefault("nFluxCorrectors", 1);
+    volScalarField corr
+    (
+        IOobject
+        (
+            "corr",
+            fluid_.mesh().time().timeName(),
+            fluid_.mesh()
+        ),
+        fluid_.mesh(),
+        dimensionedScalar("0", sqr(dimLength)/dimTime, 0.0),
+        (U_.boundaryField().size(), "zeroGradient")
+    );
+
+    for (label i = 0; i < nCorrectors; i++)
+    {
+        volScalarField meanM1Flux
+        (
+            IOobject
+            (
+                "meanM1Flux",
+                fluid_.mesh().time().timeName(),
+                fluid_.mesh(),
+                IOobject::NO_READ,
+                IOobject::NO_WRITE,
+                false
+            ),
+            fluid_.mesh(),
+            dimensionedScalar("zero", dimDensity/dimTime, Zero)
+        );
+
+        for (label nodei = 0; nodei < nNodes_; nodei++)
+        {
+            // Update average size moment flux
+            surfaceScalarField aFluxM1
+            (
+                "aFluxM1",
+                nodesNei[nodei].primaryWeight()
+               *(nodesNei[nodei].primaryAbscissa())
+               *Foam::min(phiPtr_(), zeroPhi)
+              + nodesOwn[nodei].primaryWeight()
+               *nodesOwn[nodei].primaryAbscissa()
+               *Foam::max(phiPtr_(), zeroPhi)
+            );
+
+            meanM1Flux += fvc::surfaceIntegrate(aFluxM1);
+        }
+
+        fvScalarMatrix corrEqn
+        (
+            fvm::laplacian
+            (
+                Foam::max(m1, dimensionedScalar("small", dimDensity, 0.001)),
+                corr
+            )
+         ==
+            (m1 - (*this)*rho())/fluid_.mesh().time().deltaT()
+          - meanM1Flux
+        );
+        corrEqn.setReference(0, 0.0);
+        corrEqn.relax();
+        corrEqn.solve();
+        phiPtr_() += fvc::snGrad(corr)*fluid_.mesh().magSf();
+    }
 
     forAll(quadrature_.moments(), mEqni)
     {
         volScalarField& m = quadrature_.moments()[mEqni];
-        dimensionedScalar zeroPhi("zero", phiPtr_().dimensions(), 0.0);
 
         volScalarField meanDivUbMp
         (
@@ -849,7 +920,6 @@ void Foam::pdPhaseModel::averageTransport
 
     forAll(quadrature_.velocityMoments(), mEqni)
     {
-        dimensionedScalar zeroPhi("zero", phiPtr_().dimensions(), 0.0);
         volVectorField& Up = quadrature_.velocityMoments()[mEqni];
 
         volVectorField meanDivUbUp
