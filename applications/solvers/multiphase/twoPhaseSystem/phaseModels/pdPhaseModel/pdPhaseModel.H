@@ -205,7 +205,11 @@ public:
         virtual void relativeTransport();
 
         //- Average transport of moments
-        virtual void averageTransport(const PtrList<fvVectorMatrix>& AEqns);
+        virtual void averageTransport
+        (
+            const PtrList<fvVectorMatrix>& AEqns,
+            const PtrList<surfaceScalarField>& Ffs
+        );
 };
 
 

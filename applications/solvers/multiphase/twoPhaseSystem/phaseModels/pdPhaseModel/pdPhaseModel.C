@@ -765,7 +765,11 @@ void Foam::pdPhaseModel::relativeTransport()
 }
 
 
-void Foam::pdPhaseModel::averageTransport(const PtrList<fvVectorMatrix>& AEqns)
+void Foam::pdPhaseModel::averageTransport
+(
+    const PtrList<fvVectorMatrix>& AEqns,
+    const PtrList<surfaceScalarField>& Ffs
+)
 {
     // Update moments based source terms for breakup and coalescence
     solveSourceOde();
@@ -943,6 +947,7 @@ void Foam::pdPhaseModel::averageTransport(const PtrList<fvVectorMatrix>& AEqns)
             AEqns[nodei]
           + tauC*alphaRhoi*U_
         );
+         UsEqn += -fvc::reconstruct(Ffs[nodei]);
 
         UsEqn.relax();
         UsEqn.solve();
