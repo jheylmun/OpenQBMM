@@ -127,8 +127,14 @@ public:
         //- Turbulent dispersion force
         virtual tmp<volVectorField> F(const label, const label) const;
 
+        //- Turbulent dispersion force
+        virtual tmp<surfaceScalarField> Ff(const label, const label) const;
+
         //- Mean turbulent dispersion force
         virtual tmp<volVectorField> F() const;
+
+        //- Mean turbulent dispersion force
+        virtual tmp<surfaceScalarField> Ff() const;
 };
 
 

@@ -135,4 +135,37 @@ Foam::turbulentDispersionModels::noTurbulentDispersion::F() const
             )
         );
 }
+Foam::tmp<Foam::surfaceScalarField>
+Foam::turbulentDispersionModels::noTurbulentDispersion::Ff
+(
+    const label nodei,
+    const label nodej
+) const
+{
+    return Ff();
+}
+
+
+Foam::tmp<Foam::surfaceScalarField>
+Foam::turbulentDispersionModels::noTurbulentDispersion::Ff() const
+{
+    const fvMesh& mesh(this->pair_.phase1().mesh());
+
+    return
+        tmp<surfaceScalarField>
+        (
+            new surfaceScalarField
+            (
+                IOobject
+                (
+                    "noTurbulentDispersion:F",
+                    mesh.time().timeName(),
+                    mesh
+                ),
+                mesh,
+                dimensionedScalar("zero", dimF*dimArea, 0.0)
+            )
+        );
+}
+
 // ************************************************************************* //
