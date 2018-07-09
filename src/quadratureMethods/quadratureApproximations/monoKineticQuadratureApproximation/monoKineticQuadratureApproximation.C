@@ -151,7 +151,7 @@ Foam::monoKineticQuadratureApproximation::monoKineticQuadratureApproximation
                     IOobject::AUTO_WRITE
                 ),
                 U_,
-                U_.boundaryField().types()
+                U_.boundaryField()
             )
         );
         nodesNei.set

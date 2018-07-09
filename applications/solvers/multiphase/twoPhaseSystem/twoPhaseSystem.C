@@ -957,8 +957,8 @@ void Foam::twoPhaseSystem::averageTransport()
 
                 // Dispersion, lift, wall lubrication, and bubble pressure
               - turbulentDispersion_->Ff(nodei, 0)
-              -  lift_->Ff(nodei, 0)
-              + wallLubrication_->Ff(nodei, 0)
+              - lift_->Ff(nodei, 0)
+              - wallLubrication_->Ff(nodei, 0)
               + bubblePressure_->Ff(nodei, 0);
         }
         else
@@ -975,9 +975,9 @@ void Foam::twoPhaseSystem::averageTransport()
               + Kd*phase2_->U()
 
             // Dispersion, lift, wall lubrication, and bubble pressure
-              + turbulentDispersion_->F<vector>(nodei, 0)
+              - turbulentDispersion_->F<vector>(nodei, 0)
               - lift_->F<vector>(nodei, 0)
-              + wallLubrication_->F<vector>(nodei, 0)
+              - wallLubrication_->F<vector>(nodei, 0)
               + bubblePressure_->F<vector>(nodei, 0);
         }
 
