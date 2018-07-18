@@ -35,6 +35,7 @@ License
 #include "slipFvPatchFields.H"
 #include "partialSlipFvPatchFields.H"
 #include "momentFieldSets.H"
+#include "fvc.H"
 
 
 // * * * * * * * * * * * * * Private Member Functions  * * * * * * * * * * * //
@@ -782,22 +783,39 @@ void Foam::pdPhaseModel::averageTransport
 
     // Correct flux to keep moments and volume fraction consistent
     label nCorrectors =
-        fluid_.mesh().solverDict
+        fluid_.mesh().solutionDict().subDict
         (
-            quadrature_.moments()[1].name()
+            "PIMPLE"
         ).lookupOrDefault("nFluxCorrectors", 1);
+    const volScalarField& p_rgh =
+        fluid_.mesh().lookupObject<volScalarField>("p_rgh");
+    wordList boundaries(U_.boundaryField().size(), "zeroGradient");
+    forAll(boundaries, patchi)
+    {
+        if
+        (
+            !U_.boundaryField()[patchi].fixesValue()
+         || p_rgh.boundaryField()[patchi].fixesValue()
+        )
+        {
+            boundaries[patchi] = "fixedValue";
+        }
+    }
     volScalarField corr
     (
         IOobject
         (
             "corr",
             fluid_.mesh().time().timeName(),
-            fluid_.mesh()
+            fluid_.mesh(),
+            IOobject::NO_READ,
+            IOobject::NO_WRITE
         ),
         fluid_.mesh(),
         dimensionedScalar("0", sqr(dimLength)/dimTime, 0.0),
-        wordList(U_.boundaryField().size(), "zeroGradient")
+        boundaries
     );
+    surfaceScalarField phi(phiPtr_());
 
     for (label i = 0; i < nCorrectors; i++)
     {
@@ -807,10 +825,7 @@ void Foam::pdPhaseModel::averageTransport
             (
                 "meanM1Flux",
                 fluid_.mesh().time().timeName(),
-                fluid_.mesh(),
-                IOobject::NO_READ,
-                IOobject::NO_WRITE,
-                false
+                fluid_.mesh()
             ),
             fluid_.mesh(),
             dimensionedScalar("zero", dimDensity/dimTime, Zero)
@@ -818,24 +833,24 @@ void Foam::pdPhaseModel::averageTransport
 
         for (label nodei = 0; nodei < nNodes_; nodei++)
         {
-            // Update average size moment flux
-            surfaceScalarField aFluxM1
-            (
-                "aFluxM1",
-                nodesNei[nodei].primaryWeight()
-               *(nodesNei[nodei].primaryAbscissa())
-               *Foam::min(phiPtr_(), zeroPhi)
-              + nodesOwn[nodei].primaryWeight()
-               *nodesOwn[nodei].primaryAbscissa()
-               *Foam::max(phiPtr_(), zeroPhi)
-            );
-
-            meanM1Flux += fvc::surfaceIntegrate(aFluxM1);
+            meanM1Flux +=
+                fvc::surfaceIntegrate
+                (
+                    nodesNei[nodei].primaryWeight()
+                   *nodesNei[nodei].primaryAbscissa()
+                   *Foam::min(phi, zeroPhi)
+                  + nodesOwn[nodei].primaryWeight()
+                   *nodesOwn[nodei].primaryAbscissa()
+                   *Foam::max(phi, zeroPhi)
+                );
         }
 
         fvScalarMatrix corrEqn
         (
-            fvm::laplacian
+            ((*this)*rho() - quadrature_.moments()[1])
+           /fluid_.mesh().time().deltaT()
+          + meanM1Flux
+          + fvm::laplacian
             (
                 Foam::max
                 (
@@ -847,19 +862,17 @@ void Foam::pdPhaseModel::averageTransport
                         residualAlpha_.value()
                     )
                 ),
-                corr
+                corr,
+                "laplacian(" + quadrature_.moments()[1].name() + ",corr)"
             )
-         ==
-            (
-                quadrature_.moments()[1]
-              - (*this)*rho()
-            )/fluid_.mesh().time().deltaT()
-          - meanM1Flux
         );
-        corrEqn.relax();
-        corrEqn.setReference(0, 0.0);
+        corrEqn.setReference(0,0.0);
         corrEqn.solve();
-        phiPtr_() += fvc::flux(fvc::grad(corr));
+        if (fluid_.mesh().time().outputTime())
+        {
+            corr.write();
+        }
+        phi += fvc::snGrad(corr)*fluid_.mesh().magSf();
     }
 
     forAll(quadrature_.moments(), mEqni)
@@ -894,13 +907,13 @@ void Foam::pdPhaseModel::averageTransport
                         nodesNei[nodei].primaryAbscissa(),
                         mEqni
                     )
-                )*Foam::min(phiPtr_(), zeroPhi)
+                )*Foam::min(phi, zeroPhi)
               + nodesOwn[nodei].primaryWeight()
                *pow
                 (
                     nodesOwn[nodei].primaryAbscissa(),
                     mEqni
-                )*Foam::max(phiPtr_(), zeroPhi)
+                )*Foam::max(phi, zeroPhi)
             );
 
             meanDivUbMp += fvc::surfaceIntegrate(aFluxMp);
@@ -960,14 +973,14 @@ void Foam::pdPhaseModel::averageTransport
                 (
                     nodesNei[nodei].primaryAbscissa(),
                     mEqni
-                )*Foam::min(phiPtr_(), zeroPhi)
+                )*Foam::min(phi, zeroPhi)
               + quadrature_.velocitiesOwn()[nodei]
                *nodesOwn[nodei].primaryWeight()
                *pow
                 (
                     nodesOwn[nodei].primaryAbscissa(),
                     mEqni
-                )*Foam::max(phiPtr_(), zeroPhi)
+                )*Foam::max(phi, zeroPhi)
             );
 
             meanDivUbUp += fvc::surfaceIntegrate(aFluxUp);

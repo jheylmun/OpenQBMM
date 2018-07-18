@@ -1,4 +1,5 @@
 EXE_INC = \
+    -DFULLDEBUG -g -O0 \
     -I../twoPhaseSystem \
     -I../interfacialModels/lnInclude \
     -I../phaseCompressibleTurbulenceModels/lnInclude \
@@ -26,11 +27,12 @@ EXE_INC = \
     -I../../../../src/mappedPtrList
 
 EXE_LIBS = \
-    -L$(FOAM_USER_LIBBIN) \
+    -lfiniteVolume \
     -lincompressibleTransportModels \
     -lcompressibleTransportModels \
     -lfluidThermophysicalModels \
     -lspecie \
+    -L$(FOAM_USER_LIBBIN) \
     -lmomentSet \
     -lfieldMomentInversion \
     -lquadratureApproximation \
