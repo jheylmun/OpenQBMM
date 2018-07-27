@@ -1,0 +1,83 @@
+/*--------------------------------*- C++ -*----------------------------------*\
+| =========                 |                                                 |
+| \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox           |
+|  \\    /   O peration     | Version:  dev                                   |
+|   \\  /    A nd           | Web:      www.OpenFOAM.org                      |
+|    \\/     M anipulation  |                                                 |
+\*---------------------------------------------------------------------------*/
+FoamFile
+{
+    version     2.0;
+    format      ascii;
+    class       dictionary;
+    location    "system";
+    object      setFieldsDict;
+}
+// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
+defaultFieldValues
+(
+    volScalarFieldValue alpha.air    0.1
+//     volScalarFieldValue moment.0.air 7.07355e+06
+//     volScalarFieldValue moment.1.air 0.14
+//     volScalarFieldValue moment.2.air 2.77088e-09
+//     volScalarFieldValue moment.3.air 5.48414e-17
+);
+
+regions
+(
+    boxToCell
+    {
+        box (0 0 0) (0.25 0.5 0.1);
+        fieldValues
+        (
+            volScalarFieldValue alpha.air 0.1
+            volScalarFieldValue moment.0.air 275196
+            volScalarFieldValue moment.1.air 0.14
+            volScalarFieldValue moment.2.air 7.66427e-08
+            volScalarFieldValue moment.3.air 4.49262e-14
+            volScalarFieldValue moment.4.air 2.79043e-20
+            volScalarFieldValue moment.5.air 1.81382e-26
+//             volScalarFieldValue moment.0.air 282003
+//             volScalarFieldValue moment.1.air 0.14
+//             volScalarFieldValue moment.2.air 7.75848e-08
+//             volScalarFieldValue moment.3.air 4.74745e-14
+//             volScalarFieldValue moment.4.air 3.12734e-20
+//             volScalarFieldValue moment.5.air 2.16007e-26
+        );
+    }
+    boxToCell
+    {
+        box (0 0.5 0) (0.5 1.0 0.1);
+        fieldValues
+        (
+            volScalarFieldValue alpha.air 0.1
+            volScalarFieldValue moment.0.air 7.34765e+07
+            volScalarFieldValue moment.1.air 0.14
+            volScalarFieldValue moment.2.air 1.2274e-09
+            volScalarFieldValue moment.3.air 1.97595e-17
+            volScalarFieldValue moment.4.air 3.67808e-25
+            volScalarFieldValue moment.5.air 7.14561e-33
+//             volScalarFieldValue moment.0.air 1.54734e+07
+//             volScalarFieldValue moment.1.air 0.14
+//             volScalarFieldValue moment.2.air 1.79594e-09
+//             volScalarFieldValue moment.3.air 2.9828e-17
+//             volScalarFieldValue moment.4.air 5.56829e-25
+//             volScalarFieldValue moment.5.air 1.08242e-32
+        );
+    }
+//     boxToCell
+//     {
+//         box (0 0.5 0) (0.25 0.75 0.1);
+//         fieldValues
+//         (
+//             volScalarFieldValue alpha.air 0
+//             volScalarFieldValue moment.0.air 0
+//             volScalarFieldValue moment.1.air 0
+//             volScalarFieldValue moment.2.air 0
+//             volScalarFieldValue moment.3.air 0
+//         );
+//     }
+);
+
+
+// ************************************************************************* //
