@@ -414,7 +414,7 @@ Foam::pdPhaseModel::pdPhaseModel
     nMoments_(quadrature_.nMoments()),
     alphas_(nNodes_),
     Us_(quadrature_.velocities()),
-    Vs_(nNodes_),
+    Vs_(quadrature_.deviationVelocities()),
     ds_(nNodes_),
     maxD_("maxD", dimLength, phaseDict_),
     minD_("minD", dimLength, phaseDict_),
@@ -485,32 +485,6 @@ Foam::pdPhaseModel::pdPhaseModel
                 ),
                 fluid.mesh(),
                 dimensionedScalar("alpha", dimless, 0.0)
-            )
-        );
-
-        Vs_.set
-        (
-            nodei,
-            new volVectorField
-            (
-                IOobject
-                (
-                    IOobject::groupName
-                    (
-                        "V",
-                        IOobject::groupName
-                        (
-                            phaseModel::name_,
-                            Foam::name(nodei)
-                        )
-                    ),
-                    fluid.mesh().time().timeName(),
-                    fluid.mesh(),
-                    IOobject::NO_READ,
-                    IOobject::NO_WRITE
-                ),
-                fluid.mesh(),
-                dimensionedVector("zeroV", dimVelocity, Zero)
             )
         );
 
@@ -766,14 +740,88 @@ void Foam::pdPhaseModel::relativeTransport()
 
 void Foam::pdPhaseModel::averageTransport
 (
-    const PtrList<fvVectorMatrix>& AEqns,
-    const PtrList<surfaceScalarField>& Ffs
+    const PtrList<fvVectorMatrix>& AEqns
 )
 {
     quadrature_.interpolateNodes();
 
     // Update moments based source terms for breakup and coalescence
     solveSourceOde();
+
+    // Solve for velocity abscissa directly since the momentum exchange
+    // terms do not change the mass
+    Info << "Solving for deviation velocity abscissae" << endl;
+
+    // Update deviation velocities
+    volVectorField Vp1
+    (
+        IOobject
+        (
+            "Vp1",
+            fluid_.mesh().time().timeName(),
+            fluid_.mesh()
+        ),
+        fluid_.mesh(),
+        dimensionedVector("0", dimDensity*dimVelocity, Zero)
+    );
+
+    forAll(Vs_, nodei)
+    {
+        //  Colisional time, forces velocities towards mean in the case of
+        //  high volume fractions
+        //  Could be replaced by radial distribution function
+        volScalarField tauC
+        (
+            "tauC",
+            (
+                0.5 + 0.5*tanh(((*this) - 0.63)/0.01)
+            )*HUGE
+        );
+        tauC.dimensions().reset(inv(dimTime));
+
+        volScalarField alphaRhoi(alphas_[nodei]*rho());
+
+        // Solve for velocities using acceleration terms
+        fvVectorMatrix UsEqn
+        (
+            alphaRhoi
+           *(
+                fvm::ddt(Us_[nodei])
+              - fvc::ddt(Us_[nodei])
+              - fvc::ddt(U_)
+            )
+          + fvm::Sp
+            (
+                tauC*Foam::max(alphaRhoi, residualAlpha_*rho()),
+                Us_[nodei]
+            )
+         ==
+            AEqns[nodei]
+          + tauC*Foam::max(alphaRhoi, residualAlpha_*rho())*U_
+        );
+
+        UsEqn.relax();
+        UsEqn.solve();
+
+        Vs_[nodei] = Us_[nodei] - U_;
+        Vp1 +=
+            Vs_[nodei]
+           *quadrature_.nodes()[nodei].primaryWeight()
+           *quadrature_.nodes()[nodei].primaryAbscissa();
+    }
+    volVectorField meanV1
+    (
+        Vp1/Foam::max(quadrature_.moments()[1], residualAlpha_*rho())
+    );
+
+    // Update velocity moments
+    forAll(Vs_, nodei)
+    {
+        Vs_[nodei] -= meanV1;
+        Us_[nodei] = Vs_[nodei] + U_;
+    }
+    quadrature_.updateAllMoments();
+
 
     // Mean moment advection
     Info<< "Transporting moments with average velocity" << endl;
@@ -798,7 +846,7 @@ void Foam::pdPhaseModel::averageTransport
          || p_rgh.boundaryField()[patchi].fixesValue()
         )
         {
-            boundaries[patchi] = "fixedValue";
+            boundaries[patchi] = "zeroGradient";
         }
     }
     volScalarField corr
@@ -866,12 +914,9 @@ void Foam::pdPhaseModel::averageTransport
                 "laplacian(" + quadrature_.moments()[1].name() + ",corr)"
             )
         );
-        corrEqn.setReference(0,0.0);
+        corrEqn.setReference(0, 0.0);
+        corrEqn.relax();
         corrEqn.solve();
-        if (fluid_.mesh().time().outputTime())
-        {
-            corr.write();
-        }
         phi += fvc::snGrad(corr)*fluid_.mesh().magSf();
     }
 
@@ -942,15 +987,15 @@ void Foam::pdPhaseModel::averageTransport
         return;
     }
 
-    forAll(quadrature_.velocityMoments(), mEqni)
+    forAll(quadrature_.deviationVelocityMoments(), mEqni)
     {
-        volVectorField& Up = quadrature_.velocityMoments()[mEqni];
+        volVectorField& Vp = quadrature_.deviationVelocityMoments()[mEqni];
 
-        volVectorField meanDivUbUp
+        volVectorField meanDivUbVp
         (
             IOobject
             (
-                "meanDivUbUp",
+                "meanDivUbVp",
                 fluid_.mesh().time().timeName(),
                 fluid_.mesh(),
                 IOobject::NO_READ,
@@ -958,23 +1003,23 @@ void Foam::pdPhaseModel::averageTransport
                 false
             ),
             fluid_.mesh(),
-            dimensionedVector("zero", Up.dimensions()/dimTime, Zero)
+            dimensionedVector("zero", Vp.dimensions()/dimTime, Zero)
         );
 
         for (label nodei = 0; nodei < nNodes_; nodei++)
         {
             // Update average velocity moment flux
-            surfaceVectorField aFluxUp
+            surfaceVectorField aFluxVp
             (
-                "aFluxUp",
-                quadrature_.velocitiesNei()[nodei]
+                "aFluxVp",
+                quadrature_.deviationVelocitiesNei()[nodei]
                *nodesNei[nodei].primaryWeight()
                *pow
                 (
                     nodesNei[nodei].primaryAbscissa(),
                     mEqni
                 )*Foam::min(phi, zeroPhi)
-              + quadrature_.velocitiesOwn()[nodei]
+              + quadrature_.deviationVelocitiesOwn()[nodei]
                *nodesOwn[nodei].primaryWeight()
                *pow
                 (
@@ -983,73 +1028,24 @@ void Foam::pdPhaseModel::averageTransport
                 )*Foam::max(phi, zeroPhi)
             );
 
-            meanDivUbUp += fvc::surfaceIntegrate(aFluxUp);
+            meanDivUbVp += fvc::surfaceIntegrate(aFluxVp);
         }
 
         // Solve average velocity moment transport Equation
-        fvVectorMatrix UpEqn
+        fvVectorMatrix VpEqn
         (
-            fvm::ddt(Up)
-          - fvc::ddt(Up)
-          + meanDivUbUp
+            fvm::ddt(Vp)
+          - fvc::ddt(Vp)
+          + meanDivUbVp
         );
 
-        UpEqn.relax();
-        UpEqn.solve();
+        VpEqn.relax();
+        VpEqn.solve();
     }
 
-    quadrature_.updateAllQuadrature();
+    quadrature_.updateAllDeviationQuadrature();
     correct();
 
-    // Solve for velocity abscissa directly since the momentum exchange
-    // terms do not change the mass
-    Info << "Solving for velocity abscissae" << endl;
-
-    forAll(Us_, nodei)
-    {
-        //  Colisional time, forces velocities towards mean in the case of
-        //  high volume fractions
-        //  Could be replaced by radial distribution function
-        volScalarField tauC
-        (
-            "tauC",
-            (
-                0.5 + 0.5*tanh(((*this) - 0.63)/0.01)
-            )*HUGE
-        );
-
-        tauC.dimensions().reset(inv(dimTime));
-
-        volScalarField alphaRhoi
-        (
-            "alphaRhoi",
-            alphas_[nodei]*rho()
-        );
-
-        // Solve for velocities using acceleration terms
-        fvVectorMatrix UsEqn
-        (
-            alphaRhoi*fvm::ddt(Us_[nodei])
-          - alphaRhoi*fvc::ddt(Us_[nodei])
-          + fvm::Sp(tauC*alphaRhoi, Us_[nodei])
-         ==
-            AEqns[nodei]
-          + tauC*alphaRhoi*U_
-        );
-         UsEqn += -fvc::reconstruct(Ffs[nodei]);
-
-        UsEqn.relax();
-        UsEqn.solve();
-    }
-    quadrature_.updateAllMoments();
-    this->updateVelocity();
-    correct();
-
-    // Update deviation velocity
-    forAll(Vs_, nodei)
-    {
-        Vs_[nodei] = Us_[nodei] - U_;
-    }
 }
 
 // ************************************************************************* //

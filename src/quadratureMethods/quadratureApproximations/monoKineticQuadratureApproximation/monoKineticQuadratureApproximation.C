@@ -53,11 +53,15 @@ Foam::monoKineticQuadratureApproximation::monoKineticQuadratureApproximation
     ),
     nNodes_(nodes_().size()),
     velocityMoments_(max(nNodes_, 2)),
+    deviationVelocityMoments_(velocityMoments_.size()),
     velocityAbscissae_(nNodes_),
+    deviationVelocityAbscissae_(nNodes_),
     nodesNei_(),
     velocitiesNei_(nNodes_),
+    deviationVelocitiesNei_(nNodes_),
     nodesOwn_(),
     velocitiesOwn_(nNodes_),
+    deviationVelocitiesOwn_(nNodes_),
     minM0_(readScalar((*this).subDict("residuals").lookup("minM0"))),
     minM1_(readScalar((*this).subDict("residuals").lookup("minM1")))
 {
@@ -100,13 +104,38 @@ Foam::monoKineticQuadratureApproximation::monoKineticQuadratureApproximation
                         IOobject::groupName
                         (
                             Foam::name(mi),
-                            "air"
+                            name_
                         )
                     ),
                     mesh_.time().timeName(),
                     mesh_,
                     IOobject::NO_READ,
                     IOobject::AUTO_WRITE
+                ),
+                volScalarField(moments_[mi])*U_,
+                UTypes
+            )
+        );
+        deviationVelocityMoments_.set
+        (
+            mi,
+            new volVectorField
+            (
+                IOobject
+                (
+                    IOobject::groupName
+                    (
+                        "Vp",
+                        IOobject::groupName
+                        (
+                            Foam::name(mi),
+                            name_
+                        )
+                    ),
+                    mesh_.time().timeName(),
+                    mesh_,
+                    IOobject::NO_READ,
+                    IOobject::NO_WRITE
                 ),
                 volScalarField(moments_[mi])*U_,
                 UTypes
@@ -154,6 +183,32 @@ Foam::monoKineticQuadratureApproximation::monoKineticQuadratureApproximation
                 U_.boundaryField()
             )
         );
+        deviationVelocityAbscissae_.set
+        (
+            nodei,
+            new volVectorField
+            (
+                IOobject
+                (
+                    IOobject::groupName
+                    (
+                        "V",
+                        IOobject::groupName
+                        (
+                            name_,
+                            Foam::name(nodei)
+                        )
+                    ),
+                    mesh_.time().timeName(),
+                    mesh_,
+                    IOobject::NO_READ,
+                    IOobject::NO_WRITE
+                ),
+                mesh_,
+                dimensionedVector("0", dimVelocity, Zero),
+                U_.boundaryField().types()
+            )
+        );
         nodesNei.set
         (
             nodei,
@@ -190,6 +245,31 @@ Foam::monoKineticQuadratureApproximation::monoKineticQuadratureApproximation
                     IOobject::NO_WRITE
                 ),
                 fvc::interpolate(U_)
+            )
+        );
+        deviationVelocitiesNei_.set
+        (
+            nodei,
+            new surfaceVectorField
+            (
+                IOobject
+                (
+                    IOobject::groupName
+                    (
+                        "VNei",
+                        IOobject::groupName
+                        (
+                            name_,
+                            Foam::name(nodei)
+                        )
+                    ),
+                    mesh_.time().timeName(),
+                    mesh_,
+                    IOobject::NO_READ,
+                    IOobject::NO_WRITE
+                ),
+                mesh_,
+                dimensionedVector("0", dimVelocity, Zero)
             )
         );
 
@@ -229,6 +309,31 @@ Foam::monoKineticQuadratureApproximation::monoKineticQuadratureApproximation
                     IOobject::NO_WRITE
                 ),
                 fvc::interpolate(U_)
+            )
+        );
+        deviationVelocitiesOwn_.set
+        (
+            nodei,
+            new surfaceVectorField
+            (
+                IOobject
+                (
+                    IOobject::groupName
+                    (
+                        "VOwn",
+                        IOobject::groupName
+                        (
+                            name_,
+                            Foam::name(nodei)
+                        )
+                    ),
+                    mesh_.time().timeName(),
+                    mesh_,
+                    IOobject::NO_READ,
+                    IOobject::NO_WRITE
+                ),
+                mesh_,
+                dimensionedVector("0", dimVelocity, Zero)
             )
         );
     }
@@ -295,6 +400,13 @@ void Foam::monoKineticQuadratureApproximation::interpolateNodes()
 
         velocitiesOwn_[nodei] =
             fvc::interpolate(velocityAbscissae_[nodei], own, "reconstruct(U)");
+        deviationVelocitiesOwn_[nodei] =
+            fvc::interpolate
+            (
+                deviationVelocityAbscissae_[nodei],
+                own,
+                "reconstruct(V)"
+            );
 
 
         nodeNei.primaryWeight() =
@@ -310,10 +422,22 @@ void Foam::monoKineticQuadratureApproximation::interpolateNodes()
 
         velocitiesNei_[nodei] =
             fvc::interpolate(velocityAbscissae_[nodei], nei, "reconstruct(U)");
+        deviationVelocitiesNei_[nodei] =
+            fvc::interpolate
+            (
+                deviationVelocityAbscissae_[nodei],
+                nei,
+                "reconstruct(V)"
+            );
     }
 }
 
-void Foam::monoKineticQuadratureApproximation::updateBoundaryVelocities()
+void Foam::monoKineticQuadratureApproximation::updateBoundaryVelocities
+(
+    const PtrList<volVectorField>& Ups,
+    PtrList<volVectorField>& Us,
+    const bool deviation
+)
 {
     const volScalarField& m0 = moments_[0];
 
@@ -366,8 +490,8 @@ void Foam::monoKineticQuadratureApproximation::updateBoundaryVelocities()
                         break;
                     }
                 }
-                velocityAbscissae_[index].boundaryFieldRef()[patchi][facei] =
-                    velocityMoments_[1].boundaryField()[patchi][facei]
+                Us[index].boundaryFieldRef()[patchi][facei] =
+                    Ups[1].boundaryField()[patchi][facei]
                    /(
                         nodes_()[index].primaryWeight().boundaryField()[patchi][facei]
                        *nodes_()[index].primaryAbscissa().boundaryField()[patchi][facei]
@@ -408,7 +532,7 @@ void Foam::monoKineticQuadratureApproximation::updateBoundaryVelocities()
                         if (nonZeroNodes[nodei])
                         {
                             Upcmpt[nodej][0] =
-                                velocityMoments_[nodei].boundaryField()[patchi][facei].component(cmpti);
+                                Ups[nodei].boundaryField()[patchi][facei].component(cmpti);
 
                             nodej++;
                         }
@@ -421,7 +545,7 @@ void Foam::monoKineticQuadratureApproximation::updateBoundaryVelocities()
                     {
                         if (nonZeroNodes[nodei])
                         {
-                            velocityAbscissae_[nodei].boundaryFieldRef()[patchi][facei].component(cmpti) = Ucmpt[nodej][0];
+                            Us[nodei].boundaryFieldRef()[patchi][facei].component(cmpti) = Ucmpt[nodej][0];
                             nodej++;
                         }
                     }
@@ -433,8 +557,15 @@ void Foam::monoKineticQuadratureApproximation::updateBoundaryVelocities()
             {
                 if (!nonZeroNodes[nodei])
                 {
-                    velocityAbscissae_[nodei].boundaryFieldRef()[patchi][facei]
-                    = U_.boundaryField()[patchi][facei];
+                    if (deviation)
+                    {
+                        Us[nodei].boundaryFieldRef()[patchi][facei] = Zero;
+                    }
+                    else
+                    {
+                        Us[nodei].boundaryFieldRef()[patchi][facei] =
+                            U_.boundaryField()[patchi][facei];
+                    }
                 }
             }
         }
@@ -507,18 +638,129 @@ void Foam::monoKineticQuadratureApproximation::updateAllQuadrature()
 
     updateQuadrature();
 
-    updateVelocities();
-    updateBoundaryVelocities();
+    updateVelocities(velocityMoments_, velocityAbscissae_);
+    updateBoundaryVelocities(velocityMoments_, velocityAbscissae_);
 
-    forAll(nodes_(), nodei)
+    forAll(deviationVelocityAbscissae_, nodei)
     {
-        velocityAbscissae_[nodei].correctBoundaryConditions();
+        deviationVelocityAbscissae_[nodei] = velocityAbscissae_[nodei] - U_;
     }
 
     updateAllMoments();
 }
 
-void Foam::monoKineticQuadratureApproximation::updateVelocities()
+void Foam::monoKineticQuadratureApproximation::updateAllDeviationQuadrature()
+{
+    const volScalarField& m0 = moments_[0];
+    const volScalarField::Boundary m0Bf = m0.boundaryField();
+
+    // Check for small moments at cell centers
+    forAll(m0, celli)
+    {
+        //- Make sure moments are below 0 before checking if they
+        //  are small enough to be neglected
+        if
+        (
+            m0[celli] < 0
+         && mag(m0[celli]) < minM0_
+        )
+        {
+            forAll(moments_, mi)
+            {
+                moments_[mi][celli] = 0.0;
+            }
+        }
+        else if
+        (
+            moments_[1][celli] < 0
+         && mag(moments_[1][celli]) < minM1_
+        )
+        {
+            for (label mi = 1; mi < nMoments_; mi++)
+            {
+                moments_[mi][celli] = 0.0;
+            }
+        }
+    }
+
+    // Check for small moments on boundaries
+    forAll(m0Bf, patchi)
+    {
+        forAll(m0Bf[patchi], facei)
+        {
+            if
+            (
+                m0Bf[patchi][facei] < 0
+             && mag(m0Bf[patchi][facei]) < minM0_
+            )
+            {
+                forAll(moments_, mi)
+                {
+                    moments_[mi].boundaryFieldRef()[patchi][facei] = 0.0;
+                }
+            }
+            else if
+            (
+                moments_[1].boundaryField()[patchi][facei] < 0
+             && mag(moments_[1].boundaryField()[patchi][facei]) < minM1_
+            )
+            {
+                for (label mi = 1; mi < nMoments_; mi++)
+                {
+                    moments_[mi].boundaryFieldRef()[patchi][facei] = 0.0;
+                }
+            }
+        }
+    }
+
+    updateQuadrature();
+
+    updateVelocities
+    (
+        deviationVelocityMoments_,
+        deviationVelocityAbscissae_,
+        true
+    );
+    updateBoundaryVelocities
+    (
+        deviationVelocityMoments_,
+        deviationVelocityAbscissae_,
+        true
+    );
+
+    deviationVelocityMoments_[1] =
+        dimensionedVector("0", dimDensity*dimVelocity, Zero);
+
+    forAll(deviationVelocityAbscissae_, nodei)
+    {
+        deviationVelocityMoments_[1] +=
+            deviationVelocityAbscissae_[nodei]
+           *nodes_()[nodei].primaryWeight()
+           *nodes_()[nodei].primaryAbscissa();
+    }
+
+    volVectorField meanV
+    (
+        deviationVelocityMoments_[1]
+       /Foam::max(moments_[1], dimensionedScalar("0", dimDensity, minM1_))
+    );
+
+    // Update velocity moments
+    forAll(deviationVelocityAbscissae_, nodei)
+    {
+        deviationVelocityAbscissae_[nodei] -= meanV;
+        velocityAbscissae_[nodei] = deviationVelocityAbscissae_[nodei] + U_;
+    }
+
+    updateAllMoments();
+}
+
+void Foam::monoKineticQuadratureApproximation::updateVelocities
+(
+    const PtrList<volVectorField>& Ups,
+    PtrList<volVectorField>& Us,
+    const bool deviation
+)
 {
     const volScalarField& m0 = moments_[0];
 
@@ -560,8 +802,8 @@ void Foam::monoKineticQuadratureApproximation::updateVelocities()
                     break;
                 }
             }
-            velocityAbscissae_[index][celli] =
-                velocityMoments_[1][celli]
+            Us[index][celli] =
+                Ups[1][celli]
                /(
                    nodes_()[index].primaryWeight()[celli]
                   *nodes_()[index].primaryAbscissa()[celli]
@@ -601,7 +843,7 @@ void Foam::monoKineticQuadratureApproximation::updateVelocities()
                     if (nonZeroNodes[nodei])
                     {
                         Upcmpt[nodej][0] =
-                            velocityMoments_[nodei][celli].component(cmpti);
+                            Ups[nodei][celli].component(cmpti);
                         nodej++;
                     }
                 }
@@ -613,7 +855,7 @@ void Foam::monoKineticQuadratureApproximation::updateVelocities()
                 {
                     if (nonZeroNodes[nodei])
                     {
-                        velocityAbscissae_[nodei][celli].component(cmpti) =
+                        Us[nodei][celli].component(cmpti) =
                             Ucmpt[nodej][0];
                         nodej++;
                     }
@@ -627,7 +869,14 @@ void Foam::monoKineticQuadratureApproximation::updateVelocities()
         {
             if (!nonZeroNodes[nodei])
             {
-                velocityAbscissae_[nodei][celli] = U_[celli];
+                if (deviation)
+                {
+                    Us[nodei][celli] = Zero;
+                }
+                else
+                {
+                    Us[nodei][celli] = U_[celli];
+                }
             }
         }
     }
@@ -671,6 +920,45 @@ void Foam::monoKineticQuadratureApproximation::updateVelocityMoments()
     }
 }
 
+void Foam::monoKineticQuadratureApproximation::updateDeviationVelocityMoments()
+{
+    // Update velocity moments
+    forAll(deviationVelocityMoments_, mi)
+    {
+        deviationVelocityMoments_[mi] =
+            dimensionedVector
+            (
+                "zero",
+                deviationVelocityMoments_[mi].dimensions(),
+                Zero
+            );
+
+        if (mi == 0)
+        {
+            forAll(nodes_(), nodei)
+            {
+                deviationVelocityMoments_[mi] +=
+                    nodes_()[nodei].primaryWeight()
+                   *deviationVelocityAbscissae_[nodei];
+            }
+
+            deviationVelocityMoments_[mi].correctBoundaryConditions();
+        }
+        else
+        {
+            forAll(nodes_(), nodei)
+            {
+                deviationVelocityMoments_[mi] +=
+                    nodes_()[nodei].primaryWeight()
+                   *pow(nodes_()[nodei].primaryAbscissa(), mi)
+                   *deviationVelocityAbscissae_[nodei];
+            }
+
+            deviationVelocityMoments_[mi].correctBoundaryConditions();
+        }
+    }
+}
+
 
 
 void Foam::monoKineticQuadratureApproximation::updateAllMoments()
@@ -680,5 +968,6 @@ void Foam::monoKineticQuadratureApproximation::updateAllMoments()
 
     // Update velocity moments
     updateVelocityMoments();
+    updateDeviationVelocityMoments();
 }
 // ************************************************************************* //

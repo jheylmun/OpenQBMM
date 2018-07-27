@@ -49,7 +49,7 @@ blending
 
 sigma
 (
-    (air and water)   0.7
+    (air and water)   0.07
 );
 
 aspectRatio
@@ -110,6 +110,11 @@ turbulentDispersion
 
 virtualMass
 (
+    (air in water)
+    {
+        type constantCoefficient;
+        Cvm 0.5;
+    }
 );
 
 lift

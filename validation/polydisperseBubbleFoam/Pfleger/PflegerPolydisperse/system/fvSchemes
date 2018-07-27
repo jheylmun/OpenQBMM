@@ -22,7 +22,7 @@ ddtSchemes
 
 gradSchemes
 {
-    default         cellLimited     leastSquares .2;
+    default         cellLimited     leastSquares 0.2;
     grad(p_rgh)     leastSquares;
 }
 
@@ -48,7 +48,7 @@ divSchemes
 
 laplacianSchemes
 {
-    default         Gauss linear corrected;
+    default         Gauss linear uncorrected;
 }
 
 interpolationSchemes
@@ -56,13 +56,14 @@ interpolationSchemes
     default         linear;
 
     reconstruct(U)          upwind;
+    reconstruct(V)          upwind;
     reconstruct(weight)     upwind;
     reconstruct(abscissa)   upwind;
 }
 
 snGradSchemes
 {
-    default         corrected;
+    default         uncorrected;
 }
 
 wallDist

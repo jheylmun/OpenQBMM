@@ -373,7 +373,10 @@ public:
         }
 
         //- Deviation of velocity nodei from the mean
-        virtual tmp<volVectorField> Vs(const label nodei) const;
+        virtual const volVectorField& Vs(const label nodei) const;
+
+        //- Deviation of velocity nodei from the mean
+        virtual volVectorField& Vs(const label nodei);
 
         //- Constant access to the volumetric flux
         const surfaceScalarField& phi() const
@@ -432,8 +435,7 @@ public:
         //- Average transport of moments, not used in standard phase model
         virtual void averageTransport
         (
-            const PtrList<fvVectorMatrix>& AEqns,
-            const PtrList<surfaceScalarField>& Ffs
+            const PtrList<fvVectorMatrix>& AEqns
         )
         {
             return;

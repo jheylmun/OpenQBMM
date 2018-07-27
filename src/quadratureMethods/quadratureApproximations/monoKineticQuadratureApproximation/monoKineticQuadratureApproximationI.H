@@ -38,6 +38,18 @@ Foam::monoKineticQuadratureApproximation::velocities()
 }
 
 const Foam::PtrList<Foam::volVectorField>&
+Foam::monoKineticQuadratureApproximation::deviationVelocities() const
+{
+    return deviationVelocityAbscissae_;
+}
+
+Foam::PtrList<Foam::volVectorField>&
+Foam::monoKineticQuadratureApproximation::deviationVelocities()
+{
+    return deviationVelocityAbscissae_;
+}
+
+const Foam::PtrList<Foam::volVectorField>&
 Foam::monoKineticQuadratureApproximation::velocityMoments() const
 {
     return velocityMoments_;
@@ -47,6 +59,18 @@ Foam::PtrList<Foam::volVectorField>&
 Foam::monoKineticQuadratureApproximation::velocityMoments()
 {
     return velocityMoments_;
+}
+
+Foam::PtrList<Foam::volVectorField>&
+Foam::monoKineticQuadratureApproximation::deviationVelocityMoments()
+{
+    return deviationVelocityMoments_;
+}
+
+const Foam::PtrList<Foam::volVectorField>&
+Foam::monoKineticQuadratureApproximation::deviationVelocityMoments() const
+{
+    return deviationVelocityMoments_;
 }
 
 const Foam::PtrList<Foam::surfaceScalarNode>&
@@ -61,6 +85,12 @@ Foam::monoKineticQuadratureApproximation::velocitiesOwn() const
     return velocitiesOwn_;
 }
 
+const Foam::PtrList<Foam::surfaceVectorField>&
+Foam::monoKineticQuadratureApproximation::deviationVelocitiesOwn() const
+{
+    return deviationVelocitiesOwn_;
+}
+
 const Foam::PtrList<Foam::surfaceScalarNode>&
 Foam::monoKineticQuadratureApproximation::nodesNei() const
 {
@@ -71,6 +101,12 @@ const Foam::PtrList<Foam::surfaceVectorField>&
 Foam::monoKineticQuadratureApproximation::velocitiesNei() const
 {
     return velocitiesNei_;
+}
+
+const Foam::PtrList<Foam::surfaceVectorField>&
+Foam::monoKineticQuadratureApproximation::deviationVelocitiesNei() const
+{
+    return deviationVelocitiesNei_;
 }
 
 // ************************************************************************* //

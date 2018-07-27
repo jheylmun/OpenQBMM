@@ -323,33 +323,33 @@ Foam::twoPhaseSystem::Kd(const label nodei) const
 
 Foam::tmp<Foam::volScalarField> Foam::twoPhaseSystem::Kd() const
 {
-    tmp<volScalarField> tKd
-    (
-        new volScalarField
-        (
-            IOobject
-            (
-                "Kd",
-                mesh_.time().timeName(),
-                mesh_,
-                IOobject::NO_READ,
-                IOobject::NO_WRITE,
-                false
-            ),
-            mesh_,
-            dimensionedScalar
-            (
-                "Kd",
-                dimDensity*dimViscosity/sqr(dimLength),
-                0.0
-            )
-        )
-    );
-    for (label nodei = 0; nodei < nNodes_; nodei++)
-    {
-        tKd.ref() += Kd(nodei);
-    }
-    return tKd;
+//     tmp<volScalarField> tKd
+//     (
+//         new volScalarField
+//         (
+//             IOobject
+//             (
+//                 "Kd",
+//                 mesh_.time().timeName(),
+//                 mesh_,
+//                 IOobject::NO_READ,
+//                 IOobject::NO_WRITE,
+//                 false
+//             ),
+//             mesh_,
+//             dimensionedScalar
+//             (
+//                 "Kd",
+//                 dimDensity*dimViscosity/sqr(dimLength),
+//                 0.0
+//             )
+//         )
+//     );
+//     for (label nodei = 0; nodei < nNodes_; nodei++)
+//     {
+//         tKd.ref() += Kd(nodei);
+//     }
+    return drag_->K();//tKd;
 }
 
 
@@ -475,31 +475,10 @@ Foam::twoPhaseSystem::Vmf() const
 Foam::tmp<Foam::volVectorField>
 Foam::twoPhaseSystem::F(const label nodei) const
 {
-    volVectorField DDtU1
-    (
-        fvc::ddt(phase1_->U())
-      + fvc::div(phase1_->phi(), phase1_->U())
-      - fvc::div(phase1_->phi())*phase1_->U()
-    );
-    volVectorField DDtUi
-    (
-        fvc::ddt(phase1_->U())
-      + fvc::div(phase1_->phi(), phase1_->Us(nodei))
-      - fvc::div(phase1_->phi())*phase1_->Us(nodei)
-    );
-
     return
         lift_->F<vector>(nodei, 0)
       + wallLubrication_->F<vector>(nodei, 0)
-      + bubblePressure_->F<vector>(nodei, 0)
-
-      // Force due to deviation from mean velocity
-      - Kd(nodei)*phase1_->Vs(nodei)
-      + Vm(nodei)
-       *(
-            DDtU1
-          - DDtUi
-        );
+      + bubblePressure_->F<vector>(nodei, 0);
 }
 
 
@@ -527,9 +506,26 @@ Foam::tmp<Foam::volVectorField> Foam::twoPhaseSystem::F() const
             )
         )
     );
+    volVectorField DDtU1
+    (
+        fvc::ddt(phase1_->U())
+      + fvc::div(phase1_->phi(), phase1_->U())
+      - fvc::div(phase1_->phi())*phase1_->U()
+    );
     for (label nodei = 0; nodei < nNodes_; nodei++)
     {
-        tF.ref() += F(nodei);
+        tF.ref() +=
+            F(nodei)
+          - Kd(nodei)*phase1_->Vs(nodei)
+          + Vm(nodei)
+           *(
+                DDtU1
+              - (
+                    fvc::ddt(phase1_->U())
+                  + fvc::div(phase1_->phi(), phase1_->Us(nodei))
+                  - fvc::div(phase1_->phi())*phase1_->Us(nodei)
+                )
+            );
     }
     return tF;
 }
@@ -538,33 +534,10 @@ Foam::tmp<Foam::volVectorField> Foam::twoPhaseSystem::F() const
 Foam::tmp<Foam::surfaceScalarField>
 Foam::twoPhaseSystem::Ff(const label nodei) const
 {
-    volVectorField DDtU1
-    (
-        fvc::ddt(phase1_->U())
-      + fvc::div(phase1_->phi(), phase1_->U())
-      - fvc::div(phase1_->phi())*phase1_->U()
-    );
-    volVectorField DDtUi
-    (
-        fvc::ddt(phase1_->U())
-      + fvc::div(phase1_->phi(), phase1_->Us(nodei))
-      - fvc::div(phase1_->phi())*phase1_->Us(nodei)
-    );
     return
         lift_->Ff(nodei, 0)
       + wallLubrication_->Ff(nodei, 0)
-      + bubblePressure_->Ff(nodei, 0)
-
-      // Force due to deviation from mean velocity
-      + fvc::flux
-        (
-          - Kd(nodei)*phase1_->Vs(nodei)
-          + Vm(nodei)
-           *(
-                DDtU1
-              - DDtUi
-            )
-        );
+      + bubblePressure_->Ff(nodei, 0);
 }
 
 Foam::tmp<Foam::surfaceScalarField> Foam::twoPhaseSystem::Ff() const
@@ -591,9 +564,30 @@ Foam::tmp<Foam::surfaceScalarField> Foam::twoPhaseSystem::Ff() const
             )
         )
     );
+    volVectorField DDtU1
+    (
+        fvc::ddt(phase1_->U())
+      + fvc::div(phase1_->phi(), phase1_->U())
+      - fvc::div(phase1_->phi())*phase1_->U()
+    );
+
     for (label nodei = 0; nodei < nNodes_; nodei++)
     {
-        tFf.ref() += Ff(nodei);
+        tFf.ref() +=
+            Ff(nodei)
+          + fvc::flux
+            (
+              - Kd(nodei)*phase1_->Vs(nodei)
+              + Vm(nodei)
+               *(
+                    DDtU1
+                  - (
+                      - fvc::ddt(phase1_->U())
+                      + fvc::div(phase1_->phi(), phase1_->Us(nodei))
+                      - fvc::div(phase1_->phi())*phase1_->Us(nodei)
+                    )
+                )
+            );
     }
     return tFf;
 }
@@ -876,19 +870,50 @@ void Foam::twoPhaseSystem::averageTransport()
     volSymmTensorField taul(phase2_->turbulence().devRhoReff());
 
     // Acceleration of liquid phase
+    volVectorField DDtU1
+    (
+        fvc::ddt(phase1_->U())
+      + fvc::div(phase1_->phi(), phase1_->U())
+      - fvc::div(phase1_->phi())*phase1_->U()
+    );
     volVectorField DDtU2
     (
         fvc::ddt(phase2_->U())
       + fvc::div(phase2_->phi(), phase2_->U())
       - fvc::div(phase2_->phi())*phase2_->U()
     );
-
-    Switch faceMomentum
+    volVectorField meanF1
     (
-        mesh_.solutionDict().subDict("PIMPLE").lookupOrDefault("faceMomentum", false)
+        IOobject
+        (
+            IOobject::groupName("F", phase1_->name()),
+            mesh_.time().timeName(),
+            mesh_
+        ),
+        mesh_,
+        dimensionedVector("0", dimAcceleration, Zero)
     );
+
+    for (label nodei = 0; nodei < nNodes_; nodei++)
+    {
+        meanF1 +=
+        (
+          - F(nodei)
+          - turbulentDispersion_->F<vector>(nodei, 0)
+          + Kd(nodei)*(phase2_->U() - phase1_->Us(nodei))
+          + Vm(nodei)
+           *(
+                DDtU2
+              - (
+                    fvc::ddt(phase1_->Us(nodei))
+                  + fvc::div(phase1_->phi(), phase1_->Us(nodei))
+                  - fvc::div(phase1_->phi())*phase1_->Us(nodei)
+                )
+            )
+        )/(Foam::max(phase1_(), phase1_->residualAlpha())*rho());
+    }
+
     PtrList<fvVectorMatrix> AEqns(nNodes_);
-    PtrList<surfaceScalarField> Ffs(nNodes_);
     for (label nodei = 0; nodei < nNodes_; nodei++)
     {
         //  Build matrix to solve for velocity abscissae due to interfacial
@@ -902,89 +927,32 @@ void Foam::twoPhaseSystem::averageTransport()
                 phase1_->Us(nodei).dimensions()*dimDensity*dimVol/dimTime
             )
         );
-        Ffs.set
-        (
-            nodei,
-            new surfaceScalarField
-            (
-                IOobject
-                (
-                    IOobject::groupName
-                    (
-                        "Ff" + Foam::name(nodei),
-                        phase1_->name()
-                    ),
-                    mesh_.time().timeName(),
-                    mesh_
-                ),
-                mesh_,
-                dimensionedScalar("0", dimAcceleration*dimDensity*dimArea, 0.0)
-            )
-        );
 
-        const volScalarField& p(mesh_.lookupObject<volScalarField>("p"));
         volScalarField alphaRhoi(phase1_->alphas(nodei)*phase1_->rho());
-
-        //  Implicit drag term added to velocity abscissae equations
-        volScalarField Kd(this->Kd(nodei));
+        volScalarField drag(Kd(nodei));
 
         // Interfacial forces
         AEqns[nodei] +=
-          - fvm::Sp(Kd, phase1_->Us(nodei))
+            (
+                drag*phase2_->U()
+              - fvm::Sp(drag, phase1_->Us(nodei))
 
-            // Virtual Mass
-          + Vm(nodei)
-           *(
-                DDtU2
-              - (
-                    fvm::ddt(phase1_->Us(nodei))
-                  + fvm::div(phase1_->phi(), phase1_->Us(nodei))
-                  - fvm::Sp(fvc::div(phase1_->phi()), phase1_->Us(nodei))
+              + Vm(nodei)
+               *(
+                    DDtU2
+                  - (
+                        fvm::ddt(phase1_->Us(nodei))
+                      + fvm::div(phase1_->phi(), phase1_->Us(nodei))
+                      - fvm::Sp(fvc::div(phase1_->phi()), phase1_->Us(nodei))
+                    )
                 )
-            );
-        if (faceMomentum)
-        {
-            Ffs[nodei] +=
-                // Buoyancy
-                (g_ & mesh_.Sf())*fvc::interpolate(alphaRhoi)
-              + (
-                  - fvc::snGrad(p)*mesh_.magSf()
-                  + fvc::flux(fvc::div(taul))
-                )*fvc::interpolate(phase1_->alphas(nodei))
-
-                // Drag
-              + fvc::interpolate(Kd)*phase2_->phi()
-
-                // Dispersion, lift, wall lubrication, and bubble pressure
-              - turbulentDispersion_->Ff(nodei, 0)
-              - lift_->Ff(nodei, 0)
-              - wallLubrication_->Ff(nodei, 0)
-              + bubblePressure_->Ff(nodei, 0);
-        }
-        else
-        {
-             AEqns[nodei] +=
-            // Buoyancy
-                g_*alphaRhoi
-              + (
-                  - fvc::grad(p)
-                  + fvc::div(taul)
-                )*phase1_->alphas(nodei)
-
-            // Drag
-              + Kd*phase2_->U()
-
-            // Dispersion, lift, wall lubrication, and bubble pressure
+              - F(nodei)
               - turbulentDispersion_->F<vector>(nodei, 0)
-              - lift_->F<vector>(nodei, 0)
-              - wallLubrication_->F<vector>(nodei, 0)
-              + bubblePressure_->F<vector>(nodei, 0);
-        }
-
+            )
+          - meanF1*alphaRhoi;
     }
 
-    phase1_->averageTransport(AEqns, Ffs);
-    phase1_->correct();
+    phase1_->averageTransport(AEqns);
 }
 
 

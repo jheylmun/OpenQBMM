@@ -73,8 +73,14 @@ class monoKineticQuadratureApproximation
         //- List of velocity moments
         PtrList<volVectorField> velocityMoments_;
 
+        //- List of velocity moments
+        PtrList<volVectorField> deviationVelocityMoments_;
+
         //- List of velocity abscissae
         PtrList<volVectorField> velocityAbscissae_;
+
+        //- List of velocity abscissae
+        PtrList<volVectorField> deviationVelocityAbscissae_;
 
         //- List of interpolated nodes (neighbour)
         autoPtr<PtrList<surfaceScalarNode>> nodesNei_;
@@ -82,11 +88,17 @@ class monoKineticQuadratureApproximation
         //- List of interpolate velocities (neighbour)
         PtrList<surfaceVectorField> velocitiesNei_;
 
+        //- List of interpolate velocities (neighbour)
+        PtrList<surfaceVectorField> deviationVelocitiesNei_;
+
         //- List of interpolated nodes (owner)
         autoPtr<PtrList<surfaceScalarNode>> nodesOwn_;
 
         //- List of interpolate velocities (owner)
         PtrList<surfaceVectorField> velocitiesOwn_;
+
+        //- List of interpolate velocities (owner)
+        PtrList<surfaceVectorField> deviationVelocitiesOwn_;
 
         //- Minimum values for m1 and m0
         //  minM1 should be the same order as residual alpha
@@ -121,11 +133,25 @@ public:
             //- Const access to the velocity abscissae
             inline PtrList<volVectorField>& velocities();
 
+            //- Const access to the deviation velocity abscissae
+            inline const PtrList<volVectorField>& deviationVelocities() const;
+
+            //- Const access to the deviation velocity abscissae
+            inline PtrList<volVectorField>& deviationVelocities();
+
             //- Const access to the velocity moments
             inline const PtrList<volVectorField>& velocityMoments() const;
 
             //- Non-const access to the velocity moments
             inline PtrList<volVectorField>& velocityMoments();
+
+            //- Const access to the velocity moments
+            inline const PtrList<volVectorField>&
+                deviationVelocityMoments() const;
+
+            //- Non-const access to the velocity moments
+            inline PtrList<volVectorField>&
+                deviationVelocityMoments();
 
             //- Const access to the interpolated moments (owner)
             inline const PtrList<surfaceScalarNode>& nodesOwn() const;
@@ -133,11 +159,19 @@ public:
             //- Const access to the interpolated velocities (owner)
             inline const PtrList<surfaceVectorField>& velocitiesOwn() const;
 
+            //- Const access to the interpolated velocities (owner)
+            inline const PtrList<surfaceVectorField>&
+                deviationVelocitiesOwn() const;
+
             //- Const access to the interpolated moments (neighbour)
             inline const PtrList<surfaceScalarNode>& nodesNei() const;
 
             //- Const access to the interpolated velocities (neighbour)
             inline const PtrList<surfaceVectorField>& velocitiesNei() const;
+
+            //- Const access to the interpolated velocities (neighbour)
+            inline const PtrList<surfaceVectorField>&
+                deviationVelocitiesNei() const;
 
 
         // Edit
@@ -146,16 +180,32 @@ public:
             void interpolateNodes();
 
             //- Update node velocities on fixed-value boundaries
-            void updateBoundaryVelocities();
+            void updateBoundaryVelocities
+            (
+                const PtrList<volVectorField>& Ups,
+                PtrList<volVectorField>& U,
+                const bool deviation = false
+            );
 
             //- Recalculate the velocity abscissae from the velocity moments
-            void updateVelocities();
+            void updateVelocities
+            (
+                const PtrList<volVectorField>& Ups,
+                PtrList<volVectorField>& U,
+                const bool deviation = false
+            );
 
             //- Recalculate the quadrature nodes from the moments
             void updateAllQuadrature();
 
+            //- Recalculate the quadrature nodes from the moments
+            void updateAllDeviationQuadrature();
+
             //- Recalculate the moments from the quadrature nodes
             void updateVelocityMoments();
+
+            //- Recalculate the moments from the quadrature nodes
+            void updateDeviationVelocityMoments();
 
             //- Recalculate all moments from the quadrature nodes
             void updateAllMoments();

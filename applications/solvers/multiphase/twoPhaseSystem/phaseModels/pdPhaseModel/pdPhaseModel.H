@@ -93,7 +93,7 @@ class pdPhaseModel
         PtrList<volVectorField>& Us_;
 
         //- List of deviation velocities
-        PtrList<volVectorField> Vs_;
+        PtrList<volVectorField>& Vs_;
 
         //- List of diameters
         PtrList<volScalarField> ds_;
@@ -193,7 +193,13 @@ public:
         }
 
         //- Return deviation velocity for nodei
-        virtual tmp<volVectorField> Vs(const label nodei) const
+        virtual const volVectorField& Vs(const label nodei) const
+        {
+            return Vs_[nodei];
+        }
+
+        //- Return deviation velocity for nodei
+        virtual volVectorField& Vs(const label nodei)
         {
             return Vs_[nodei];
         }
@@ -207,8 +213,7 @@ public:
         //- Average transport of moments
         virtual void averageTransport
         (
-            const PtrList<fvVectorMatrix>& AEqns,
-            const PtrList<surfaceScalarField>& Ffs
+            const PtrList<fvVectorMatrix>& AEqns
         );
 };
 
