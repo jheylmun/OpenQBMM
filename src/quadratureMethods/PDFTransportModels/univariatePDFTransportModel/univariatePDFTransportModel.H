@@ -147,8 +147,17 @@ public:
 
         //-Edit
 
+            //- Advect moments
+            virtual void updateAdvection();
+
+            //- Return divergence of moment fluxes
+            virtual const mappedPtrList<surfaceScalarField>& momentFluxes() const;
+
             //- Solve univariate PDF transport equation
             virtual void solve();
+
+            //- Solve for sources
+            virtual void solveSources();
 };
 
 

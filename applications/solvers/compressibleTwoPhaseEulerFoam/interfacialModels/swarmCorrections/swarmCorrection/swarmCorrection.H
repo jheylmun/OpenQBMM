@@ -2,8 +2,10 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2014 OpenFOAM Foundation
+    \\  /    A nd           | Copyright (C) 2014-2017 OpenFOAM Foundation
      \\/     M anipulation  |
+-------------------------------------------------------------------------------
+2017-05-18 Jeff Heylmun:    Added support of polydisperse phase models
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -106,6 +108,9 @@ public:
     // Member Functions
 
         //- Swarm correction coefficient
+        virtual tmp<volScalarField> Cs(const label, const label) const = 0;
+
+        //- Mean swarm correction coefficient
         virtual tmp<volScalarField> Cs() const = 0;
 };
 

@@ -65,13 +65,17 @@ Foam::heatTransferModels::sphericalHeatTransfer::~sphericalHeatTransfer()
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
 
 Foam::tmp<Foam::volScalarField>
-Foam::heatTransferModels::sphericalHeatTransfer::K() const
+Foam::heatTransferModels::sphericalHeatTransfer::K
+(
+    const label nodei,
+    const label nodej
+) const
 {
     return
         60.0
        *max(pair_.dispersed(), residualAlpha_)
        *pair_.continuous().kappa()
-       /sqr(pair_.dispersed().d());
+       /sqr(pair_.dispersed().d(nodei));
 }
 
 

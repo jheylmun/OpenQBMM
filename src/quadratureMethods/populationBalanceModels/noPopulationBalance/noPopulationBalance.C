@@ -78,7 +78,23 @@ Foam::populationBalanceModels::noPopulationBalance::CoNum
     return 0.0;
 }
 
+void Foam::populationBalanceModels::noPopulationBalance::updateAdvection()
+{
+    return;
+}
+
+const Foam::mappedPtrList<Foam::surfaceScalarField>& Foam::populationBalanceModels::noPopulationBalance::momentFluxes() const
+{
+    NotImplemented;
+    //return mappedPtrList<surfaceScalarField>(0, l);
+}
+
 void Foam::populationBalanceModels::noPopulationBalance::solve()
+{
+    return;
+}
+
+void Foam::populationBalanceModels::noPopulationBalance::solveSources()
 {
     return;
 }

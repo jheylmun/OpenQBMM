@@ -71,22 +71,22 @@ Foam::velocityMomentAdvection::velocityMomentAdvection
     support_(support),
     momentOrders_(quadrature.momentOrders()),
     nodeIndexes_(quadrature.nodeIndexes()),
-    divMoments_(nMoments_),
+    momentFluxes_(nMoments_, quadrature.moments().map()),
     ew_(dict.lookupOrDefault("ew", 1.0))
 {
-    forAll(divMoments_, momenti)
+    forAll(momentFluxes_, momenti)
     {
         const labelList& momentOrder = momentOrders_[momenti];
-        divMoments_.set
+        momentFluxes_.set
         (
-            momenti,
-            new volScalarField
+            momentOrder,
+            new surfaceScalarField
             (
                 IOobject
                 (
                     IOobject::groupName
                     (
-                        "divMoment"
+                        "momentFlux"
                        + volVectorMoment::listToWord(momentOrder),
                         name_
                     ),
@@ -99,7 +99,7 @@ Foam::velocityMomentAdvection::velocityMomentAdvection
                 moments_[0].mesh(),
                 dimensionedScalar
                 (
-                    "zero", moments_[momenti].dimensions()/dimTime, 0
+                    "zero", moments_[momenti].dimensions()*dimVolume/dimTime, 0
                 )
             )
         );

@@ -2,8 +2,10 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2014-2015 OpenFOAM Foundation
+    \\  /    A nd           | Copyright (C) 2014-2017 OpenFOAM Foundation
      \\/     M anipulation  |
+-------------------------------------------------------------------------------
+2017-05-18 Jeff Heylmun:    Added support of polydisperse phase models
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -71,9 +73,28 @@ Foam::virtualMassModel::~virtualMassModel()
 
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
 
+Foam::tmp<Foam::volScalarField> Foam::virtualMassModel::Ki
+(
+    const label nodei,
+    const label nodej
+) const
+{
+    return Cvm(nodei, nodej)*pair_.continuous().rho();
+}
+
 Foam::tmp<Foam::volScalarField> Foam::virtualMassModel::Ki() const
 {
     return Cvm()*pair_.continuous().rho();
+}
+
+
+Foam::tmp<Foam::volScalarField> Foam::virtualMassModel::K
+(
+    const label nodei,
+    const label nodej
+) const
+{
+    return pair_.dispersed().alphas(nodei)*Ki(nodei, nodej);
 }
 
 
@@ -83,10 +104,21 @@ Foam::tmp<Foam::volScalarField> Foam::virtualMassModel::K() const
 }
 
 
-Foam::tmp<Foam::surfaceScalarField> Foam::virtualMassModel::Kf() const
+Foam::tmp<Foam::surfaceScalarField> Foam::virtualMassModel::Kf
+(
+    const label nodei,
+    const label nodej
+) const
 {
     return
-        fvc::interpolate(pair_.dispersed())*fvc::interpolate(Ki());
+        fvc::interpolate(pair_.dispersed().alphas(nodei))
+       *fvc::interpolate(Ki(nodei, nodej));
+}
+
+
+Foam::tmp<Foam::surfaceScalarField> Foam::virtualMassModel::Kf() const
+{
+    return fvc::interpolate(pair_.dispersed())*fvc::interpolate(Ki());
 }
 
 

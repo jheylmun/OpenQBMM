@@ -5,6 +5,8 @@
     \\  /    A nd           | Copyright (C) 2011-2017 OpenFOAM Foundation
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
+2017-05-18 Jeff Heylmun:    Added support of polydisperse phase models
+-------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
 
@@ -61,9 +63,13 @@ Foam::dragModels::SchillerNaumann::~SchillerNaumann()
 
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
 
-Foam::tmp<Foam::volScalarField> Foam::dragModels::SchillerNaumann::CdRe() const
+Foam::tmp<Foam::volScalarField> Foam::dragModels::SchillerNaumann::CdRe
+(
+    const label nodei,
+    const label nodej
+) const
 {
-    volScalarField Re(pair_.Re());
+    volScalarField Re(pair_.Re(nodei, nodej));
 
     return
         neg(Re - 1000)*24.0*(1.0 + 0.15*pow(Re, 0.687))

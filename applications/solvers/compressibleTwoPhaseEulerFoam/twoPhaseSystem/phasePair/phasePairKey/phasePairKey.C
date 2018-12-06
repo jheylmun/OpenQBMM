@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2014-2015 OpenFOAM Foundation
+    \\  /    A nd           | Copyright (C) 2014-2017 OpenFOAM Foundation
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -86,7 +86,7 @@ bool Foam::operator==
     const phasePairKey& b
 )
 {
-    const label c = Pair<word>::compare(a,b);
+    const label c = Pair<word>::compare(a, b);
 
     return
         (a.ordered_ == b.ordered_)
@@ -119,7 +119,7 @@ Foam::Istream& Foam::operator>>(Istream& is, phasePairKey& key)
     {
         key.ordered_ = false;
     }
-    else if(temp[1] == "in")
+    else if (temp[1] == "in")
     {
         key.ordered_ = true;
     }

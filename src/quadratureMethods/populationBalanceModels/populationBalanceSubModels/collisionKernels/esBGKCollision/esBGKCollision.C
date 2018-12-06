@@ -282,6 +282,25 @@ Foam::populationBalanceSubModels::collisionKernels::esBGKCollision
     ),
     dp_("d", dimLength, dict),
     zeta_(dict_.lookupOrDefault("zeta", 1.0)),
+    frictionalPressure_(dict_.lookup("frictionalPressure")),
+    rho_("rho", dimDensity, dict),
+    Pfric_
+    (
+        mesh.lookupObject<volScalarField>
+        (
+            IOobject::groupName("Pfric", quadrature_.moments()[0].group())
+        )
+    ),
+    gradPfric_
+    (
+        IOobject
+        (
+            IOobject::groupName("gradPfric", Pfric_.group()),
+            mesh.time().timeName(),
+            mesh
+        ),
+        fvc::grad(Pfric_)/rho_
+    ),
     Meqf_(quadrature.moments().size(), momentOrders_),
     Meq_(quadrature.moments().size(), momentOrders_)
 {
@@ -335,6 +354,11 @@ void Foam::populationBalanceSubModels::collisionKernels::esBGKCollision
     const label celli
 )
 {
+    if (frictionalPressure_)
+    {
+        gradPfric_ = fvc::grad(Pfric_)/rho_;
+    }
+
     if (nDimensions_ == 1)
     {
         updateCells1D(celli);
@@ -352,6 +376,11 @@ void Foam::populationBalanceSubModels::collisionKernels::esBGKCollision
 void Foam::populationBalanceSubModels::collisionKernels::esBGKCollision
 ::updateFields()
 {
+    if (frictionalPressure_)
+    {
+        gradPfric_ = fvc::grad(Pfric_)/rho_;
+    }
+
     if (nDimensions_ == 1)
     {
         updateFields1D();
@@ -379,8 +408,35 @@ Foam::populationBalanceSubModels::collisionKernels::esBGKCollision
             12.0*gs0*quadrature_.moments()[0][celli]*sqrt(Theta_[celli]),
             1e-10
         );
+    scalar source = (Meq_[mi] - quadrature_.moments()[mi][celli])/tauC;
 
-    return (Meq_[mi] - quadrature_.moments()[mi][celli])/tauC;
+    if (!frictionalPressure_)
+    {
+        return source;
+    }
+
+    vector gradPfricSource = gradPfric_[celli];
+    vector Mijk = Zero;
+
+    labelList order = momentOrders_[mi];
+    if (max(order) > 0 )
+    {
+        forAll(order, cmpt)
+        {
+            if (order[cmpt] > 0)
+            {
+                labelList srcOrder = order;
+                srcOrder[cmpt] = order[cmpt] - 1;
+                Mijk.component(cmpt) = quadrature_.moments()(srcOrder)[celli];
+            }
+        }
+    }
+
+//     if (mag(diff) > 1 &&(order == labelList({2,0}) || order == labelList({0,2})))
+//     {
+//         Info<<Mijk<<endl;
+//     }
+    return source - (gradPfricSource & Mijk);
 }
 
 Foam::tmp<Foam::fvScalarMatrix>
@@ -399,10 +455,36 @@ Foam::populationBalanceSubModels::collisionKernels::esBGKCollision
         )
     );
 
+    volVectorField gradPfricSource
+    (
+        IOobject
+        (
+            "gradPfricSource",
+            mesh_.time().timeName(),
+            mesh_
+        ),
+        mesh_,
+        dimensionedVector("zero", m.dimensions()/dimTime, Zero)
+    );
+    labelList order = m.cmptOrders();
+    forAll(order, cmpt)
+    {
+        labelList srcOrder = order;
+        srcOrder[cmpt] = max(srcOrder[cmpt] - 1, 0);
+
+        gradPfricSource.replace
+        (
+            cmpt,
+            quadrature_.moments()(srcOrder)
+           *gradPfric_.component(cmpt)
+        );
+    }
+
     return
     (
         Meqf_(m.cmptOrders())/tauC
       - fvm::Sp(1/tauC, m)
+      - (gradPfricSource & vector::one)
     );
 }
 // ************************************************************************* //

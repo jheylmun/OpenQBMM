@@ -243,33 +243,11 @@ void Foam::univariateAdvection::firstOrderKinetic::update()
 
     dimensionedScalar zeroPhi("zero", phi_.dimensions(), 0.0);
 
-    forAll(divMoments_, divi)
+    forAll(momentFluxes_, mi)
     {
-        volScalarField divMoment
-        (
-            IOobject
-            (
-                "divMoment",
-                moments_[0].mesh().time().timeName(),
-                moments_[0].mesh(),
-                IOobject::NO_READ,
-                IOobject::NO_WRITE,
-                false
-            ),
-            moments_[0].mesh(),
-            dimensionedScalar("zero", dimless, 0.0)
-        );
-
-        surfaceScalarField mFlux
-        (
-            momentsNei_[divi]*min(phi_, zeroPhi)
-          + momentsOwn_[divi]*max(phi_, zeroPhi)
-        );
-
-        fvc::surfaceIntegrate(divMoment.ref(), mFlux);
-        divMoment.ref().dimensions().reset(moments_[divi].dimensions()/dimTime);
-
-        divMoments_[divi].replace(0, divMoment);
+        momentFluxes_[mi] =
+            momentsNei_[mi]*min(phi_, zeroPhi)
+          + momentsOwn_[mi]*max(phi_, zeroPhi);
     }
 }
 

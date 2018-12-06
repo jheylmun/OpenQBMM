@@ -2,8 +2,11 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2014-2016 OpenFOAM Foundation
+    \\  /    A nd           | Copyright (C) 2014-2017 OpenFOAM Foundation
      \\/     M anipulation  |
+-------------------------------------------------------------------------------
+2017-05-18 Jeff Heylmun:    Added support of polydisperse phase models
+2017-05-24 Jeff Heylmun:    Added return functions for acceleration
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -121,19 +124,57 @@ public:
         const modelType& phaseModel(const phaseModel& phase) const;
 
         //- Return the blended force coefficient
+        tmp<volScalarField> K
+        (
+            const label,
+            const label
+        ) const;
+
+        //- Return the mean blended force coefficient
         tmp<volScalarField> K() const;
 
+
         //- Return the face blended force coefficient
+        tmp<surfaceScalarField> Kf
+        (
+            const label,
+            const label
+        ) const;
+
+        //- Return the mean face blended force coefficient
         tmp<surfaceScalarField> Kf() const;
 
         //- Return the blended force
         template<class Type>
+        tmp<GeometricField<Type, fvPatchField, volMesh>> F
+        (
+            const label,
+            const label
+        ) const;
+
+        //- Return the mean blended force
+        template<class Type>
         tmp<GeometricField<Type, fvPatchField, volMesh>> F() const;
 
         //- Return the face blended force
+        tmp<surfaceScalarField> Ff
+        (
+            const label,
+            const label
+        ) const;
+
+        //- Return the mean face blended force
         tmp<surfaceScalarField> Ff() const;
 
+
         //- Return the blended diffusivity
+        tmp<volScalarField> D
+        (
+            const label,
+            const label
+        ) const;
+
+        //- Return the mean blended diffusivity
         tmp<volScalarField> D() const;
 };
 

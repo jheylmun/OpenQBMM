@@ -5,6 +5,8 @@
     \\  /    A nd           | Copyright (C) 2011-2017 OpenFOAM Foundation
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
+2017-05-18 Jeff Heylmun:    Added support of polydisperse phase models
+-------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
 
@@ -60,17 +62,29 @@ Foam::dragModels::Gibilaro::~Gibilaro()
 
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
 
-Foam::tmp<Foam::volScalarField> Foam::dragModels::Gibilaro::CdRe() const
+Foam::tmp<Foam::volScalarField> Foam::dragModels::Gibilaro::CdRe
+(
+    const label nodei,
+    const label nodej
+) const
 {
     volScalarField alpha2
     (
-        max(scalar(1) - pair_.dispersed(), pair_.continuous().residualAlpha())
+        max
+        (
+            scalar(1) - pair_.dispersed().alphas(nodei),
+            pair_.continuous().residualAlpha()
+        )
     );
 
     return
         (4.0/3.0)
-       *(17.3/alpha2 + 0.336*pair_.Re())
-       *max(pair_.continuous(), pair_.continuous().residualAlpha())
+       *(17.3/alpha2 + 0.336*pair_.Re(nodei, nodej))
+       *max
+        (
+            pair_.continuous().alphas(nodej),
+            pair_.continuous().residualAlpha()
+        )
        *pow(alpha2, -2.8);
 }
 

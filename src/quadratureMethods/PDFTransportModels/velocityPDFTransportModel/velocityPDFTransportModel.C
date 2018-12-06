@@ -47,6 +47,7 @@ Foam::PDFTransportModels::velocityPDFTransportModel::velocityPDFTransportModel
     facMin_(readScalar(dict.subDict("odeCoeffs").lookup("facMin"))),
     facMax_(readScalar(dict.subDict("odeCoeffs").lookup("facMax"))),
     minLocalDt_(readScalar(dict.subDict("odeCoeffs").lookup("minLocalDt"))),
+    deltaT_(mesh.nCells(), mesh.time().deltaTValue()),
     quadrature_(name, mesh, support),
     momentAdvection_
     (
@@ -89,7 +90,7 @@ void Foam::PDFTransportModels::velocityPDFTransportModel::explicitMomentSource()
         scalar localT = 0.0;
 
         // Initialize the local step
-        scalar localDt = globalDt/100.0;
+        scalar localDt = deltaT_[celli];
 
         // Initialize RK parameters
         scalarList k1(nMoments, 0.0);
@@ -221,6 +222,7 @@ void Foam::PDFTransportModels::velocityPDFTransportModel::explicitMomentSource()
                 {
                     timeComplete = true;
                     localT = 0.0;
+                    deltaT_[celli] = localDt;
                     break;
                 }
 
@@ -237,6 +239,17 @@ void Foam::PDFTransportModels::velocityPDFTransportModel::explicitMomentSource()
             }
         }
     }
+}
+
+void Foam::PDFTransportModels::velocityPDFTransportModel::updateAdvection()
+{
+    momentAdvection_->update();
+}
+
+const Foam::mappedPtrList<Foam::surfaceScalarField>&
+Foam::PDFTransportModels::velocityPDFTransportModel::momentFluxes() const
+{
+    return momentAdvection_->momentFluxes();
 }
 
 void Foam::PDFTransportModels::velocityPDFTransportModel::solve()
@@ -256,7 +269,7 @@ void Foam::PDFTransportModels::velocityPDFTransportModel::solve()
             new fvScalarMatrix
             (
                 fvm::ddt(m)
-              + momentAdvection_().divMoments()[momenti]
+              + fvc::div(momentAdvection_().momentFluxes()[momenti])
             )
         );
     }
@@ -286,8 +299,8 @@ void Foam::PDFTransportModels::velocityPDFTransportModel::solve()
                 momentEqns[mEqni].relax();
                 momentEqns[mEqni].solve();
 
-                //  Set moments.oldTime to moments transport is not neglected due to
-                //  large collision source terms
+                //  Set moments.oldTime to moments transport is not neglected
+                //  due to large collision source terms
                 m.oldTime() = m;
 
                 // Solve collisions
@@ -314,55 +327,36 @@ void Foam::PDFTransportModels::velocityPDFTransportModel::solve()
     quadrature_.updateQuadrature();
 }
 
-void Foam::PDFTransportModels::velocityPDFTransportModel::meanTransport
-(
-    const surfaceScalarField& phi,
-    const bool wallCollisions
-)
+void Foam::PDFTransportModels::velocityPDFTransportModel::solveSources()
 {
-    Info<< "Solving mean transport" << endl;
-
-    momentAdvection_().update(phi, wallCollisions);
-
-    // Solve moment transport equations
-    forAll(quadrature_.moments(), momenti)
+    if (collision())
     {
-        volScalarField& m = quadrature_.moments()[momenti];
-        fvScalarMatrix mEqn
-        (
-            fvm::ddt(m)
-          - fvc::ddt(m)
-          + momentAdvection_().divMoments()[momenti]
-        );
+        if (solveODESource_)
+        {
+            explicitMomentSource();
+        }
+        else
+        {
+            updateImplicitCollisionSource();
+            forAll(quadrature_.moments(), mEqni)
+            {
+                volVectorMoment& m = quadrature_.moments()[mEqni];
+                m.storeOldTime();
 
-        mEqn.relax();
-        mEqn.solve();
+                // Solve collisions
+                fvScalarMatrix mEqn
+                (
+                    fvm::ddt(m)
+                 ==
+                    implicitCollisionSource(m)
+                );
+                mEqn.relax();
+                mEqn.solve();
+            }
+        }
     }
-}
 
-void Foam::PDFTransportModels::velocityPDFTransportModel::relativeTransport
-(
-    const mappedPtrList<volVectorField>& Vs,
-    const bool wallCollisions
-)
-{
-    Info<< "Solving relative transport" << endl;
-
-    momentAdvection_().update(Vs, wallCollisions);
-
-    // Solve moment transport equations
-    forAll(quadrature_.moments(), momenti)
-    {
-        volScalarField& m = quadrature_.moments()[momenti];
-        fvScalarMatrix mEqn
-        (
-            fvm::ddt(m)
-          + momentAdvection_().divMoments()[momenti]
-        );
-
-        mEqn.relax();
-        mEqn.solve();
-    }
+    quadrature_.updateQuadrature();
 }
 
 // ************************************************************************* //

@@ -238,13 +238,13 @@ void Foam::velocityAdvection::firstOrderKinetic::update()
     updateWallCollisions();
 
     // Zero moment flux
-    forAll(divMoments_, divi)
+    forAll(momentFluxes_, mi)
     {
-        divMoments_[divi] =
+        momentFluxes_[mi] =
             dimensionedScalar
             (
                 "0",
-                moments_[divi].dimensions()/dimTime,
+                momentFluxes_[mi].dimensions(),
                 0.0
             );
     }
@@ -262,9 +262,9 @@ void Foam::velocityAdvection::firstOrderKinetic::update()
         surfaceScalarField phiOwn(UOwn & mesh.Sf());
         surfaceScalarField phiNei(UNei & mesh.Sf());
 
-        forAll(divMoments_, divi)
+        forAll(momentFluxes_, mi)
         {
-            const labelList& momentOrder = momentOrders_[divi];
+            const labelList& momentOrder = momentOrders_[mi];
 
             surfaceScalarField momentCmptOwn(weightOwn);
             surfaceScalarField momentCmptNei(weightNei);
@@ -299,201 +299,12 @@ void Foam::velocityAdvection::firstOrderKinetic::update()
                 momentCmptNei == mNeiPow;
             }
 
-            divMoments_[divi] +=
-                fvc::surfaceIntegrate
-                (
-                    momentCmptOwn*max(phiOwn, zeroPhi)
-                  + momentCmptNei*min(phiNei, zeroPhi)
-                );
+            momentFluxes_[mi] +=
+                momentCmptOwn*max(phiOwn, zeroPhi)
+              + momentCmptNei*min(phiNei, zeroPhi);
         }
     }
 }
 
-void Foam::velocityAdvection::firstOrderKinetic::update
-(
-    const surfaceScalarField& phi,
-    const bool wallCollisions
-)
-{
-    dimensionedScalar zeroPhi("zero", dimVolume/dimTime, 0.0);
-
-    // Interpolate weights and abscissae
-    interpolateNodes();
-
-    // Set velocities at boundaries for rebounding
-    if (wallCollisions)
-    {
-        updateWallCollisions();
-    }
-
-    // Zero moment fluxes
-    forAll(divMoments_, divi)
-    {
-        divMoments_[divi] =
-            dimensionedScalar
-            (
-                "0",
-                moments_[divi].dimensions()/dimTime,
-                0.0
-            );
-    }
-
-    forAll(nodes_, nodei)
-    {
-        const surfaceVectorNode& nodeNei(nodesNei_()[nodei]);
-        const surfaceVectorNode& nodeOwn(nodesOwn_()[nodei]);
-
-        const surfaceScalarField& weightOwn = nodeOwn.primaryWeight();
-        const surfaceScalarField& weightNei = nodeNei.primaryWeight();
-        const surfaceVectorField& abscissaOwn = nodeOwn.primaryAbscissa();
-        const surfaceVectorField& abscissaNei = nodeNei.primaryAbscissa();
-
-        forAll(divMoments_, divi)
-        {
-            const labelList& momentOrder = momentOrders_[divi];
-
-            surfaceScalarField momentCmptOwn(weightOwn);
-            surfaceScalarField momentCmptNei(weightNei);
-
-            forAll(momentOrder, cmpti)
-            {
-                const label cmptMomentOrder = momentOrder[cmpti];
-
-                tmp<surfaceScalarField> abscissaOwnCmpt =
-                   abscissaOwn.component(cmpti);
-                tmp<surfaceScalarField> abscissaNeiCmpt =
-                    abscissaNei.component(cmpti);
-
-                tmp<surfaceScalarField> mOwnPow =
-                    momentCmptOwn
-                   *pow
-                    (
-                        abscissaOwnCmpt,
-                        cmptMomentOrder
-                    );
-                tmp<surfaceScalarField> mNeiPow =
-                    momentCmptNei
-                   *pow
-                    (
-                        abscissaNeiCmpt,
-                        cmptMomentOrder
-                    );
-                momentCmptOwn.dimensions().reset(mOwnPow().dimensions());
-                momentCmptOwn == mOwnPow;
-
-                momentCmptNei.dimensions().reset(mNeiPow().dimensions());
-                momentCmptNei == mNeiPow;
-            }
-
-            divMoments_[divi] +=
-                fvc::surfaceIntegrate
-                (
-                    momentCmptOwn*max(phi, zeroPhi)
-                  + momentCmptNei*min(phi, zeroPhi)
-                );
-        }
-    }
-}
-
-void Foam::velocityAdvection::firstOrderKinetic::update
-(
-    const mappedPtrList<volVectorField>& Us,
-    const bool wallCollisions
-)
-{
-    const fvMesh& mesh = own_.mesh();
-    dimensionedScalar zeroPhi("zero", dimVolume/dimTime, 0.0);
-
-    // Interplate weights and abscissae
-    interpolateNodes();
-
-    // Set velocities at boundaries for rebounding
-    if (wallCollisions)
-    {
-        updateWallCollisions();
-    }
-
-    // Zero moment fluxes
-    forAll(divMoments_, divi)
-    {
-        divMoments_[divi] =
-            dimensionedScalar
-            (
-                "0",
-                moments_[divi].dimensions()/dimTime,
-                0.0
-            );
-    }
-
-    forAll(nodes_, nodei)
-    {
-//         const labelList& nodeIndex = nodeIndexes_[nodei];
-
-        const surfaceVectorNode& nodeNei(nodesNei_()[nodei]);
-        const surfaceVectorNode& nodeOwn(nodesOwn_()[nodei]);
-
-        const surfaceScalarField& weightOwn = nodeOwn.primaryWeight();
-        const surfaceScalarField& weightNei = nodeNei.primaryWeight();
-        const surfaceVectorField& abscissaOwn = nodeOwn.primaryAbscissa();
-        const surfaceVectorField& abscissaNei = nodeNei.primaryAbscissa();
-
-        surfaceVectorField UOwn
-        (
-            fvc::interpolate(Us[nodei], own_, "reconstruct(U)")
-        );
-        surfaceVectorField UNei
-        (
-            fvc::interpolate(Us[nodei], nei_, "reconstruct(U)")
-        );
-
-        surfaceScalarField phiOwn(UOwn & mesh.Sf());
-        surfaceScalarField phiNei(UNei & mesh.Sf());
-
-        forAll(divMoments_, divi)
-        {
-            const labelList& momentOrder = momentOrders_[divi];
-            // Calculate size moment flux
-            surfaceScalarField momentCmptOwn(weightOwn);
-            surfaceScalarField momentCmptNei(weightNei);
-
-            forAll(momentOrder, cmpti)
-            {
-                const label cmptMomentOrder = momentOrder[cmpti];
-
-                tmp<surfaceScalarField> abscissaOwnCmpt =
-                   abscissaOwn.component(cmpti);
-                tmp<surfaceScalarField> abscissaNeiCmpt =
-                    abscissaNei.component(cmpti);
-
-                tmp<surfaceScalarField> mOwnPow =
-                    momentCmptOwn
-                   *pow
-                    (
-                        abscissaOwnCmpt,
-                        cmptMomentOrder
-                    );
-                tmp<surfaceScalarField> mNeiPow =
-                    momentCmptNei
-                   *pow
-                    (
-                        abscissaNeiCmpt,
-                        cmptMomentOrder
-                    );
-                momentCmptOwn.dimensions().reset(mOwnPow().dimensions());
-                momentCmptOwn == mOwnPow;
-
-                momentCmptNei.dimensions().reset(mNeiPow().dimensions());
-                momentCmptNei == mNeiPow;
-            }
-
-            divMoments_[divi] +=
-                fvc::surfaceIntegrate
-                (
-                    momentCmptOwn*max(phiOwn, zeroPhi)
-                  + momentCmptNei*min(phiNei, zeroPhi)
-                );
-        }
-    }
-}
 
 // ************************************************************************* //

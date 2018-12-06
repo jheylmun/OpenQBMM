@@ -47,7 +47,7 @@ Foam::univariateMomentAdvection::univariateMomentAdvection
     name_(quadrature.name()),
     moments_(quadrature.moments()),
     nMoments_(moments_.size()),
-    divMoments_(nMoments_, quadrature.moments().map()),
+    momentFluxes_(nMoments_, quadrature.moments().map()),
     own_
     (
         IOobject
@@ -74,12 +74,12 @@ Foam::univariateMomentAdvection::univariateMomentAdvection
     support_(support),
     nDimensions_(1)
 {
-    forAll(divMoments_, momenti)
+    forAll(momentFluxes_, momenti)
     {
-        divMoments_.set
+        momentFluxes_.set
         (
             momenti,
-            new volScalarField
+            new surfaceScalarField
             (
                 IOobject
                 (
@@ -93,7 +93,7 @@ Foam::univariateMomentAdvection::univariateMomentAdvection
                 moments_[0].mesh(),
                 dimensionedScalar
                 (
-                    "zero", moments_[momenti].dimensions()/dimTime, 0
+                    "zero", moments_[momenti].dimensions()*dimVolume/dimTime, 0
                 )
             )
         );

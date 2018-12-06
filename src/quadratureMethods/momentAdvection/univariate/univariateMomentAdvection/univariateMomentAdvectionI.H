@@ -25,10 +25,10 @@ License
 
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
 
-const Foam::mappedPtrList<Foam::volScalarField>&
-Foam::univariateMomentAdvection::divMoments() const
+const Foam::mappedPtrList<Foam::surfaceScalarField>&
+Foam::univariateMomentAdvection::momentFluxes() const
 {
-    return divMoments_;
+    return momentFluxes_;
 }
 
 // ************************************************************************* //

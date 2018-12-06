@@ -5,6 +5,8 @@
     \\  /    A nd           | Copyright (C) 2011-2017 OpenFOAM Foundation
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
+2017-05-18 Jeff Heylmun:    Added support of polydisperse phase models
+-------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
 
@@ -60,7 +62,11 @@ Foam::dragModels::Ergun::~Ergun()
 
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
 
-Foam::tmp<Foam::volScalarField> Foam::dragModels::Ergun::CdRe() const
+Foam::tmp<Foam::volScalarField> Foam::dragModels::Ergun::CdRe
+(
+    const label nodei,
+    const label nodej
+) const
 {
     return
         (4.0/3.0)
@@ -68,11 +74,15 @@ Foam::tmp<Foam::volScalarField> Foam::dragModels::Ergun::CdRe() const
             150
            *max
             (
-                scalar(1) - pair_.continuous(),
+                scalar(1) - pair_.continuous().alphas(nodej),
                 pair_.continuous().residualAlpha()
-            )/max(pair_.continuous(), pair_.continuous().residualAlpha())
+            )/max
+            (
+                pair_.continuous().alphas(nodej),
+                pair_.continuous().residualAlpha()
+            )
           + 1.75
-           *pair_.Re()
+           *pair_.Re(nodei, nodej)
         );
 }
 

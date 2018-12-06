@@ -2,8 +2,11 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2014-2016 OpenFOAM Foundation
+    \\  /    A nd           | Copyright (C) 2014-2017 OpenFOAM Foundation
      \\/     M anipulation  |
+-------------------------------------------------------------------------------
+2017-05-18 Jeff Heylmun:    Added support of polydisperse phase models
+2017-05-24 Jeff Heylmun:    Added return functions for acceleration
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -39,13 +42,13 @@ void Foam::BlendedInterfacialModel<modelType>::correctFixedFluxBCs
     typename GeometricField::Boundary& fieldBf =
         field.boundaryFieldRef();
 
-    forAll(pair_.phase1().phi().boundaryField(), patchi)
+    forAll(pair_.phase1().phi()().boundaryField(), patchi)
     {
         if
         (
             isA<fixedValueFvsPatchScalarField>
             (
-                pair_.phase1().phi().boundaryField()[patchi]
+                pair_.phase1().phi()().boundaryField()[patchi]
             )
         )
         {
@@ -123,6 +126,72 @@ Foam::BlendedInterfacialModel<modelType>::~BlendedInterfacialModel()
 
 template<class modelType>
 Foam::tmp<Foam::volScalarField>
+Foam::BlendedInterfacialModel<modelType>::K
+(
+    const label nodei,
+    const label nodej
+) const
+{
+    tmp<volScalarField> f1, f2;
+
+    if (model_.valid() || model1In2_.valid())
+    {
+        f1 = blending_.f1(pair1In2_.dispersed(), pair2In1_.dispersed());
+    }
+
+    if (model_.valid() || model2In1_.valid())
+    {
+        f2 = blending_.f2(pair1In2_.dispersed(), pair2In1_.dispersed());
+    }
+
+    tmp<volScalarField> x
+    (
+        new volScalarField
+        (
+            IOobject
+            (
+                modelType::typeName + ":K",
+                pair_.phase1().mesh().time().timeName(),
+                pair_.phase1().mesh(),
+                IOobject::NO_READ,
+                IOobject::NO_WRITE,
+                false
+            ),
+            pair_.phase1().mesh(),
+            dimensionedScalar("zero", modelType::dimK, 0)
+        )
+    );
+
+    if (model_.valid())
+    {
+        x.ref() += model_->K(nodei, nodej)*(f1() - f2());
+    }
+
+    if (model1In2_.valid())
+    {
+        x.ref() += model1In2_->K(nodei, nodej)*(1 - f1);
+    }
+
+    if (model2In1_.valid())
+    {
+        x.ref() += model2In1_->K(nodej, nodei)*f2;
+    }
+
+    if
+    (
+        correctFixedFluxBCs_
+     && (model_.valid() || model1In2_.valid() || model2In1_.valid())
+    )
+    {
+        correctFixedFluxBCs(x.ref());
+    }
+
+    return x;
+}
+
+
+template<class modelType>
+Foam::tmp<Foam::volScalarField>
 Foam::BlendedInterfacialModel<modelType>::K() const
 {
     tmp<volScalarField> f1, f2;
@@ -144,13 +213,13 @@ Foam::BlendedInterfacialModel<modelType>::K() const
             IOobject
             (
                 modelType::typeName + ":K",
-                volScalarField(pair_.phase1()).mesh().time().timeName(),
-                volScalarField(pair_.phase1()).mesh(),
+                pair_.phase1().mesh().time().timeName(),
+                pair_.phase1().mesh(),
                 IOobject::NO_READ,
                 IOobject::NO_WRITE,
                 false
             ),
-            volScalarField(pair_.phase1()).mesh(),
+            pair_.phase1().mesh(),
             dimensionedScalar("zero", modelType::dimK, 0)
         )
     );
@@ -168,6 +237,78 @@ Foam::BlendedInterfacialModel<modelType>::K() const
     if (model2In1_.valid())
     {
         x.ref() += model2In1_->K()*f2;
+    }
+
+    if
+    (
+        correctFixedFluxBCs_
+     && (model_.valid() || model1In2_.valid() || model2In1_.valid())
+    )
+    {
+        correctFixedFluxBCs(x.ref());
+    }
+
+    return x;
+}
+
+
+template<class modelType>
+Foam::tmp<Foam::surfaceScalarField>
+Foam::BlendedInterfacialModel<modelType>::Kf
+(
+    const label nodei,
+    const label nodej
+) const
+{
+    tmp<surfaceScalarField> f1, f2;
+
+    if (model_.valid() || model1In2_.valid())
+    {
+        f1 = fvc::interpolate
+        (
+            blending_.f1(pair1In2_.dispersed(), pair2In1_.dispersed())
+        );
+    }
+
+    if (model_.valid() || model2In1_.valid())
+    {
+        f2 = fvc::interpolate
+        (
+            blending_.f2(pair1In2_.dispersed(), pair2In1_.dispersed())
+        );
+    }
+
+    tmp<surfaceScalarField> x
+    (
+        new surfaceScalarField
+        (
+            IOobject
+            (
+                modelType::typeName + ":Kf",
+                pair_.phase1().mesh().time().timeName(),
+                pair_.phase1().mesh(),
+                IOobject::NO_READ,
+                IOobject::NO_WRITE,
+                false
+            ),
+            pair_.phase1().mesh(),
+            dimensionedScalar("zero", modelType::dimK, 0)
+        )
+    );
+
+    if (model_.valid())
+    {
+        x.ref() += model_->Kf(nodei, nodej)*(f1() - f2());
+    }
+
+    if (model1In2_.valid())
+    {
+        x.ref() += model1In2_->Kf(nodei, nodej)*(1 - f1);
+    }
+
+    if (model2In1_.valid())
+    {
+        x.ref() += model2In1_->Kf(nodej, nodei)*f2;
     }
 
     if
@@ -212,13 +353,13 @@ Foam::BlendedInterfacialModel<modelType>::Kf() const
             IOobject
             (
                 modelType::typeName + ":Kf",
-                volScalarField(pair_.phase1()).mesh().time().timeName(),
-                volScalarField(pair_.phase1()).mesh(),
+                pair_.phase1().mesh().time().timeName(),
+                pair_.phase1().mesh(),
                 IOobject::NO_READ,
                 IOobject::NO_WRITE,
                 false
             ),
-            volScalarField(pair_.phase1()).mesh(),
+            pair_.phase1().mesh(),
             dimensionedScalar("zero", modelType::dimK, 0)
         )
     );
@@ -236,6 +377,73 @@ Foam::BlendedInterfacialModel<modelType>::Kf() const
     if (model2In1_.valid())
     {
         x.ref() += model2In1_->Kf()*f2;
+    }
+
+    if
+    (
+        correctFixedFluxBCs_
+     && (model_.valid() || model1In2_.valid() || model2In1_.valid())
+    )
+    {
+        correctFixedFluxBCs(x.ref());
+    }
+
+    return x;
+}
+
+
+template<class modelType>
+template<class Type>
+Foam::tmp<Foam::GeometricField<Type, Foam::fvPatchField, Foam::volMesh>>
+Foam::BlendedInterfacialModel<modelType>::F
+(
+    const label nodei,
+    const label nodej
+) const
+{
+    tmp<volScalarField> f1, f2;
+
+    if (model_.valid() || model1In2_.valid())
+    {
+        f1 = blending_.f1(pair1In2_.dispersed(), pair2In1_.dispersed());
+    }
+
+    if (model_.valid() || model2In1_.valid())
+    {
+        f2 = blending_.f2(pair1In2_.dispersed(), pair2In1_.dispersed());
+    }
+
+    tmp<GeometricField<Type, fvPatchField, volMesh>> x
+    (
+        new GeometricField<Type, fvPatchField, volMesh>
+        (
+            IOobject
+            (
+                modelType::typeName + ":F",
+                pair_.phase1().mesh().time().timeName(),
+                pair_.phase1().mesh(),
+                IOobject::NO_READ,
+                IOobject::NO_WRITE,
+                false
+            ),
+            pair_.phase1().mesh(),
+            dimensioned<Type>("zero", modelType::dimF, Zero)
+        )
+    );
+
+    if (model_.valid())
+    {
+        x.ref() += model_->F(nodei, nodej)*(f1() - f2());
+    }
+
+    if (model1In2_.valid())
+    {
+        x.ref() += model1In2_->F(nodei, nodej)*(1 - f1);
+    }
+
+    if (model2In1_.valid())
+    {
+        x.ref() -= model2In1_->F(nodej, nodei)*f2; // note : subtraction
     }
 
     if
@@ -275,13 +483,13 @@ Foam::BlendedInterfacialModel<modelType>::F() const
             IOobject
             (
                 modelType::typeName + ":F",
-                volScalarField(pair_.phase1()).mesh().time().timeName(),
-                volScalarField(pair_.phase1()).mesh(),
+                pair_.phase1().mesh().time().timeName(),
+                pair_.phase1().mesh(),
                 IOobject::NO_READ,
                 IOobject::NO_WRITE,
                 false
             ),
-            volScalarField(pair_.phase1()).mesh(),
+            pair_.phase1().mesh(),
             dimensioned<Type>("zero", modelType::dimF, Zero)
         )
     );
@@ -299,6 +507,78 @@ Foam::BlendedInterfacialModel<modelType>::F() const
     if (model2In1_.valid())
     {
         x.ref() -= model2In1_->F()*f2; // note : subtraction
+    }
+
+    if
+    (
+        correctFixedFluxBCs_
+     && (model_.valid() || model1In2_.valid() || model2In1_.valid())
+    )
+    {
+        correctFixedFluxBCs(x.ref());
+    }
+
+    return x;
+}
+
+
+template<class modelType>
+Foam::tmp<Foam::surfaceScalarField>
+Foam::BlendedInterfacialModel<modelType>::Ff
+(
+    const label nodei,
+    const label nodej
+) const
+{
+    tmp<surfaceScalarField> f1, f2;
+
+    if (model_.valid() || model1In2_.valid())
+    {
+        f1 = fvc::interpolate
+        (
+            blending_.f1(pair1In2_.dispersed(), pair2In1_.dispersed())
+        );
+    }
+
+    if (model_.valid() || model2In1_.valid())
+    {
+        f2 = fvc::interpolate
+        (
+            blending_.f2(pair1In2_.dispersed(), pair2In1_.dispersed())
+        );
+    }
+
+    tmp<surfaceScalarField> x
+    (
+        new surfaceScalarField
+        (
+            IOobject
+            (
+                modelType::typeName + ":Ff",
+                pair_.phase1().mesh().time().timeName(),
+                pair_.phase1().mesh(),
+                IOobject::NO_READ,
+                IOobject::NO_WRITE,
+                false
+            ),
+            pair_.phase1().mesh(),
+            dimensionedScalar("zero", modelType::dimF*dimArea, 0)
+        )
+    );
+
+    if (model_.valid())
+    {
+        x.ref() += model_->Ff(nodei, nodej)*(f1() - f2());
+    }
+
+    if (model1In2_.valid())
+    {
+        x.ref() += model1In2_->Ff(nodei, nodej)*(1 - f1);
+    }
+
+    if (model2In1_.valid())
+    {
+        x.ref() -= model2In1_->Ff(nodej, nodei)*f2; // note : subtraction
     }
 
     if
@@ -343,13 +623,13 @@ Foam::BlendedInterfacialModel<modelType>::Ff() const
             IOobject
             (
                 modelType::typeName + ":Ff",
-                volScalarField(pair_.phase1()).mesh().time().timeName(),
-                volScalarField(pair_.phase1()).mesh(),
+                pair_.phase1().mesh().time().timeName(),
+                pair_.phase1().mesh(),
                 IOobject::NO_READ,
                 IOobject::NO_WRITE,
                 false
             ),
-            volScalarField(pair_.phase1()).mesh(),
+            pair_.phase1().mesh(),
             dimensionedScalar("zero", modelType::dimF*dimArea, 0)
         )
     );
@@ -367,6 +647,72 @@ Foam::BlendedInterfacialModel<modelType>::Ff() const
     if (model2In1_.valid())
     {
         x.ref() -= model2In1_->Ff()*f2; // note : subtraction
+    }
+
+    if
+    (
+        correctFixedFluxBCs_
+     && (model_.valid() || model1In2_.valid() || model2In1_.valid())
+    )
+    {
+        correctFixedFluxBCs(x.ref());
+    }
+
+    return x;
+}
+
+
+template<class modelType>
+Foam::tmp<Foam::volScalarField>
+Foam::BlendedInterfacialModel<modelType>::D
+(
+    const label nodei,
+    const label nodej
+) const
+{
+    tmp<volScalarField> f1, f2;
+
+    if (model_.valid() || model1In2_.valid())
+    {
+        f1 = blending_.f1(pair1In2_.dispersed(), pair2In1_.dispersed());
+    }
+
+    if (model_.valid() || model2In1_.valid())
+    {
+        f2 = blending_.f2(pair1In2_.dispersed(), pair2In1_.dispersed());
+    }
+
+    tmp<volScalarField> x
+    (
+        new volScalarField
+        (
+            IOobject
+            (
+                modelType::typeName + ":D",
+                pair_.phase1().mesh().time().timeName(),
+                pair_.phase1().mesh(),
+                IOobject::NO_READ,
+                IOobject::NO_WRITE,
+                false
+            ),
+            pair_.phase1().mesh(),
+            dimensionedScalar("zero", modelType::dimD, 0)
+        )
+    );
+
+    if (model_.valid())
+    {
+        x.ref() += model_->D(nodei, nodej)*(f1() - f2());
+    }
+
+    if (model1In2_.valid())
+    {
+        x.ref() += model1In2_->D(nodei, nodej)*(1 - f1);
+    }
+
+    if (model2In1_.valid())
+    {
+        x.ref() += model2In1_->D(nodej, nodei)*f2;
     }
 
     if
@@ -405,13 +751,13 @@ Foam::BlendedInterfacialModel<modelType>::D() const
             IOobject
             (
                 modelType::typeName + ":D",
-                volScalarField(pair_.phase1()).mesh().time().timeName(),
-                volScalarField(pair_.phase1()).mesh(),
+                pair_.phase1().mesh().time().timeName(),
+                pair_.phase1().mesh(),
                 IOobject::NO_READ,
                 IOobject::NO_WRITE,
                 false
             ),
-            volScalarField(pair_.phase1()).mesh(),
+            pair_.phase1().mesh(),
             dimensionedScalar("zero", modelType::dimD, 0)
         )
     );

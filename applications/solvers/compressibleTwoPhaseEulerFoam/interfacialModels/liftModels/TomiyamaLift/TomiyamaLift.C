@@ -5,6 +5,8 @@
     \\  /    A nd           | Copyright (C) 2014-2017 OpenFOAM Foundation
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
+2017-05-18 Jeff Heylmun:    Added support of polydisperse phase models
+-------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
 
@@ -59,9 +61,13 @@ Foam::liftModels::TomiyamaLift::~TomiyamaLift()
 
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
 
-Foam::tmp<Foam::volScalarField> Foam::liftModels::TomiyamaLift::Cl() const
+Foam::tmp<Foam::volScalarField> Foam::liftModels::TomiyamaLift::Cl
+(
+    const label nodei,
+    const label nodej
+) const
 {
-    volScalarField EoH(pair_.EoH2());
+    volScalarField EoH(pair_.EoH2(nodei, nodej));
 
     volScalarField f
     (
@@ -69,7 +75,7 @@ Foam::tmp<Foam::volScalarField> Foam::liftModels::TomiyamaLift::Cl() const
     );
 
     return
-        neg(EoH - scalar(4))*min(0.288*tanh(0.121*pair_.Re()), f)
+        neg(EoH - scalar(4))*min(0.288*tanh(0.121*pair_.Re(nodei, nodej)), f)
       + pos0(EoH - scalar(4))*neg(EoH - scalar(10.7))*f
       + pos0(EoH - scalar(10.7))*(-0.288);
 }

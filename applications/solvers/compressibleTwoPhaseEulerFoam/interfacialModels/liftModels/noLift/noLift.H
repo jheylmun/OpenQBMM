@@ -2,8 +2,10 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2014-2015 OpenFOAM Foundation
+    \\  /    A nd           | Copyright (C) 2014-2017 OpenFOAM Foundation
      \\/     M anipulation  |
+-------------------------------------------------------------------------------
+2017-05-18 Jeff Heylmun:    Added support of polydisperse phase models
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -77,13 +79,13 @@ public:
     // Member Functions
 
         //- Lift coefficient
-        virtual tmp<volScalarField> Cl() const;
+        virtual tmp<volScalarField> Cl(const label, const label) const;
 
         //- Lift force
-        virtual tmp<volVectorField> F() const;
+        virtual tmp<volVectorField> F(const label, const label) const;
 
         //- Lift force on faces
-        virtual tmp<surfaceScalarField> Ff() const;
+        virtual tmp<surfaceScalarField> Ff(const label, const label) const;
 };
 
 

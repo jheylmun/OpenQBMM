@@ -81,6 +81,9 @@ class velocityPDFTransportModel
         //- Minimum local step in realizable ODE solver
         label minLocalDt_;
 
+        //- Stored time step for each cell
+        scalarField deltaT_;
+
 
 protected:
 
@@ -160,22 +163,17 @@ public:
 
         //-Edit
 
+            //- Advect moments
+            virtual void updateAdvection();
+
+            //- Return divergence of moment fluxes
+            virtual const mappedPtrList<surfaceScalarField>& momentFluxes() const;
+
             //- Solve velocity PDF transport equation
             virtual void solve();
 
-            //- Solve mean tranport
-            virtual void meanTransport
-            (
-                const surfaceScalarField& phi,
-                const bool wallCollisions
-            );
-
-            //- Solve relative transport
-            virtual void relativeTransport
-            (
-                const mappedPtrList<volVectorField>& Vs,
-                const bool wallCollisions
-            );
+            //- Solve for sources
+            virtual void solveSources();
 };
 
 

@@ -2,8 +2,10 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2014-2015 OpenFOAM Foundation
+    \\  /    A nd           | Copyright (C) 2014-2017 OpenFOAM Foundation
      \\/     M anipulation  |
+-------------------------------------------------------------------------------
+2017-05-18 Jeff Heylmun:    Added support of polydisperse phase models
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -114,25 +116,53 @@ Foam::tmp<Foam::volScalarField> Foam::phasePair::rho() const
 }
 
 
-Foam::tmp<Foam::volScalarField> Foam::phasePair::magUr() const
+Foam::tmp<Foam::volScalarField> Foam::phasePair::magUr
+(
+    const label nodei,
+    const label nodej
+) const
 {
-    return mag(phase1().U() - phase2().U());
+    return mag(phase1().U(nodei) - phase2().U(nodej));
 }
 
 
-Foam::tmp<Foam::volVectorField> Foam::phasePair::Ur() const
+Foam::tmp<Foam::volVectorField> Foam::phasePair::Ur
+(
+    const label nodei,
+    const label nodej
+) const
 {
-    return dispersed().U() - continuous().U();
+    return dispersed().U(nodei) - continuous().U(nodej);
 }
 
 
-Foam::tmp<Foam::volScalarField> Foam::phasePair::Re() const
+Foam::tmp<Foam::volScalarField> Foam::phasePair::Re
+(
+    const label nodei,
+    const label nodej
+) const
 {
-    return magUr()*dispersed().d()/continuous().nu();
+    return magUr(nodei, nodej)*dispersed().d(nodei)/continuous().nu();
 }
 
 
-Foam::tmp<Foam::volScalarField> Foam::phasePair::Pr() const
+Foam::tmp<Foam::volScalarField> Foam::phasePair::We
+(
+    const label nodei,
+    const label nodej
+) const
+{
+    return
+        sqr(magUr(nodei, nodej))*dispersed().d(nodei)
+        *continuous().rho()/sigma_;
+}
+
+
+Foam::tmp<Foam::volScalarField> Foam::phasePair::Pr
+(
+    const label nodei,
+    const label nodej
+) const
 {
     return
          continuous().nu()*continuous().Cp()*continuous().rho()
@@ -140,31 +170,37 @@ Foam::tmp<Foam::volScalarField> Foam::phasePair::Pr() const
 }
 
 
-Foam::tmp<Foam::volScalarField> Foam::phasePair::Eo() const
+Foam::tmp<Foam::volScalarField> Foam::phasePair::Eo
+(
+    const label nodei,
+    const label nodej
+) const
 {
-    return EoH(dispersed().d());
+    return EoH(dispersed().d(nodei));
 }
 
-
-Foam::tmp<Foam::volScalarField> Foam::phasePair::EoH1() const
+Foam::tmp<Foam::volScalarField> Foam::phasePair::EoH1
+(
+    const label nodei,
+    const label nodej
+) const
 {
     return
         EoH
         (
-            dispersed().d()
-           *cbrt(1 + 0.163*pow(Eo(), 0.757))
+            dispersed().d(nodei)
+           *cbrt(1.0 + 0.163*pow(Eo(nodei, nodej), 0.757))
         );
 }
 
 
-Foam::tmp<Foam::volScalarField> Foam::phasePair::EoH2() const
+Foam::tmp<Foam::volScalarField> Foam::phasePair::EoH2
+(
+    const label nodei,
+    const label nodej
+) const
 {
-    return
-        EoH
-        (
-            dispersed().d()
-           /cbrt(E())
-        );
+    return EoH(dispersed().d(nodei)/cbrt(E(nodei, nodej)));
 }
 
 
@@ -177,13 +213,21 @@ Foam::tmp<Foam::volScalarField> Foam::phasePair::Mo() const
 }
 
 
-Foam::tmp<Foam::volScalarField> Foam::phasePair::Ta() const
+Foam::tmp<Foam::volScalarField> Foam::phasePair::Ta
+(
+    const label nodei,
+    const label nodej
+) const
 {
-    return Re()*pow(Mo(), 0.23);
+    return Re(nodei, nodej)*pow(Mo(), 0.23);
 }
 
 
-Foam::tmp<Foam::volScalarField> Foam::phasePair::E() const
+Foam::tmp<Foam::volScalarField> Foam::phasePair::E
+(
+    const label nodei,
+    const label nodej
+) const
 {
     FatalErrorInFunction
         << "Requested aspect ratio of the dispersed phase in an unordered pair"

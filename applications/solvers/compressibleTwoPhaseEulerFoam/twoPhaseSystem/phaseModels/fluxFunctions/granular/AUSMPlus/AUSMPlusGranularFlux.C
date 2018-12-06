@@ -45,7 +45,7 @@ namespace granularFluxFunctions
 }
 
 
-// * * * * * * * * * * * * * * Static Data Members * * * * * * * * * * * * * //
+// * * * * * * * * * * * * * * Private Data Members * * * * * * * * * * * * * //
 
 Foam::tmp<Foam::surfaceScalarField>
 Foam::granularFluxFunctions::AUSMPlusFlux::M1
@@ -225,7 +225,7 @@ void Foam::granularFluxFunctions::AUSMPlusFlux::updateFluxes
 
     pf_ =
         -Ku*fa_*(a12 - residualU_)*p5Own*p5Nei
-       *(alphaOwn*rhoNei + alphaNei*rhoNei)*(UvNei - UvOwn)
+       *(alphaOwn*rhoOwn + alphaNei*rhoNei)*(UvNei - UvOwn)
       + p5Own*pOwn + p5Nei*pNei;
 
     surfaceScalarField F

@@ -64,11 +64,11 @@ void Foam::twoPhaseSystem::relaxPressure()
 
     volScalarField& alpha1(phase1_());
     volScalarField& alpha2(phase2_());
-    volScalarField& alphaRhoE1(phase1_->alphaRhoE());
-    volScalarField& alphaRhoE2(phase2_->alphaRhoE());
+    volScalarField& alphaRhoE1(phase1_->alphaRhoERef());
+    volScalarField& alphaRhoE2(phase2_->alphaRhoERef());
 
-    volScalarField& p1(phase1_->p());
-    volScalarField& p2(phase2_->p());
+    volScalarField& p1(phase1_->pRef());
+    volScalarField& p2(phase2_->pRef());
 
     while (!timeComplete)
     {
@@ -216,13 +216,13 @@ void Foam::twoPhaseSystem::relaxVelocity()
     label nItt = 0;
     bool timeComplete = false;
 
-    volVectorField& alphaRhoU1(phase1_->alphaRhoU());
-    volVectorField& alphaRhoU2(phase2_->alphaRhoU());
-    volScalarField& alphaRhoE1(phase1_->alphaRhoE());
-    volScalarField& alphaRhoE2(phase2_->alphaRhoE());
+    volVectorField& alphaRhoU1(phase1_->alphaRhoURef());
+    volVectorField& alphaRhoU2(phase2_->alphaRhoURef());
+    volScalarField& alphaRhoE1(phase1_->alphaRhoERef());
+    volScalarField& alphaRhoE2(phase2_->alphaRhoERef());
 
-    volVectorField& U1(phase1_->U());
-    volVectorField& U2(phase2_->U());
+    volVectorField& U1(phase1_->URef());
+    volVectorField& U2(phase2_->URef());
 
     while (!timeComplete)
     {
@@ -644,51 +644,64 @@ Foam::tmp<Foam::volScalarField> Foam::twoPhaseSystem::rho() const
 }
 
 
-Foam::tmp<Foam::volScalarField> Foam::twoPhaseSystem::Kd() const
+Foam::tmp<Foam::volScalarField> Foam::twoPhaseSystem::Kd
+(
+    const label nodei,
+    const label nodej
+) const
 {
-    return drag_->K();
+    return drag_->K(nodei, nodej);
 }
 
 
-Foam::tmp<Foam::surfaceScalarField> Foam::twoPhaseSystem::Kdf() const
+Foam::tmp<Foam::surfaceScalarField>
+Foam::twoPhaseSystem::Kdf(const label nodei, const label nodej) const
 {
-    return drag_->Kf();
+    return drag_->Kf(nodei, nodej);
 }
 
 
-Foam::tmp<Foam::volScalarField> Foam::twoPhaseSystem::Vm() const
+Foam::tmp<Foam::volScalarField>
+Foam::twoPhaseSystem::Vm(const label nodei, const label nodej) const
 {
-    return virtualMass_->K();
+    return virtualMass_->K(nodei, nodej);
 }
 
 
-Foam::tmp<Foam::surfaceScalarField> Foam::twoPhaseSystem::Vmf() const
+Foam::tmp<Foam::surfaceScalarField>
+Foam::twoPhaseSystem::Vmf(const label nodei, const label nodej) const
 {
-    return virtualMass_->Kf();
+    return virtualMass_->Kf(nodei, nodej);
 }
 
 
-Foam::tmp<Foam::volScalarField> Foam::twoPhaseSystem::Kh() const
+Foam::tmp<Foam::volScalarField>
+Foam::twoPhaseSystem::Kh(const label nodei, const label nodej) const
 {
-    return heatTransfer_->K();
+    return heatTransfer_->K(nodei, nodej);
 }
 
 
-Foam::tmp<Foam::volVectorField> Foam::twoPhaseSystem::F() const
+Foam::tmp<Foam::volVectorField>
+Foam::twoPhaseSystem::F(const label nodei, const label nodej) const
 {
-    return lift_->F<vector>() + wallLubrication_->F<vector>();
+    return
+        lift_->F<vector>(nodei, nodej)
+      + wallLubrication_->F<vector>(nodei, nodej);
 }
 
 
-Foam::tmp<Foam::surfaceScalarField> Foam::twoPhaseSystem::Ff() const
+Foam::tmp<Foam::surfaceScalarField>
+Foam::twoPhaseSystem::Ff(const label nodei, const label nodej) const
 {
-    return lift_->Ff() + wallLubrication_->Ff();
+    return lift_->Ff(nodei, nodej) + wallLubrication_->Ff(nodei, nodej);
 }
 
 
-Foam::tmp<Foam::volScalarField> Foam::twoPhaseSystem::D() const
+Foam::tmp<Foam::volScalarField>
+Foam::twoPhaseSystem::D(const label nodei, const label nodej) const
 {
-    return turbulentDispersion_->D();
+    return turbulentDispersion_->D(nodei, nodej);
 }
 
 
@@ -767,36 +780,151 @@ void Foam::twoPhaseSystem::relax()
 //     relaxVelocity();
 
     dimensionedScalar deltaT(mesh_.time().deltaT());
-
-    // Momentum and heat transfer
-    volScalarField XiD(1.0/phase1_->alphaRho() + 1.0/phase2_->alphaRho());
-    volScalarField XiE
+    volScalarField XiDMean
     (
-        1.0/(phase1_->alphaRho()*phase1_->Cv())
-      + 1.0/(phase2_->alphaRho()*phase2_->Cv())
+        IOobject
+        (
+            "XiDmean",
+            mesh_.time().timeName(),
+            mesh_
+        ),
+        mesh_,
+        dimensionedScalar("0", inv(dimDensity), 0.0)
+    );
+    volScalarField dragCoeffMean
+    (
+        IOobject
+        (
+            "dragCoeffMean",
+            mesh_.time().timeName(),
+            mesh_
+        ),
+        mesh_,
+        dimensionedScalar("0", dimDensity/dimTime, 0.0)
     );
 
-    volScalarField dragCoeff(Kd());
-    volVectorField deltaM
+    for (label nodei = 0; nodei < phase1_->nNodes(); nodei++)
+    {
+        for (label nodej = 0; nodej < phase2_->nNodes(); nodej++)
+        {
+            volScalarField alphaRho1
+            (
+                max(phase1_->alphaRho(nodei), phase1_->residualAlphaRho())
+            );
+            volScalarField alphaRho2
+            (
+                max(phase2_->alphaRho(nodej), phase2_->residualAlphaRho())
+            );
+            // Momentum and heat transfer
+            volScalarField XiD
+            (
+                1.0/alphaRho1 + 1.0/alphaRho2
+            );
+            XiDMean += XiD;
+            volScalarField XiE
+            (
+                1.0/(alphaRho1*phase1_->Cv())
+              + 1.0/(alphaRho2*phase2_->Cv())
+            );
+            volScalarField dragCoeff(Kd(nodei, nodej));
+            dragCoeffMean += dragCoeff;
+            volVectorField deltaM
+            (
+                (phase1_->U(nodei) - phase2_->U(nodej))/XiD
+               *(1.0/(dragCoeff*XiD*deltaT + 1.0) - 1.0)
+            );
+            volScalarField deltaE
+            (
+                (phase1_->thermo().T() - phase2_->thermo().T())/XiE
+               *(exp(-max(Kh(nodei, nodej)*XiE*deltaT, vSmall)) - 1.0)
+            );
+
+            phase1_->alphaRhoURef(nodei) += deltaM;
+            phase2_->alphaRhoURef(nodei) -= deltaM;
+
+            phase1_->alphaRhoERef() += deltaE;
+            phase2_->alphaRhoERef() -= deltaE;
+
+            if (!phase1_->granular())
+            {
+                tmp<volScalarField> magSqrU2
+                (
+                    magSqr(phase2_->alphaRhoU(nodej)/alphaRho2)
+                );
+                phase1_->alphaRhoERef() -=
+                    alphaRho2*0.5
+                   *(
+                        magSqrU2 - magSqr(phase2_->U(nodej))
+                    );
+            }
+            if (!phase2_->granular())
+            {
+                tmp<volScalarField> magSqrU1
+                (
+                    magSqr(phase1_->alphaRhoU(nodei)/alphaRho1)
+                );
+                phase2_->alphaRhoERef() -=
+                    alphaRho1*0.5
+                   *(
+                        magSqrU1 - magSqr(phase1_->U(nodei))
+                    );
+            }
+        }
+    }
+
+    if(phase1_->nNodes() > 1)
+    {
+        phase1_->correctThermo();
+    }
+    else
+    {
+        phase1_->decode();
+    }
+
+    if(phase2_->nNodes() > 1)
+    {
+        phase2_->correctThermo();
+    }
+    else
+    {
+        phase2_->decode();
+    }
+
+    if
     (
-        (phase1_->U() - phase2_->U())/XiD
-       *(1.0/(dragCoeff*XiD*deltaT + 1.0) - 1.0)
-    );
-    volScalarField deltaE
-    (
-        (phase1_->thermo().T() - phase2_->thermo().T())/XiE
-       *(exp(-max(Kh()*XiE*deltaT, vSmall)) - 1.0)
-    );
-    phase1_->store();
-    phase2_->store();
+        (phase1_->granular() && phase1_->nNodes() > 1)
+     || (phase2_->granular() && phase2_->nNodes() > 1)
+    )
+    {
+        phaseModel* particles;
+        phaseModel* gas;
+        if (phase1_->granular() && phase1_->nNodes() > 1)
+        {
+            particles = &phase1_();
+            gas = &phase2_();
+        }
+        else
+        {
+            particles = &phase2_();
+            gas = &phase1_();
+        }
+        volScalarField deltaAlphaRhoPTEp
+        (
+            3.0/2.0*(*particles)*particles->rho()
+           *(particles->Theta() - particles->Theta()().oldTime())
+        );
 
-    phase1_->alphaRhoU() += deltaM;
-    phase2_->alphaRhoU() -= deltaM;
-
-    phase1_->alphaRhoE() += deltaE;
-    phase2_->alphaRhoE() -= deltaE;
-
-    if (phase1_->granular() || phase2_->granular())
+        if (mesh_.time().outputTime())
+        {
+            volScalarField
+            (
+                "ddt(Theta)",
+                fvc::ddt(particles->Theta()())
+            ).write();
+        }
+        gas->alphaRhoERef() += deltaAlphaRhoPTEp;
+    }
+    else if (phase1_->granular() || phase2_->granular())
     {
         phaseModel* particles;
         phaseModel* gas;
@@ -810,26 +938,18 @@ void Foam::twoPhaseSystem::relax()
             particles = &phase2_();
             gas = &phase1_();
         }
-        const volScalarField& alphaRhop = particles->alphaRho();
-        volScalarField& Theta = particles->Theta();
-
-        volScalarField magSqrUp(magSqr(particles->alphaRhoU()/alphaRhop));
-
-        gas->alphaRhoE() -=
-            particles->alphaRho()*0.5
-           *(
-                magSqrUp - magSqr(particles->U())
-            );
+        const volScalarField& alphaRhop = particles->alphaRho()();
+        volScalarField& Theta = particles->ThetaRef();
         volScalarField ThetaStar
         (
-            Theta*exp(-max(2.0*dragCoeff*deltaT/alphaRhop, vSmall))
+            Theta*exp(-max(2.0*dragCoeffMean*deltaT/alphaRhop, vSmall))
         );
         ThetaStar.max(vSmall);
 
         volScalarField XiSlip
         (
             particles->productionCoeff()
-           /(dragCoeff*XiD*deltaT + 1.0)
+           /(dragCoeffMean*XiDMean*deltaT + 1.0)
         );
 
         volScalarField ThetaStarStar
@@ -840,7 +960,7 @@ void Foam::twoPhaseSystem::relax()
               + pow(ThetaStar, 1.5), 2.0/3.0
             )
         );
-        gas->alphaRhoE() -= 1.5*alphaRhop*(ThetaStarStar - Theta);
+        gas->alphaRhoERef() -= 1.5*alphaRhop*(ThetaStarStar - Theta);
 
         Theta =
             ThetaStarStar*9.0*sqr(alphaRhop)
@@ -850,37 +970,16 @@ void Foam::twoPhaseSystem::relax()
               + deltaT*particles->dissipationCoeff()*sqrt(ThetaStarStar)
             );
 
-        particles->alphaRhoPTE() = 1.5*alphaRhop*Theta;
-        particles->alphaRhoPTE().correctBoundaryConditions();
+        particles->alphaRhoPTERef() = 1.5*alphaRhop*Theta;
+        particles->alphaRhoPTERef().correctBoundaryConditions();
 
-        particles->alphaRhoE() -= 1.5*alphaRhop*(Theta - ThetaStarStar);
-    }
-    else
-    {
-        volScalarField magSqrU1
-        (
-            magSqr(phase1_->alphaRhoU()/phase1_->alphaRho())
-        );
-        volScalarField magSqrU2
-        (
-            magSqr(phase2_->alphaRhoU()/phase2_->alphaRho())
-        );
-        phase1_->alphaRhoE() -=
-            phase1_->alphaRho()*0.5
-           *(
-                magSqrU1 - magSqr(phase1_->U())
-            );
-        phase2_->alphaRhoE() -=
-            phase2_->alphaRho()*0.5
-           *(
-                magSqrU2 - magSqr(phase2_->U())
-            );
+        particles->alphaRhoERef() -= 1.5*alphaRhop*(Theta - ThetaStarStar);
     }
 
-    phase1_->alphaRhoU().correctBoundaryConditions();
-    phase2_->alphaRhoU().correctBoundaryConditions();
-    phase1_->alphaRhoE().correctBoundaryConditions();
-    phase2_->alphaRhoE().correctBoundaryConditions();
+    phase1_->alphaRhoURef().correctBoundaryConditions();
+    phase2_->alphaRhoURef().correctBoundaryConditions();
+    phase1_->alphaRhoERef().correctBoundaryConditions();
+    phase2_->alphaRhoERef().correctBoundaryConditions();
 
     decode();
     U_ = mixtureU();

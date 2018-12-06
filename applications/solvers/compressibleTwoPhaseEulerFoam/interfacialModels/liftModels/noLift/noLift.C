@@ -2,8 +2,10 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2014-2016 OpenFOAM Foundation
+    \\  /    A nd           | Copyright (C) 2014-2017 OpenFOAM Foundation
      \\/     M anipulation  |
+-------------------------------------------------------------------------------
+2017-05-18 Jeff Heylmun:    Added support of polydisperse phase models
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -59,7 +61,11 @@ Foam::liftModels::noLift::~noLift()
 
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
 
-Foam::tmp<Foam::volScalarField> Foam::liftModels::noLift::Cl() const
+Foam::tmp<Foam::volScalarField> Foam::liftModels::noLift::Cl
+(
+    const label nodei,
+    const label nodej
+) const
 {
     const fvMesh& mesh(this->pair_.phase1().mesh());
 
@@ -83,7 +89,11 @@ Foam::tmp<Foam::volScalarField> Foam::liftModels::noLift::Cl() const
 }
 
 
-Foam::tmp<Foam::volVectorField> Foam::liftModels::noLift::F() const
+Foam::tmp<Foam::volVectorField> Foam::liftModels::noLift::F
+(
+    const label nodei,
+    const label nodej
+) const
 {
     const fvMesh& mesh(this->pair_.phase1().mesh());
 
@@ -107,7 +117,11 @@ Foam::tmp<Foam::volVectorField> Foam::liftModels::noLift::F() const
 }
 
 
-Foam::tmp<Foam::surfaceScalarField> Foam::liftModels::noLift::Ff() const
+Foam::tmp<Foam::surfaceScalarField> Foam::liftModels::noLift::Ff
+(
+    const label nodei,
+    const label nodej
+) const
 {
     const fvMesh& mesh(this->pair_.phase1().mesh());
 

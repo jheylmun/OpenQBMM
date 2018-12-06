@@ -2,8 +2,10 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2014-2015 OpenFOAM Foundation
+    \\  /    A nd           | Copyright (C) 2014-2017 OpenFOAM Foundation
      \\/     M anipulation  |
+-------------------------------------------------------------------------------
+2017-05-18 Jeff Heylmun:    Added support of polydisperse phase models
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -66,21 +68,27 @@ Foam::wallLubricationModels::Antal::~Antal()
 
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
 
-Foam::tmp<Foam::volVectorField> Foam::wallLubricationModels::Antal::Fi() const
+Foam::tmp<Foam::volVectorField> Foam::wallLubricationModels::Antal::Fi
+(
+    const label nodei,
+    const label nodej
+) const
 {
-    volVectorField Ur(pair_.Ur());
+    volVectorField Ur(pair_.Ur(nodei, nodej));
 
     const volVectorField& n(nWall());
 
-    return
+    return zeroGradWalls
+    (
         max
         (
             dimensionedScalar("zero", dimless/dimLength, 0),
-            Cw1_/pair_.dispersed().d() + Cw2_/yWall()
+            Cw1_/pair_.dispersed().d(nodei) + Cw2_/yWall()
         )
        *pair_.continuous().rho()
        *magSqr(Ur - (Ur & n)*n)
-       *n;
+       *n
+    );
 }
 
 

@@ -2,8 +2,10 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2014 OpenFOAM Foundation
+    \\  /    A nd           | Copyright (C) 2014-2017 OpenFOAM Foundation
      \\/     M anipulation  |
+-------------------------------------------------------------------------------
+2017-05-18 Jeff Heylmun:    Added support of polydisperse phase models
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -61,6 +63,17 @@ Foam::virtualMassModels::noVirtualMass::~noVirtualMass()
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
 
 Foam::tmp<Foam::volScalarField>
+Foam::virtualMassModels::noVirtualMass::Cvm
+(
+    const label nodei,
+    const label nodej
+) const
+{
+    return Cvm();
+}
+
+
+Foam::tmp<Foam::volScalarField>
 Foam::virtualMassModels::noVirtualMass::Cvm() const
 {
     const fvMesh& mesh(this->pair_.phase1().mesh());
@@ -72,7 +85,7 @@ Foam::virtualMassModels::noVirtualMass::Cvm() const
             (
                 IOobject
                 (
-                    "zero",
+                    "noVirtualMass:Cvm",
                     mesh.time().timeName(),
                     mesh
                 ),
@@ -80,6 +93,17 @@ Foam::virtualMassModels::noVirtualMass::Cvm() const
                 dimensionedScalar("zero", dimless, 0)
             )
         );
+}
+
+
+Foam::tmp<Foam::volScalarField>
+Foam::virtualMassModels::noVirtualMass::K
+(
+    const label nodei,
+    const label nodej
+) const
+{
+    return K();
 }
 
 

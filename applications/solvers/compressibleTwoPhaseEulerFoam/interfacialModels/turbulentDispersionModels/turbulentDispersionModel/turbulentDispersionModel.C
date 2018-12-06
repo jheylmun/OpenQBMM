@@ -2,8 +2,10 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2014-2015 OpenFOAM Foundation
+    \\  /    A nd           | Copyright (C) 2014-2017 OpenFOAM Foundation
      \\/     M anipulation  |
+-------------------------------------------------------------------------------
+2017-05-18 Jeff Heylmun:    Added support of polydisperse phase models
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -60,10 +62,13 @@ Foam::turbulentDispersionModel::~turbulentDispersionModel()
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
 
 Foam::tmp<Foam::volVectorField>
-Foam::turbulentDispersionModel::F() const
+Foam::turbulentDispersionModel::F
+(
+    const label nodei,
+    const label nodej
+) const
 {
-    return D()*fvc::grad(pair_.dispersed());
+    return D(nodei, nodej)*fvc::grad(pair_.dispersed().alphas(nodei));
 }
-
 
 // ************************************************************************* //

@@ -1,8 +1,8 @@
 phaseModels/phaseModel.C
 phaseModels/newPhaseModel.C
 phaseModels/fluidPhaseModel/fluidPhaseModel.C
-#phaseModels/liquidPhaseModel/liquidPhaseModel.C
 phaseModels/granularPhaseModel/granularPhaseModel.C
+phaseModels/vdfPhaseModel/vdfPhaseModel.C
 
 phaseModels/fluxFunctions/fluid/fluxFunction/fluidFluxFunction.C
 phaseModels/fluxFunctions/fluid/fluxFunction/newFluidFluxFunction.C
@@ -14,6 +14,8 @@ phaseModels/fluxFunctions/fluid/HLLC/HLLCFluidFlux.C
 phaseModels/fluxFunctions/granular/fluxFunction/granularFluxFunction.C
 phaseModels/fluxFunctions/granular/fluxFunction/newGranularFluxFunction.C
 phaseModels/fluxFunctions/granular/AUSMPlus/AUSMPlusGranularFlux.C
+
+phaseModels/fluxFunctions/vdf/AUSMPlusKineticVelocityAdvection/AUSMPlusKineticVelocityAdvection.C
 
 diameterModels/diameterModel/diameterModel.C
 diameterModels/diameterModel/newDiameterModel.C

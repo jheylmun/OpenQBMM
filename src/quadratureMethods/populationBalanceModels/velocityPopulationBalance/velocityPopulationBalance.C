@@ -168,30 +168,30 @@ Foam::scalar Foam::PDFTransportModels::populationBalanceModels
     return velocityPDFTransportModel::CoNum();
 }
 
-void Foam::PDFTransportModels::populationBalanceModels
-::velocityPopulationBalance::solve()
+void Foam::PDFTransportModels::populationBalanceModels::velocityPopulationBalance::
+updateAdvection()
+{
+    velocityPDFTransportModel::updateAdvection();
+}
+
+const Foam::mappedPtrList<Foam::surfaceScalarField>&Foam::PDFTransportModels::populationBalanceModels::velocityPopulationBalance::
+momentFluxes() const
+{
+    return velocityPDFTransportModel::momentFluxes();
+}
+
+void
+Foam::PDFTransportModels::populationBalanceModels::velocityPopulationBalance
+::solve()
 {
     velocityPDFTransportModel::solve();
 }
 
-void Foam::PDFTransportModels::populationBalanceModels
-::velocityPopulationBalance::meanTransport
-(
-    const surfaceScalarField& phi,
-    const bool wallCollisions
-)
+void
+Foam::PDFTransportModels::populationBalanceModels::velocityPopulationBalance
+::solveSources()
 {
-    velocityPDFTransportModel::meanTransport(phi, wallCollisions);
-}
-
-void Foam::PDFTransportModels::populationBalanceModels
-::velocityPopulationBalance::relativeTransport
-(
-    const mappedPtrList<volVectorField>& Vs,
-    const bool wallCollisions
-)
-{
-    velocityPDFTransportModel::relativeTransport(Vs, wallCollisions);
+    velocityPDFTransportModel::solveSources();
 }
 
 // ************************************************************************* //

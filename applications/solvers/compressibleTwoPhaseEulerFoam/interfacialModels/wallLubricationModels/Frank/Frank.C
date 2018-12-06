@@ -5,6 +5,8 @@
     \\  /    A nd           | Copyright (C) 2014-2017 OpenFOAM Foundation
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
+2017-05-18 Jeff Heylmun:    Added support of polydisperse phase models
+-------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
 
@@ -67,17 +69,22 @@ Foam::wallLubricationModels::Frank::~Frank()
 
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
 
-Foam::tmp<Foam::volVectorField> Foam::wallLubricationModels::Frank::Fi() const
+Foam::tmp<Foam::volVectorField> Foam::wallLubricationModels::Frank::Fi
+(
+    const label nodei,
+    const label nodej
+) const
 {
-    volVectorField Ur(pair_.Ur());
+    volVectorField Ur(pair_.Ur(nodei, nodej));
 
     const volVectorField& n(nWall());
     const volScalarField& y(yWall());
 
-    volScalarField Eo(pair_.Eo());
-    volScalarField yTilde(y/(Cwc_*pair_.dispersed().d()));
+    volScalarField Eo(pair_.Eo(nodei, nodej));
+    volScalarField yTilde(y/(Cwc_*pair_.dispersed().d(nodei)));
 
-    return
+    return zeroGradWalls
+    (
         (
             pos0(Eo - 1.0)*neg(Eo - 5.0)*exp(-0.933*Eo + 0.179)
           + pos0(Eo - 5.0)*neg(Eo - 33.0)*(0.00599*Eo - 0.0187)
@@ -90,7 +97,8 @@ Foam::tmp<Foam::volVectorField> Foam::wallLubricationModels::Frank::Fi() const
         )
        *pair_.continuous().rho()
        *magSqr(Ur - (Ur & n)*n)
-       *n;
+       *n
+    );
 }
 
 

@@ -208,13 +208,13 @@ public:
         }
 
         //- Const access to the phase pseudo thermal energy
-        virtual const volScalarField& Theta() const
+        virtual tmp<volScalarField> Theta() const
         {
             return Theta_;
         }
 
         //- Non-const access to the phase pseudo thermal energy
-        virtual volScalarField& Theta()
+        virtual volScalarField& ThetaRef()
         {
             return Theta_;
         }
@@ -226,7 +226,7 @@ public:
         }
 
         //- Non-const access to the phase pressure
-        virtual volScalarField& p()
+        virtual volScalarField& pRef()
         {
             return Ps_;
         }
@@ -236,120 +236,97 @@ public:
 
 
         //- Return the phase volumentric flux
-        virtual const surfaceScalarField& phi() const
+        virtual tmp<surfaceScalarField> phi(const label i = -1) const
         {
             return fluxFunction_->phi();
         }
 
         //- Return the phase volumentric flux
-        virtual tmp<surfaceScalarField> alphaPhi() const
+        virtual tmp<surfaceScalarField> alphaPhi(const label i = -1) const
         {
             return fluxFunction_->alphaPhi();
         }
-//- Const access to phasic density
-        virtual const volScalarField& alphaRho() const
+
+        //- Const access to phasic density
+        virtual tmp<volScalarField> alphaRho(const label i = -1) const
         {
             return alphaRho_;
         }
 
         //- Non-const access to phasic density
-        virtual volScalarField& alphaRho()
+        virtual volScalarField& alphaRhoRef(const label i = -1)
         {
             return alphaRho_;
         }
 
         //- Const access to phasic momentum
-        virtual const volVectorField& alphaRhoU() const
+        virtual tmp<volVectorField> alphaRhoU(const label i = -1) const
         {
             return alphaRhoU_;
         }
 
         //- Non-const access to phasic momentum
-        virtual volVectorField& alphaRhoU()
+        virtual volVectorField& alphaRhoURef(const label i = -1)
         {
             return alphaRhoU_;
         }
 
         //- Const access to total phasic energy
-        virtual const volScalarField& alphaRhoE() const
+        virtual tmp<volScalarField> alphaRhoE(const label i = -1) const
         {
             return alphaRhoE_;
         }
 
         //- Non-const access to total phasic energy
-        virtual volScalarField& alphaRhoE()
+        virtual volScalarField& alphaRhoERef(const label i = -1)
         {
             return alphaRhoE_;
         }
 
         //- Const access to phase internal energy
-        virtual const volScalarField& alphaRhoPTE() const
+        virtual tmp<volScalarField> alphaRhoPTE(const label i = -1) const
         {
             return alphaRhoPTE_;
         }
 
         //- Non-const access to phase internal energy
-        virtual volScalarField& alphaRhoPTE()
+        virtual volScalarField& alphaRhoPTERef(const label i = -1)
         {
             return alphaRhoPTE_;
         }
 
         //- Const access to phasic mass flux
-        virtual const surfaceScalarField& massFlux() const
-        {
-            return massFlux_;
-        }
-
-        //- Non-const access to phasic mass flux
-        virtual surfaceScalarField& massFlux()
+        virtual tmp<surfaceScalarField> massFlux() const
         {
             return massFlux_;
         }
 
         //- Const access to phasic momentum flux
-        virtual const surfaceVectorField& momentumFlux() const
-        {
-            return momentumFlux_;
-        }
-
-        //- Non-const access to phasic momentum flux
-        virtual surfaceVectorField& momentumFlux()
+        virtual tmp<surfaceVectorField> momentumFlux() const
         {
             return momentumFlux_;
         }
 
         //- Const access to total phasic energy flux
-        virtual const surfaceScalarField& energyFlux() const
-        {
-            return energyFlux_;
-        }
-
-        //- Non-const access to total phasic energy flux
-        virtual surfaceScalarField& energyFlux()
+        virtual tmp<surfaceScalarField> energyFlux() const
         {
             return energyFlux_;
         }
 
         //- Const access to phase internal energy flux
-        virtual const surfaceScalarField& PTEFlux() const
-        {
-            return PTEFlux_;
-        }
-
-        //- Non-const access to phase internal energy flux
-        virtual surfaceScalarField& PTEFlux()
+        virtual tmp<surfaceScalarField> PTEFlux() const
         {
             return PTEFlux_;
         }
 
         //- Return the gradient of pressure
-        virtual const surfaceScalarField& alphaf() const
+        virtual tmp<surfaceScalarField> alphaf(const label i = -1) const
         {
             return fluxFunction_->alphaf();
         }
 
         //- Return the gradient of velocity
-        virtual tmp<volTensorField> gradU() const
+        virtual tmp<volTensorField> gradU(const label i = -1) const
         {
             return fluxFunction_->gradU();
         }

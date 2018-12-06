@@ -8,6 +8,8 @@ EXE_INC = \
     -I$(LIB_SRC)/thermophysicalModels/radiation/lnInclude \
     -I$(LIB_SRC)/TurbulenceModels/turbulenceModels/lnInclude \
     -I$(LIB_SRC)/TurbulenceModels/compressible/lnInclude \
+    -I$../../../../src/mappedList \
+    -I$../../../../src/mappedPtrList \
     -I$../../../../src/quadratureMethods/univariateMomentSet/lnInclude \
     -I$../../../../src/quadratureMethods/momentInversion/lnInclude \
     -I$../../../../src/quadratureMethods/quadratureNode \

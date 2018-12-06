@@ -5,6 +5,8 @@
     \\  /    A nd           | Copyright (C) 2014-2017 OpenFOAM Foundation
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
+2017-05-18 Jeff Heylmun:    Added support of polydisperse phase models
+-------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
 
@@ -65,9 +67,13 @@ Foam::aspectRatioModels::VakhrushevEfremov::~VakhrushevEfremov()
 // * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * * //
 
 Foam::tmp<Foam::volScalarField>
-Foam::aspectRatioModels::VakhrushevEfremov::E() const
+Foam::aspectRatioModels::VakhrushevEfremov::E
+(
+    const label nodei,
+    const label nodej
+) const
 {
-    volScalarField Ta(pair_.Ta());
+    volScalarField Ta(pair_.Ta(nodei, nodej));
 
     return
         neg(Ta - scalar(1))*scalar(1)

@@ -773,7 +773,7 @@ Foam::PDFTransportModels::populationBalanceModels::mixingPopulationBalance
     return gSource;
 }
 
-Foam::scalar 
+Foam::scalar
 Foam::PDFTransportModels::populationBalanceModels::mixingPopulationBalance
 ::cellMomentSource
 (
@@ -789,7 +789,7 @@ Foam::PDFTransportModels::populationBalanceModels::mixingPopulationBalance
             + phaseSpaceConvection(momentOrder, celli, nodes, environment);
 }
 
-Foam::scalar 
+Foam::scalar
 Foam::PDFTransportModels::populationBalanceModels::mixingPopulationBalance
 ::realizableCo() const
 {
@@ -801,11 +801,23 @@ Foam::PDFTransportModels::populationBalanceModels::mixingPopulationBalance
         );
 }
 
-Foam::scalar 
+Foam::scalar
 Foam::PDFTransportModels::populationBalanceModels::mixingPopulationBalance
 ::CoNum() const
 {
     return 0.0;
+}
+
+void Foam::PDFTransportModels::populationBalanceModels::mixingPopulationBalance::
+updateAdvection()
+{
+    meanMomentsAdvection_->update();
+}
+
+const Foam::mappedPtrList<Foam::surfaceScalarField>& Foam::PDFTransportModels::populationBalanceModels::mixingPopulationBalance::
+momentFluxes() const
+{
+    return meanMomentsAdvection_->momentFluxes();
 }
 
 void Foam::PDFTransportModels::populationBalanceModels::mixingPopulationBalance
@@ -848,7 +860,7 @@ void Foam::PDFTransportModels::populationBalanceModels::mixingPopulationBalance
             new fvScalarMatrix
             (
                 fvm::ddt(meanM)
-              + meanMomentsAdvection_().divMoments()[momenti]
+              + fvc::div(meanMomentsAdvection_().momentFluxes()[momenti])
               - momentDiffusion(meanM)
             )
         );
@@ -864,15 +876,15 @@ void Foam::PDFTransportModels::populationBalanceModels::mixingPopulationBalance
             new fvScalarMatrix
             (
                 fvm::ddt(varM)
-              + meanMomentsVarianceAdvection_().divMoments()[momenti]
+              + fvc::div(meanMomentsVarianceAdvection_().momentFluxes()[momenti])
               - momentDiffusion(varM)
               ==
                 envMixingModel_->K
-                    (
-                        meanM,
-                        varM,
-                        meanXi_
-                    )
+                (
+                    meanM,
+                    varM,
+                    meanXi_
+                )
             )
         );
     }
@@ -907,11 +919,16 @@ void Foam::PDFTransportModels::populationBalanceModels::mixingPopulationBalance
         meanMomentVarianceEqns[mEqni].solve();
 
         meanMomentEqns[mEqni].relax();
-        meanMomentEqns[mEqni].solve();       
+        meanMomentEqns[mEqni].solve();
     }
 
     meanMomentsQuadrature_.updateQuadrature();
     meanMomentsVarianceQuadrature_.updateQuadrature();
 }
 
+void Foam::PDFTransportModels::populationBalanceModels::mixingPopulationBalance
+::solveSources()
+{
+    return;
+}
 // ************************************************************************* //

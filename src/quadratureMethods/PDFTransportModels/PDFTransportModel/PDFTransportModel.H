@@ -39,6 +39,7 @@ SourceFiles
 #include "fvMesh.H"
 #include "volFields.H"
 #include "dimensionedTypes.H"
+#include "mappedPtrList.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
@@ -91,8 +92,17 @@ public:
 
     // Member Functions
 
+        //- Advect moments
+        virtual void updateAdvection() = 0;
+
+        //- Return divergence of moment fluxes
+        virtual const mappedPtrList<surfaceScalarField>& momentFluxes() const = 0;
+
         //- Solve PDF transport equation
         virtual void solve() = 0;
+
+        //- Solve for sources
+        virtual void solveSources() = 0;
 
 };
 

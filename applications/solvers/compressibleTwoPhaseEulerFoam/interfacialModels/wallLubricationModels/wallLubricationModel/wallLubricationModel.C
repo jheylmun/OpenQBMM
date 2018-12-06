@@ -2,8 +2,10 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2014-2016 OpenFOAM Foundation
+    \\  /    A nd           | Copyright (C) 2014-2017 OpenFOAM Foundation
      \\/     M anipulation  |
+-------------------------------------------------------------------------------
+2017-05-18 Jeff Heylmun:    Added support of polydisperse phase models
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -27,6 +29,7 @@ License
 #include "phasePair.H"
 #include "fvcFlux.H"
 #include "surfaceInterpolate.H"
+#include "wallFvPatch.H"
 
 // * * * * * * * * * * * * * * Static Data Members * * * * * * * * * * * * * //
 
@@ -37,6 +40,31 @@ namespace Foam
 }
 
 const Foam::dimensionSet Foam::wallLubricationModel::dimF(1, -2, -2, 0, 0);
+
+
+// * * * * * * * * * * * * * Private Member Functions  * * * * * * * * * * * //
+
+Foam::tmp<Foam::volVectorField> Foam::wallLubricationModel::zeroGradWalls
+(
+    tmp<volVectorField> tFi
+) const
+{
+    volVectorField& Fi = tFi.ref();
+    const fvPatchList& patches =  Fi.mesh().boundary();
+
+    volVectorField::Boundary& FiBf = Fi.boundaryFieldRef();
+
+    forAll(patches, patchi)
+    {
+        if (isA<wallFvPatch>(patches[patchi]))
+        {
+            fvPatchVectorField& Fiw = FiBf[patchi];
+            Fiw = Fiw.patchInternalField();
+        }
+    }
+
+    return tFi;
+}
 
 
 // * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
@@ -60,16 +88,25 @@ Foam::wallLubricationModel::~wallLubricationModel()
 
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
 
-Foam::tmp<Foam::volVectorField> Foam::wallLubricationModel::F() const
+Foam::tmp<Foam::volVectorField> Foam::wallLubricationModel::F
+(
+    const label nodei,
+    const label nodej
+) const
 {
-    return pair_.dispersed()*Fi();
+    return pair_.dispersed().alphas(nodei)*Fi(nodei, nodej);
 }
 
 
-Foam::tmp<Foam::surfaceScalarField> Foam::wallLubricationModel::Ff() const
+Foam::tmp<Foam::surfaceScalarField> Foam::wallLubricationModel::Ff
+(
+    const label nodei,
+    const label nodej
+) const
 {
-    return fvc::interpolate(pair_.dispersed())*fvc::flux(Fi());
+    return
+        fvc::interpolate(pair_.dispersed().alphas(nodei))
+        *fvc::flux(Fi(nodei, nodej));
 }
-
 
 // ************************************************************************* //

@@ -2,8 +2,10 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2014-2015 OpenFOAM Foundation
+    \\  /    A nd           | Copyright (C) 2014-2017 OpenFOAM Foundation
      \\/     M anipulation  |
+-------------------------------------------------------------------------------
+2017-05-18 Jeff Heylmun:    Added support of polydisperse phase models
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -63,6 +65,12 @@ protected:
         const phasePair& pair_;
 
 
+    // Protected member functions
+
+        //- Zero-gradient wall-lubrication force at walls
+        tmp<volVectorField> zeroGradWalls(tmp<volVectorField>) const;
+
+
 public:
 
     //- Runtime type information
@@ -86,7 +94,7 @@ public:
 
     // Static data members
 
-        //- Coefficient dimensions
+        //- Force dimensions
         static const dimensionSet dimF;
 
 
@@ -116,13 +124,13 @@ public:
     // Member Functions
 
         //- Return phase-intensive wall lubrication force
-        virtual tmp<volVectorField> Fi() const = 0;
+        virtual tmp<volVectorField> Fi(const label, const label) const = 0;
 
         //- Return wall lubrication force
-        virtual tmp<volVectorField> F() const;
+        virtual tmp<volVectorField> F(const label, const label) const;
 
         //- Return face wall lubrication force
-        virtual tmp<surfaceScalarField> Ff() const;
+        virtual tmp<surfaceScalarField> Ff(const label, const label) const;
 };
 
 

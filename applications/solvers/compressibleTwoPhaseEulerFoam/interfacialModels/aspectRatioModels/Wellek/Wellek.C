@@ -2,8 +2,10 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2014-2015 OpenFOAM Foundation
+    \\  /    A nd           | Copyright (C) 2014-2017 OpenFOAM Foundation
      \\/     M anipulation  |
+-------------------------------------------------------------------------------
+2017-05-18 Jeff Heylmun:    Added support of polydisperse phase models
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -65,10 +67,13 @@ Foam::aspectRatioModels::Wellek::~Wellek()
 // * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * * //
 
 Foam::tmp<Foam::volScalarField>
-Foam::aspectRatioModels::Wellek::E() const
+Foam::aspectRatioModels::Wellek::E
+(
+    const label nodei,
+    const label nodej
+) const
 {
-    return scalar(1)/(scalar(1) + 0.163*pow(pair_.Eo(), 0.757));
+    return scalar(1)/(scalar(1) + 0.163*pow(pair_.Eo(nodei,nodej), 0.757));
 }
-
 
 // ************************************************************************* //

@@ -204,29 +204,61 @@ public:
         inline volScalarField& p();
 
         //- Return the drag coefficient
-        tmp<volScalarField> Kd() const;
+        tmp<volScalarField> Kd
+        (
+            const label nodei = -1,
+            const label nodej = -1
+        ) const;
 
         //- Return the face drag coefficient
-        tmp<surfaceScalarField> Kdf() const;
+        tmp<surfaceScalarField> Kdf
+        (
+            const label nodei = -1,
+            const label nodej = -1
+        ) const;
 
         //- Return the virtual mass coefficient
-        tmp<volScalarField> Vm() const;
+        tmp<volScalarField> Vm
+        (
+            const label nodei = -1,
+            const label nodej = -1
+        ) const;
 
         //- Return the face virtual mass coefficient
-        tmp<surfaceScalarField> Vmf() const;
+        tmp<surfaceScalarField> Vmf
+        (
+            const label nodei = -1,
+            const label nodej = -1
+        ) const;
 
         //- Return the heat transfer coefficient
-        tmp<volScalarField> Kh() const;
+        tmp<volScalarField> Kh
+        (
+            const label nodei = -1,
+            const label nodej = -1
+        ) const;
 
         //- Return the combined force (lift + wall-lubrication)
-        tmp<volVectorField> F() const;
+        tmp<volVectorField> F
+        (
+            const label nodei = -1,
+            const label nodej = -1
+        ) const;
 
         //- Return the combined face-force (lift + wall-lubrication)
-        tmp<surfaceScalarField> Ff() const;
+        tmp<surfaceScalarField> Ff
+        (
+            const label nodei = -1,
+            const label nodej = -1
+        ) const;
 
         //- Return the turbulent diffusivity
         //  Multiplies the phase-fraction gradient
-        tmp<volScalarField> D() const;
+        tmp<volScalarField> D
+        (
+            const label nodei = -1,
+            const label nodej = -1
+        ) const;
 
         //- Calculate and return mixture velocity
         tmp<volVectorField> mixtureU() const;

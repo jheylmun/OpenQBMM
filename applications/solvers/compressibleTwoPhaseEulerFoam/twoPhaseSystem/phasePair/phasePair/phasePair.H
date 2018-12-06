@@ -2,8 +2,10 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2014 OpenFOAM Foundation
+    \\  /    A nd           | Copyright (C) 2017 OpenFOAM Foundation
      \\/     M anipulation  |
+-------------------------------------------------------------------------------
+2017-05-18 Jeff Heylmun:    Added support of polydisperse phase models
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -119,34 +121,77 @@ public:
         tmp<volScalarField> rho() const;
 
         //- Relative velocity magnitude
-        tmp<volScalarField> magUr() const;
+        tmp<volScalarField> magUr
+        (
+            const label nodei = -1,
+            const label nodej = -1
+        ) const;
 
         //- Relative velocity
-        tmp<volVectorField> Ur() const;
+        tmp<volVectorField> Ur
+        (
+            const label nodei = -1,
+            const label nodej = -1
+        ) const;
 
         //- Reynolds number
-        tmp<volScalarField> Re() const;
+        tmp<volScalarField> Re
+        (
+            const label nodei = -1,
+            const label nodej = -1
+        ) const;
+
+        //- Weber number
+        tmp<volScalarField> We
+        (
+            const label nodei = -1,
+            const label nodej = -1
+        ) const;
 
         //- Prandtl number
-        tmp<volScalarField> Pr() const;
+        tmp<volScalarField> Pr
+        (
+            const label nodei = -1,
+            const label nodej = -1
+        ) const;
 
         //- Eotvos number
-        tmp<volScalarField> Eo() const;
+        tmp<volScalarField> Eo
+        (
+            const label nodei = -1,
+            const label nodej = -1
+        ) const;
 
         //- Eotvos number based on hydraulic diameter type 1
-        tmp<volScalarField> EoH1() const;
+        tmp<volScalarField> EoH1
+        (
+            const label nodei = -1,
+            const label nodej = -1
+        ) const;
 
         //- Eotvos number based on hydraulic diameter type 2
-        tmp<volScalarField> EoH2() const;
+        tmp<volScalarField> EoH2
+        (
+            const label nodei = -1,
+            const label nodej = -1
+        ) const;
 
         //- Morton Number
         tmp<volScalarField> Mo() const;
 
         //- Takahashi Number
-        tmp<volScalarField> Ta() const;
+        tmp<volScalarField> Ta
+        (
+            const label nodei = -1,
+            const label nodej = -1
+        ) const;
 
         //- Aspect ratio
-        virtual tmp<volScalarField> E() const;
+        virtual tmp<volScalarField> E
+        (
+            const label nodei = -1,
+            const label nodej = -1
+        ) const;
 
         // Access
 

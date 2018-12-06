@@ -80,7 +80,7 @@ protected:
         const label nMoments_;
 
         //- Advection terms for moment transport equations
-        mappedPtrList<volScalarField> divMoments_;
+        mappedPtrList<surfaceScalarField> momentFluxes_;
 
         //- Field used to find upwind values of the owner
         surfaceScalarField own_;
@@ -151,7 +151,7 @@ public:
     // Member Functions
 
         //- Return the advection term for the moment transport equation
-        inline const mappedPtrList<volScalarField>& divMoments() const;
+        inline const mappedPtrList<surfaceScalarField>& momentFluxes() const;
 
         //- Return the maximum Courant number ensuring moment realizability
         virtual scalar realizableCo() const = 0;

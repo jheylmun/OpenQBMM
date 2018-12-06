@@ -5,6 +5,8 @@
     \\  /    A nd           | Copyright (C) 2014-2017 OpenFOAM Foundation
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
+2017-05-18 Jeff Heylmun:    Added support of polydisperse phase models
+-------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
 
@@ -79,7 +81,11 @@ Foam::turbulentDispersionModels::Burns::~Burns()
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
 
 Foam::tmp<Foam::volScalarField>
-Foam::turbulentDispersionModels::Burns::D() const
+Foam::turbulentDispersionModels::Burns::D
+(
+    const label nodei,
+    const label nodej
+) const
 {
     const fvMesh& mesh(pair_.phase1().mesh());
     const dragModel&
@@ -93,18 +99,18 @@ Foam::turbulentDispersionModels::Burns::D() const
 
     return
         0.75
-       *drag.CdRe()
+       *drag.CdRe(nodei, nodej)
        *pair_.continuous().nu()
        *pair_.continuous().turbulence().nut()
        /(
             sigma_
-           *sqr(pair_.dispersed().d())
+           *sqr(pair_.dispersed().d(nodei))
         )
        *pair_.continuous().rho()
-       *pair_.dispersed()
        *(
-           1.0/max(pair_.dispersed(), residualAlpha_)
-         + 1.0/max(pair_.continuous(), residualAlpha_)
+           1.0
+         + pair_.dispersed().alphas(nodei)
+          /max(pair_.continuous(), residualAlpha_)
         );
 }
 

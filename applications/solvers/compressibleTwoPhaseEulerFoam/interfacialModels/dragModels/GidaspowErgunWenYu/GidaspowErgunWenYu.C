@@ -5,6 +5,8 @@
     \\  /    A nd           | Copyright (C) 2011-2017 OpenFOAM Foundation
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
+2017-05-18 Jeff Heylmun:    Added support of polydisperse phase models
+-------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
 
@@ -36,7 +38,7 @@ namespace Foam
 namespace dragModels
 {
     defineTypeNameAndDebug(GidaspowErgunWenYu, 0);
-    addToRunTimeSelectionTable(dragModel, GidaspowErgunWenYu, dictionary); 
+    addToRunTimeSelectionTable(dragModel, GidaspowErgunWenYu, dictionary);
 }
 }
 
@@ -81,11 +83,15 @@ Foam::dragModels::GidaspowErgunWenYu::~GidaspowErgunWenYu()
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
 
 Foam::tmp<Foam::volScalarField>
-Foam::dragModels::GidaspowErgunWenYu::CdRe() const
+Foam::dragModels::GidaspowErgunWenYu::CdRe
+(
+    const label nodei,
+    const label nodej
+) const
 {
     return
-        pos0(pair_.continuous() - 0.8)*WenYu_->CdRe()
-      + neg(pair_.continuous() - 0.8)*Ergun_->CdRe();
+        pos0(pair_.continuous().alphas(nodej) - 0.8)*WenYu_->CdRe(nodei, nodej)
+      + neg(pair_.continuous().alphas(nodej) - 0.8)*Ergun_->CdRe(nodei, nodej);
 }
 
 

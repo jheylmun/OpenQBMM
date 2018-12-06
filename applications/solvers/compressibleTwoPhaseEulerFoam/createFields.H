@@ -12,9 +12,9 @@ phaseModel& phase2 = fluid.phase2();
 volScalarField& alpha1 = phase1;
 volScalarField& alpha2 = phase2;
 
-volVectorField& U1 = phase1.U();
+volVectorField& U1 = phase1.URef();
 const surfaceScalarField& phi1 = phase1.phi();
-volVectorField& U2 = phase2.U();
+volVectorField& U2 = phase2.URef();
 const surfaceScalarField& phi2 = phase2.phi();
 
 #include "gh.H"

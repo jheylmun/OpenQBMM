@@ -2,8 +2,10 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2014-2016 OpenFOAM Foundation
+    \\  /    A nd           | Copyright (C) 2014-2017 OpenFOAM Foundation
      \\/     M anipulation  |
+-------------------------------------------------------------------------------
+2017-05-18 Jeff Heylmun:    Added support of polydisperse phase models
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -60,26 +62,40 @@ Foam::liftModel::~liftModel()
 
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
 
-Foam::tmp<Foam::volVectorField> Foam::liftModel::Fi() const
+Foam::tmp<Foam::volVectorField> Foam::liftModel::Fi
+(
+    const label nodei,
+    const label nodej
+) const
 {
     return
-        Cl()
+        Cl(nodei, nodej)
        *pair_.continuous().rho()
        *(
-            pair_.Ur() ^ fvc::curl(pair_.continuous().U())
+            pair_.Ur(nodei, nodej) ^ fvc::curl(pair_.continuous().U(nodej))
         );
 }
 
 
-Foam::tmp<Foam::volVectorField> Foam::liftModel::F() const
+Foam::tmp<Foam::volVectorField> Foam::liftModel::F
+(
+    const label nodei,
+    const label nodej
+) const
 {
-    return pair_.dispersed()*Fi();
+    return pair_.dispersed().alphas(nodei)*Fi(nodei, nodej);
 }
 
 
-Foam::tmp<Foam::surfaceScalarField> Foam::liftModel::Ff() const
+Foam::tmp<Foam::surfaceScalarField> Foam::liftModel::Ff
+(
+    const label nodei,
+    const label nodej
+) const
 {
-    return fvc::interpolate(pair_.dispersed())*fvc::flux(Fi());
+    return
+        fvc::interpolate(pair_.dispersed().alphas(nodei))
+       *fvc::flux(Fi(nodei, nodej));
 }
 
 

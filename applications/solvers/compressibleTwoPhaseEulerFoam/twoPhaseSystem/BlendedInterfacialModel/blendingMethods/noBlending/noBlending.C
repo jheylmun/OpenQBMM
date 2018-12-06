@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2014 OpenFOAM Foundation
+    \\  /    A nd           | Copyright (C) 2014-2017 OpenFOAM Foundation
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -70,7 +70,7 @@ Foam::tmp<Foam::volScalarField> Foam::blendingMethods::noBlending::f1
     const phaseModel& phase2
 ) const
 {
-    const fvMesh& mesh(volScalarField(phase1).mesh());
+    const fvMesh& mesh(phase1.mesh());
 
     return
         tmp<volScalarField>
@@ -101,7 +101,7 @@ Foam::tmp<Foam::volScalarField> Foam::blendingMethods::noBlending::f2
     const phaseModel& phase2
 ) const
 {
-    const fvMesh& mesh(volScalarField(phase1).mesh());
+    const fvMesh& mesh(phase1.mesh());
 
     return
         tmp<volScalarField>

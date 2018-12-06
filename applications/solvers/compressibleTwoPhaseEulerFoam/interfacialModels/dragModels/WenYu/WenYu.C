@@ -5,6 +5,8 @@
     \\  /    A nd           | Copyright (C) 2011-2017 OpenFOAM Foundation
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
+2017-05-18 Jeff Heylmun:    Added support of polydisperse phase models
+-------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
 
@@ -61,14 +63,22 @@ Foam::dragModels::WenYu::~WenYu()
 
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
 
-Foam::tmp<Foam::volScalarField> Foam::dragModels::WenYu::CdRe() const
+Foam::tmp<Foam::volScalarField> Foam::dragModels::WenYu::CdRe
+(
+    const label nodei,
+    const label nodej
+) const
 {
     volScalarField alpha2
     (
-        max(scalar(1) - pair_.dispersed(), pair_.continuous().residualAlpha())
+        max
+        (
+            scalar(1) - pair_.dispersed().alphas(nodei),
+            pair_.continuous().residualAlpha()
+        )
     );
 
-    volScalarField Res(alpha2*pair_.Re());
+    volScalarField Res(alpha2*pair_.Re(nodei, nodej));
     volScalarField CdsRes
     (
         neg(Res - 1000)*24.0*(1.0 + 0.15*pow(Res, 0.687))
@@ -78,7 +88,11 @@ Foam::tmp<Foam::volScalarField> Foam::dragModels::WenYu::CdRe() const
     return
         CdsRes
        *pow(alpha2, -3.65)
-       *max(pair_.continuous(), pair_.continuous().residualAlpha());
+       *max
+        (
+            pair_.continuous().alphas(nodej),
+            pair_.continuous().residualAlpha()
+        );
 }
 
 

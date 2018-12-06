@@ -131,7 +131,7 @@ void Foam::phaseFluxIntegrator::integrateFluxes
             pi
         );
         phase1_.decode();
-        phase1_.encode();
+        //phase1_.encode();
 
         phase2_.advect
         (
@@ -147,7 +147,7 @@ void Foam::phaseFluxIntegrator::integrateFluxes
         alpha2 = 1.0 - alpha1;
         alpha2.correctBoundaryConditions();
         phase2_.decode();
-        phase2_.encode();
+        //phase2_.encode();
 
 
         Ui = phase1_.fluid().mixtureU();

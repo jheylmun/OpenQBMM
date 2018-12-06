@@ -60,23 +60,28 @@ Foam::heatTransferModels::RanzMarshall::~RanzMarshall()
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
 
 Foam::tmp<Foam::volScalarField>
-Foam::heatTransferModels::RanzMarshall::K() const
+Foam::heatTransferModels::RanzMarshall::K
+(
+    const label nodei,
+    const label nodej
+) const
 {
     const volScalarField& alphag = pair_.continuous();
-    volScalarField cbrtPr(cbrt(pair_.Pr()));
+    volScalarField cbrtPr(cbrt(pair_.Pr(nodei, nodej)));
     volScalarField Nu
     (
         (7.0 - 10.0*alphag + 5.0*sqr(alphag))
-       *(1.0 + 0.7*pow(pair_.Re(), 0.2)*cbrtPr)
-      + (1.33 - 2.4*alphag + 1.2*sqr(alphag))*pow(pair_.Re(), 0.7)*cbrtPr
+       *(1.0 + 0.7*pow(pair_.Re(nodei, nodej), 0.2)*cbrtPr)
+      + (1.33 - 2.4*alphag + 1.2*sqr(alphag))
+       *pow(pair_.Re(nodei, nodej), 0.7)*cbrtPr
     );
 
     return
         6.0
-       *max(pair_.dispersed(), residualAlpha_)
+       *max(pair_.dispersed().alphas(nodei), residualAlpha_)
        *pair_.continuous().kappa()
        *Nu
-       /sqr(pair_.dispersed().d());
+       /sqr(pair_.dispersed().d(nodei));
 }
 
 

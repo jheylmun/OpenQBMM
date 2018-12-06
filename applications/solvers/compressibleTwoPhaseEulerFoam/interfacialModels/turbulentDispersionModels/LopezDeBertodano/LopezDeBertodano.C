@@ -2,8 +2,10 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2014-2015 OpenFOAM Foundation
+    \\  /    A nd           | Copyright (C) 2014-2017 OpenFOAM Foundation
      \\/     M anipulation  |
+-------------------------------------------------------------------------------
+2017-05-18 Jeff Heylmun:    Added support of polydisperse phase models
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -67,7 +69,11 @@ Foam::turbulentDispersionModels::LopezDeBertodano::~LopezDeBertodano()
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
 
 Foam::tmp<Foam::volScalarField>
-Foam::turbulentDispersionModels::LopezDeBertodano::D() const
+Foam::turbulentDispersionModels::LopezDeBertodano::D
+(
+    const label nodei,
+    const label nodej
+) const
 {
     return
         Ctd_

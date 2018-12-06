@@ -2,8 +2,10 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2014-2015 OpenFOAM Foundation
+    \\  /    A nd           | Copyright (C) 2014-2017 OpenFOAM Foundation
      \\/     M anipulation  |
+-------------------------------------------------------------------------------
+2017-05-18 Jeff Heylmun:    Added support of polydisperse phase models
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -60,15 +62,19 @@ Foam::liftModels::Moraga::~Moraga()
 
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
 
-Foam::tmp<Foam::volScalarField> Foam::liftModels::Moraga::Cl() const
+Foam::tmp<Foam::volScalarField> Foam::liftModels::Moraga::Cl
+(
+    const label nodei,
+    const label nodej
+) const
 {
-    volScalarField Re(pair_.Re());
+    volScalarField Re(pair_.Re(nodei, nodej));
 
     volScalarField sqrSr
     (
-        sqr(pair_.dispersed().d())
+        sqr(pair_.dispersed().d(nodei))
        /pair_.continuous().nu()
-       *mag(fvc::grad(pair_.continuous().U()))
+       *mag(fvc::grad(pair_.continuous().U(nodej)))
     );
 
     if

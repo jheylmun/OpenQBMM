@@ -244,6 +244,16 @@ void Foam::PDFTransportModels::univariatePDFTransportModel
     }
 }
 
+void Foam::PDFTransportModels::univariatePDFTransportModel::updateAdvection()
+{
+    momentAdvection_->update();
+}
+
+const Foam::mappedPtrList<Foam::surfaceScalarField>& Foam::PDFTransportModels::univariatePDFTransportModel::momentFluxes() const
+{
+    return momentAdvection_->momentFluxes();
+}
+
 void Foam::PDFTransportModels::univariatePDFTransportModel::solve()
 {
     momentAdvection_().update();
@@ -262,7 +272,7 @@ void Foam::PDFTransportModels::univariatePDFTransportModel::solve()
             new fvScalarMatrix
             (
                 fvm::ddt(m)
-              + momentAdvection_().divMoments()[momenti]
+              + fvc::div(momentAdvection_().momentFluxes()[momenti])
               - momentDiffusion(m)
               ==
                 implicitMomentSource(m)
@@ -292,5 +302,49 @@ void Foam::PDFTransportModels::univariatePDFTransportModel::solve()
     //quadrature_.updateMoments();
 }
 
+void Foam::PDFTransportModels::univariatePDFTransportModel::solveSources()
+{
+    // List of moment transport equations
+    PtrList<fvScalarMatrix> momentEqns(quadrature_.nMoments());
+
+    // Solve moment transport equations
+    forAll(quadrature_.moments(), momenti)
+    {
+        volUnivariateMoment& m = quadrature_.moments()[momenti];
+
+        momentEqns.set
+        (
+            momenti,
+            new fvScalarMatrix
+            (
+                fvm::ddt(m)
+              - momentDiffusion(m)
+              ==
+                implicitMomentSource(m)
+            )
+        );
+    }
+
+    if (solveODESource_)
+    {
+        explicitMomentSource();
+    }
+
+    forAll (momentEqns, mEqni)
+    {
+        volUnivariateMoment& m = quadrature_.moments()[mEqni];
+
+        if (solveODESource_)
+        {
+            momentEqns[mEqni] -= fvc::ddt(m);
+        }
+
+        momentEqns[mEqni].relax();
+        momentEqns[mEqni].solve();
+    }
+
+    quadrature_.updateQuadrature();
+    //quadrature_.updateMoments();
+}
 
 // ************************************************************************* //

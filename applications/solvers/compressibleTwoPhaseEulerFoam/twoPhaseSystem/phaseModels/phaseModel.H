@@ -165,6 +165,11 @@ public:
         //- Return the name of this phase
         inline const word& name() const;
 
+        virtual label nNodes() const
+        {
+            return 1;
+        }
+
         //- Return the twoPhaseSystem to which this phase belongs
         inline const twoPhaseSystem& fluid() const;
 
@@ -207,46 +212,64 @@ public:
         inline const rhoThermo& thermo() const;
 
         //- Return non-const access to the thermodynamic model
-        inline rhoThermo& thermo();
+        inline rhoThermo& thermoRef();
 
         //- Const access to the phase density
         inline const volScalarField& rho() const;
 
         //- Non-const access to the phase density
-        inline volScalarField& rho();
+        inline volScalarField& rhoRef();
+
+        //- Const access to the volume fraction
+        virtual const volScalarField& alphas(const label i = -1) const
+        {
+            return *this;
+        }
+
+        //- Non-const access to the volume fraction
+        virtual volScalarField& alphasRef(const label i = -1)
+        {
+            return *this;
+        }
 
         //- Const access to the phase velocity
-        inline const volVectorField& U() const;
+        virtual const volVectorField& U(const label i = -1) const
+        {
+            return U_;
+        }
 
         //- Non-const access to the phase velocity
-        inline volVectorField& U();
+        virtual volVectorField& URef(const label i = -1)
+        {
+            return U_;
+        }
 
         //- Return the phase volumentric flux
-        virtual const surfaceScalarField& phi() const = 0;
+        virtual tmp<surfaceScalarField> phi(const label i = -1) const = 0;
 
         //- Return the phase volumentric flux
-        virtual tmp<surfaceScalarField> alphaPhi() const = 0;
+        virtual tmp<surfaceScalarField> alphaPhi(const label i = -1) const = 0;
 
         //- Const access to the phase total energy
         inline const volScalarField& E() const;
 
         //- Non-const access to the phase total energy
-        inline volScalarField& E();
+        inline volScalarField& ERef();
 
         //- Const access to the phase pseudo thermal energy
-        virtual const volScalarField& Theta() const = 0;
+        virtual tmp<volScalarField> Theta() const = 0;
 
         //- Non-const access to the phase pseudo thermal energy
-        virtual volScalarField& Theta() = 0;
+        virtual volScalarField& ThetaRef() = 0;
 
         //- Const access to the phase pressure
         virtual const volScalarField& p() const = 0;
 
         //- Non-const access to the phase pressure
-        virtual volScalarField& p() = 0;
+        virtual volScalarField& pRef() = 0;
 
         //- Return the Sauter-mean diameter
-        tmp<volScalarField> d() const;
+        tmp<volScalarField> d(const label i = -1) const;
 
         //- Speed of sound of the phase
         virtual tmp<volScalarField> c() const = 0;
@@ -343,70 +366,58 @@ public:
         virtual tmp<fvVectorMatrix> divDevRhoReff(volVectorField& U) const;
 
         //- Const access to phasic density
-        virtual const volScalarField& alphaRho() const = 0;
+        virtual tmp<volScalarField> alphaRho(const label i = -1) const = 0;
 
         //- Non-const access to phasic density
-        virtual volScalarField& alphaRho() = 0;
+        virtual volScalarField& alphaRhoRef(const label i = -1) = 0;
 
         //- Const access to phasic momentum
-        virtual const volVectorField& alphaRhoU() const = 0;
+        virtual tmp<volVectorField> alphaRhoU(const label i = -1) const = 0;
 
         //- Non-const access to phasic momentum
-        virtual volVectorField& alphaRhoU() = 0;
+        virtual volVectorField& alphaRhoURef(const label i = -1) = 0;
 
         //- Const access to total phasic energy
-        virtual const volScalarField& alphaRhoE() const = 0;
+        virtual tmp<volScalarField> alphaRhoE(const label i = -1) const = 0;
 
         //- Non-const access to total phasic energy
-        virtual volScalarField& alphaRhoE() = 0;
+        virtual volScalarField& alphaRhoERef(const label i = -1) = 0;
 
         //- Const access to phase internal energy
-        virtual const volScalarField& alphaRhoPTE() const = 0;
+        virtual tmp<volScalarField> alphaRhoPTE(const label i = -1) const = 0;
 
         //- Non-const access to phase internal energy
-        virtual volScalarField& alphaRhoPTE() = 0;
+        virtual volScalarField& alphaRhoPTERef(const label i = -1) = 0;
 
         //- Const access to phasic mass flux
-        virtual const surfaceScalarField& massFlux() const = 0;
-
-        //- Non-const access to phasic mass flux
-        virtual surfaceScalarField& massFlux() = 0;
+        virtual tmp<surfaceScalarField> massFlux() const = 0;
 
         //- Const access to phasic momentum flux
-        virtual const surfaceVectorField& momentumFlux() const = 0;
-
-        //- Non-const access to phasic momentum flux
-        virtual surfaceVectorField& momentumFlux() = 0;
+        virtual tmp<surfaceVectorField> momentumFlux() const = 0;
 
         //- Const access to total phasic energy flux
-        virtual const surfaceScalarField& energyFlux() const = 0;
-
-        //- Non-const access to total phasic energy flux
-        virtual surfaceScalarField& energyFlux() = 0;
+        virtual tmp<surfaceScalarField> energyFlux() const = 0;
 
         //- Const access to phase internal energy flux
-        virtual const surfaceScalarField& PTEFlux() const = 0;
-
-        //- Non-const access to phase internal energy flux
-        virtual surfaceScalarField& PTEFlux() = 0;
+        virtual tmp<surfaceScalarField> PTEFlux() const = 0;
 
         //- Return the gradient of pressure
-        virtual const surfaceScalarField& alphaf() const = 0;
+        virtual tmp<surfaceScalarField> alphaf(const label i = -1) const = 0;
 
         //- Return the gradient of volume fraction
-        virtual const volVectorField& gradAlpha() const
+        virtual const volVectorField& gradAlpha(const label i = -1) const
         {
             return gradAlpha_;
         }
 
         //- Return non-const access to the gradient of volume fraction
-        virtual volVectorField& gradAlpha()
+        virtual volVectorField& gradAlphaRef(const label i = -1)
         {
             return gradAlpha_;
         }
 
         //- Return the gradient of velocity
-        virtual tmp<volTensorField> gradU() const = 0;
+        virtual tmp<volTensorField> gradU(const label i = -1) const = 0;
 
         //- Return the gradient of pressure
         virtual tmp<volVectorField> gradp() const = 0;

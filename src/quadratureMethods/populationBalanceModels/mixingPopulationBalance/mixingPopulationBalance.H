@@ -282,8 +282,17 @@ public:
         //- Return the courant number based on abscissae
         virtual scalar CoNum() const;
 
+        //- Advect moments
+        virtual void updateAdvection();
+
+        //- Return divergence of moment fluxes
+        virtual const mappedPtrList<surfaceScalarField>& momentFluxes() const;
+
         //- Solve population balance equation
-        void solve();
+        virtual void solve();
+
+        //- Solve only for sources
+        virtual void solveSources();
 };
 
 

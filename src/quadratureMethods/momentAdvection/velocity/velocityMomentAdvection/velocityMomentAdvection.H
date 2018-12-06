@@ -94,7 +94,7 @@ protected:
         labelListList nodeIndexes_;
 
         //- Advection terms for moment transport equations
-        PtrList<volScalarField> divMoments_;
+        mappedPtrList<surfaceScalarField> momentFluxes_;
 
         //- Coefficient of restitution
         scalar ew_;
@@ -150,7 +150,7 @@ public:
     // Member Functions
 
         //- Return the advection term for the moment transport equation
-        inline const PtrList<volScalarField>& divMoments() const;
+        inline const mappedPtrList<surfaceScalarField>& momentFluxes() const;
 
         //- Return the maximum Courant number ensuring moment realizability
         virtual scalar realizableCo() const = 0;
@@ -160,21 +160,6 @@ public:
 
         //- Update moment advection
         virtual void update() = 0;
-
-        //- Update moment advection using a specified velocity field
-        virtual void update
-        (
-            const surfaceScalarField& U,
-            const bool wallCollisions
-        ) = 0;
-
-        //- Update moment advection using a specified list of velocity fields
-        virtual void update
-        (
-            const mappedPtrList<volVectorField>& Us,
-            const bool wallCollisions
-        ) = 0;
-
 };
 
 

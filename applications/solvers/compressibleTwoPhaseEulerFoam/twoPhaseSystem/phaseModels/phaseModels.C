@@ -27,8 +27,9 @@ License
 
 #include "phaseModel.H"
 #include "fluidPhaseModel.H"
-#include "liquidPhaseModel.H"
+//#include "liquidPhaseModel.H"
 #include "granularPhaseModel.H"
+#include "vdfPhaseModel.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
@@ -48,6 +49,14 @@ namespace Foam
         granularPhaseModel,
         dictionary,
         granularPhaseModel
+    );
+
+    addNamedToRunTimeSelectionTable
+    (
+        phaseModel,
+        vdfPhaseModel,
+        dictionary,
+        vdfPhaseModel
     );
 }
 

@@ -156,7 +156,7 @@ void Foam::phaseModel::setTurbulenceModel()
             this->rho(),
             this->U(),
             this->massFlux(),
-            this->phi(),
+            this->phi()(),
             *this
         );
 }
@@ -188,7 +188,7 @@ Foam::phaseModel::turbulence()
 }
 
 
-Foam::tmp<Foam::volScalarField> Foam::phaseModel::d() const
+Foam::tmp<Foam::volScalarField> Foam::phaseModel::d(const label i) const
 {
     return dPtr_().d();
 }
@@ -312,7 +312,7 @@ void Foam::phaseModel::correctInflowOutflow(surfaceScalarField& alphaPhi) const
 {
     surfaceScalarField::Boundary& alphaPhiBf = alphaPhi.boundaryFieldRef();
     const volScalarField::Boundary& alphaBf = boundaryField();
-    const surfaceScalarField::Boundary& phiBf = phi().boundaryField();
+    const surfaceScalarField::Boundary& phiBf = phi()().boundaryField();
 
     forAll(alphaPhiBf, patchi)
     {

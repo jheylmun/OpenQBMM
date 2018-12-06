@@ -53,7 +53,7 @@ inline const Foam::rhoThermo& Foam::phaseModel::thermo() const
     return thermoPtr_();
 }
 
-inline Foam::rhoThermo& Foam::phaseModel::thermo()
+inline Foam::rhoThermo& Foam::phaseModel::thermoRef()
 {
     return thermoPtr_();
 }
@@ -63,19 +63,9 @@ inline const Foam::volScalarField& Foam::phaseModel::rho() const
     return rho_;
 }
 
-inline Foam::volScalarField& Foam::phaseModel::rho()
+inline Foam::volScalarField& Foam::phaseModel::rhoRef()
 {
     return rho_;
-}
-
-inline const Foam::volVectorField& Foam::phaseModel::U() const
-{
-    return U_;
-}
-
-inline Foam::volVectorField& Foam::phaseModel::U()
-{
-    return U_;
 }
 
 inline const Foam::volScalarField& Foam::phaseModel::E() const
@@ -83,7 +73,7 @@ inline const Foam::volScalarField& Foam::phaseModel::E() const
     return E_;
 }
 
-inline Foam::volScalarField& Foam::phaseModel::E()
+inline Foam::volScalarField& Foam::phaseModel::ERef()
 {
     return E_;
 }

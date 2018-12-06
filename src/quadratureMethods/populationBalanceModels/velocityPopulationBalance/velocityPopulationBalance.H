@@ -130,22 +130,18 @@ public:
         //- Return the maximum Courant number based on velocities
         virtual scalar CoNum() const;
 
+        //- Advect moments
+        virtual void updateAdvection();
+
+        //- Return divergence of moment fluxes
+        virtual const mappedPtrList<surfaceScalarField>& momentFluxes() const;
+
         //- Solve population balance equation
         virtual void solve();
 
-        //- Solve mean tranport
-        virtual void meanTransport
-        (
-            const surfaceScalarField& phi,
-            const bool wallCollisions
-        );
+        //- Solve only for sources
+        virtual void solveSources();
 
-        //- Solve relative transport
-        virtual void relativeTransport
-        (
-            const mappedPtrList<volVectorField>& Vs,
-            const bool wallCollisions
-        );
 };
 
 

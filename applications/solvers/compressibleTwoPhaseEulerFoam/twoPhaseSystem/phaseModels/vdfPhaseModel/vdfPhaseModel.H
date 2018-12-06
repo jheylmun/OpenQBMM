@@ -22,24 +22,24 @@ License
     along with OpenFOAM.  If not, see <http://www.gnu.org/licenses/>.
 
 Class
-    Foam::granularPhaseModel
+    Foam::vdfPhaseModel
 
 SourceFiles
-    granularPhaseModel.C
+    vdfPhaseModel.C
 
 \*---------------------------------------------------------------------------*/
 
-#ifndef granularPhaseModel_H
-#define granularPhaseModel_H
+#ifndef vdfPhaseModel_H
+#define vdfPhaseModel_H
 
 #include "phaseModel.H"
 #include "dragModel.H"
 #include "granularViscosityModel.H"
-#include "conductivityModel.H"
 #include "radialModel.H"
 #include "granularPressureModel.H"
 #include "frictionalStressModel.H"
-#include "granularFluxFunction.H"
+#include "populationBalanceModel.H"
+#include "quadratureApproximations.H"
 
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
@@ -48,15 +48,17 @@ namespace Foam
 {
 
 /*---------------------------------------------------------------------------*\
-                           Class granularPhaseModel Declaration
+                           Class vdfPhaseModel Declaration
 \*---------------------------------------------------------------------------*/
 
-class granularPhaseModel
+class vdfPhaseModel
 :
     public phaseModel
 {
 protected:
     // Protected data
+
+    IOdictionary populationBalanceProperties_;
 
         // Sub-models
 
@@ -64,11 +66,7 @@ protected:
             autoPtr<kineticTheoryModels::viscosityModel>
                 viscosityModel_;
 
-            //- Run-time selected conductivity model
-            autoPtr<kineticTheoryModels::conductivityModel>
-                conductivityModel_;
-
-            //- Run-time selected radial distribution model
+                //- Run-time selected radial distribution model
             autoPtr<kineticTheoryModels::radialModel> radialModel_;
 
             //- Run-time selected granular pressure model
@@ -81,9 +79,6 @@ protected:
 
 
         // Kinetic Theory Model coefficients
-
-            //- Use equilibrium approximation: generation == dissipation
-            Switch equilibrium_;
 
             //- Coefficient of restitution
             dimensionedScalar e_;
@@ -115,30 +110,55 @@ protected:
             //- The granular radial distribution
             volScalarField gs0_;
 
-            //- The granular "thermal" conductivity
-            volScalarField kappa_;
-
             //- The effective viscosity
             volScalarField nut_;
 
             //- The frictional viscosity
             volScalarField nuFric_;
 
+            //- The speed of sound
+            volScalarField c_;
 
-        //- Phase psudo-thermal energy
-        volScalarField alphaRhoPTE_;
+            //- Total momentum
+            volVectorField alphaRhoU_;
 
-        //- Phase psudo thermal energy flux
-        surfaceScalarField PTEFlux_;
+            //- List of node momentums
+            PtrList<volVectorField> alphaRhoUs_;
 
-        //- Model to calculate hyperbolic phase flux
-        autoPtr<granularFluxFunction> fluxFunction_;
+            //- Total phasic energy
+            volScalarField alphaRhoE_;
+
+
+        //- Conservative fluxes
+
+            //- volumetric flux
+            surfaceScalarField phi_;
+
+            //- Mass flux
+            surfaceScalarField massFlux_;
+
+            //- Total energy flux
+            surfaceScalarField energyFlux_;
+
+
+    autoPtr<populationBalanceModel> populationBalance_;
+
+    velocityQuadratureApproximation& quadrature_;
+
+        //- Fields stored for partial ode steps
+
+            //- Changes in mass
+            PtrList<PtrList<volScalarField>> moments_;
+            PtrList<PtrList<volScalarField>> deltaMoments_;
+
+            PtrList<volScalarField> alphaRhoEs_;
+            PtrList<volScalarField> deltaAlphaRhoEs_;
 
 
 public:
 
     // Constructors
-        granularPhaseModel
+        vdfPhaseModel
         (
             const twoPhaseSystem& fluid,
             const dictionary& dict,
@@ -147,10 +167,15 @@ public:
 
 
     //- Destructor
-    virtual ~granularPhaseModel();
+    virtual ~vdfPhaseModel();
 
 
     // Access
+
+        virtual label nNodes() const
+        {
+            return quadrature_.nodes().size();
+        }
 
         //- Return that the phase uses a slave pressure
         virtual bool slavePressure() const
@@ -165,13 +190,13 @@ public:
         }
 
         //- Const access to the phase pseudo thermal energy
-        virtual const volScalarField& Theta() const
+        virtual tmp<volScalarField> Theta() const
         {
             return Theta_;
         }
 
         //- Non-const access to the phase pseudo thermal energy
-        virtual volScalarField& Theta()
+        virtual volScalarField& ThetaRef()
         {
             return Theta_;
         }
@@ -183,66 +208,191 @@ public:
         }
 
         //- Non-const access to the phase pressure
-        virtual volScalarField& p()
+        virtual volScalarField& pRef()
         {
             return Ps_;
+        }
+
+         //- Const access to the volume fraction
+        virtual const volScalarField& alphas(const label i = -1) const
+        {
+            return
+            (
+                i == -1
+              ? refCast<const volScalarField>(*this)
+              : quadrature_.nodes()[i].primaryWeight()
+            );
+        }
+
+        //- Non-const access to the volume fraction
+        virtual volScalarField& alphasRef(const label i = -1)
+        {
+            return
+            (
+                i == -1
+              ? (*this)
+              : quadrature_.nodes()[i].primaryWeight()
+            );
+        }
+
+        //- Const access to the phase velocity
+        virtual const volVectorField& U(const label i = -1) const
+        {
+            return (i == -1 ? U_ : quadrature_.nodes()[i].primaryAbscissa());
+        }
+
+        //- Non-const access to the phase velocity
+        virtual volVectorField& URef(const label i = -1)
+        {
+            return (i == -1 ? U_ : quadrature_.nodes()[i].primaryAbscissa());
         }
 
         //- Speed of sound in the phase
         virtual tmp<volScalarField> c() const;
 
-        //- Const access to phasic thermal energy
-        virtual const volScalarField& alphaRhoPTE() const
-        {
-            return alphaRhoPTE_;
-        }
 
-        //- Non-const access to phasic thermal energy
-        virtual volScalarField& alphaRhoPTE()
+        //- Return the phase volumentric flux
+        virtual tmp<surfaceScalarField> phi(const label i = -1) const
         {
-            return alphaRhoPTE_;
-        }
-
-        //- Const access to phase thermal energy flux
-        virtual const surfaceScalarField& PTEFlux() const
-        {
-            return PTEFlux_;
-        }
-
-        //- Non-const access to phase thermal energy flux
-        virtual surfaceScalarField& thermalEnergyFlux()
-        {
-            return PTEFlux_;
+            return
+            (
+                i == -1
+              ? tmp<surfaceScalarField>(phi_)
+              : fvc::flux(quadrature_.nodes()[i].primaryAbscissa())
+            );
         }
 
         //- Return the phase volumentric flux
-        virtual const surfaceScalarField& phi() const
+        virtual tmp<surfaceScalarField> alphaPhi(const label i = -1) const
         {
-            return fluxFunction_->phi();
+            return
+            (
+                i == -1
+              ? phi_*fvc::interpolate(*this)
+              : fvc::flux
+                (
+                    quadrature_.nodes()[i].primaryWeight()
+                   *quadrature_.nodes()[i].primaryAbscissa()
+                )
+            );
         }
 
-        //- Return the phase volumentric flux
-        virtual tmp<surfaceScalarField> alphaPhi() const
+        //- Const access to phasic density
+        virtual tmp<volScalarField> alphaRho(const label i = -1) const
         {
-            return fluxFunction_->alphaPhi();
+            return
+            (
+                i == -1
+              ? Foam::max((*this), residualAlpha_)*rho_
+              : quadrature_.nodes()[i].primaryWeight()*rho_
+            );
+        }
+
+        //- Non-const access to phasic density
+        virtual volScalarField& alphaRhoRef(const label i = -1)
+        {
+            NotImplemented;
+            return *this;
+        }
+
+        //- Const access to phasic momentum
+        virtual tmp<volVectorField> alphaRhoU(const label i = -1) const
+        {
+            return
+            (
+                i == -1
+              ? (*this)*rho_*U_
+              : quadrature_.nodes()[i].primaryWeight()*rho_
+               *quadrature_.nodes()[i].primaryAbscissa()
+            );
+        }
+
+        //- Non-const access to phasic momentum
+        virtual volVectorField& alphaRhoURef(const label i = -1)
+        {
+            return
+            (
+                i == -1
+              ? alphaRhoU_
+              : alphaRhoUs_[i]
+            );
+        }
+
+        //- Const access to total phasic energy
+        virtual tmp<volScalarField> alphaRhoE(const label i = -1) const
+        {
+            return
+            (
+                i == -1
+              ? (*this)*rho_*E_
+              : quadrature_.nodes()[i].primaryWeight()*rho_*E_
+            );
+        }
+
+        //- Non-const access to total phasic energy
+        virtual volScalarField& alphaRhoERef(const label i = -1)
+        {
+            if (i != -1)
+            {
+                NotImplemented;
+            }
+            return alphaRhoE_;
+        }
+
+        //- Const access to phase internal energy
+        virtual tmp<volScalarField> alphaRhoPTE(const label i = -1) const
+        {
+            return (*this)*rho_*Theta_*3.0/2.0;
+        }
+
+        //- Non-const access to phase internal energy
+        virtual volScalarField& alphaRhoPTERef(const label i = -1)
+        {
+            NotImplemented;
+            return alphaRhoE_;
+        }
+
+        //- Const access to phasic mass flux
+        virtual tmp<surfaceScalarField> massFlux() const
+        {
+            return massFlux_;
+        }
+
+        //- Const access to phasic momentum flux
+        virtual tmp<surfaceVectorField> momentumFlux() const
+        {
+            return phi_*fvc::interpolate(U_*(*this)*rho_);
+        }
+
+        //- Const access to total phasic energy flux
+        virtual tmp<surfaceScalarField> energyFlux() const
+        {
+            return energyFlux_;
+        }
+
+        //- Const access to phase internal energy flux
+        virtual tmp<surfaceScalarField> PTEFlux() const
+        {
+            NotImplemented;
+            return energyFlux_;
         }
 
         //- Return the gradient of pressure
-        virtual const surfaceScalarField& alphaf() const
+        virtual tmp<surfaceScalarField> alphaf(const label i = -1) const
         {
-            return fluxFunction_->alphaf();
+            return fvc::interpolate(*this);
         }
 
         //- Return the gradient of velocity
-        virtual tmp<volTensorField> gradU() const
+        virtual tmp<volTensorField> gradU(const label i = -1) const
         {
-            return fluxFunction_->gradU();
+            return fvc::grad(U_);
         }
 
         //- Return the gradient of pressure
         virtual tmp<volVectorField> gradp() const
         {
-            return fluxFunction_->gradp();
+            return fvc::grad(Ps_ + Pfric_);
         }
 
         //- Return the turbulence kinetic energy
@@ -310,6 +460,13 @@ public:
 
         //- Read phaseProperties dictionary
         virtual bool read(const dictionary& phaseProperties);
+
+        //- Set the number of steps used in ode solution to hyperbolic terms
+        virtual void setNSteps
+        (
+            const boolList& storeCoeffs,
+            const boolList& storeFcoeffs
+        );
 };
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //

@@ -110,20 +110,6 @@ public:
 
         //- Update moment advection
         virtual void update();
-
-        //- Update moment advection using a specified velocity field
-        virtual void update
-        (
-            const surfaceScalarField& U,
-            const bool wallCollisions
-        );
-
-        //- Update moment advection using a specified list of velocity fields
-        virtual void update
-        (
-            const mappedPtrList<volVectorField>& Us,
-            const bool wallCollisions
-        );
 };
 
 

@@ -370,7 +370,7 @@ Foam::PDFTransportModels::populationBalanceModels::univariatePopulationBalance
     return impSource;
 }
 
-Foam::scalar 
+Foam::scalar
 Foam::PDFTransportModels::populationBalanceModels::univariatePopulationBalance
 ::cellMomentSource
 (
@@ -384,25 +384,44 @@ Foam::PDFTransportModels::populationBalanceModels::univariatePopulationBalance
             + phaseSpaceConvection(momentOrder, celli);
 }
 
-Foam::scalar 
+Foam::scalar
 Foam::PDFTransportModels::populationBalanceModels::univariatePopulationBalance
 ::realizableCo() const
 {
     return univariatePDFTransportModel::realizableCo();
 }
 
-Foam::scalar 
+Foam::scalar
 Foam::PDFTransportModels::populationBalanceModels::univariatePopulationBalance
 ::CoNum() const
 {
     return 0.0;
 }
 
-void 
+void Foam::PDFTransportModels::populationBalanceModels::univariatePopulationBalance::
+updateAdvection()
+{
+    univariatePDFTransportModel::updateAdvection();
+}
+
+const Foam::mappedPtrList<Foam::surfaceScalarField>& Foam::PDFTransportModels::populationBalanceModels::univariatePopulationBalance::
+momentFluxes() const
+{
+    return univariatePDFTransportModel::momentFluxes();
+}
+
+void
 Foam::PDFTransportModels::populationBalanceModels::univariatePopulationBalance
 ::solve()
 {
     univariatePDFTransportModel::solve();
+}
+
+void
+Foam::PDFTransportModels::populationBalanceModels::univariatePopulationBalance
+::solveSources()
+{
+    univariatePDFTransportModel::solveSources();
 }
 
 // ************************************************************************* //

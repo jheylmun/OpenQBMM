@@ -39,6 +39,7 @@ SourceFiles
 #include "volFields.H"
 #include "dimensionedTypes.H"
 #include "runTimeSelectionTables.H"
+#include "mappedPtrList.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
@@ -127,8 +128,17 @@ public:
         //- Return the courant number based on abscissae
         virtual scalar CoNum() const = 0;
 
+        //- Advect moments
+        virtual void updateAdvection() = 0;
+
+        //- Return divergence of moment fluxes
+        virtual const mappedPtrList<surfaceScalarField>& momentFluxes() const = 0;
+
         //- Solve population balance equation
         virtual void solve() = 0;
+
+        //- Solve only for sources
+        virtual void solveSources() = 0;
 
 };
 

@@ -514,7 +514,7 @@ Foam::tmp<Foam::volScalarField> Foam::granularPhaseModel::c() const
     (
         new volScalarField
         (
-            IOobject::groupName("a", name()),
+            IOobject::groupName("c", name()),
             sqrt
             (
                 pPrime()/rho_

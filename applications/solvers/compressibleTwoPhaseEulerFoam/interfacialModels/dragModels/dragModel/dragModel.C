@@ -2,8 +2,11 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2011-2015 OpenFOAM Foundation
+    \\  /    A nd           | Copyright (C) 2011-2017 OpenFOAM Foundation
      \\/     M anipulation  |
+-------------------------------------------------------------------------------
+2017-05-18 Jeff Heylmun:    Added support of polydisperse phase models
+2017-05-24 Jeff Heylmun:    Added return functions for acceleration
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -26,6 +29,7 @@ License
 #include "dragModel.H"
 #include "phasePair.H"
 #include "swarmCorrection.H"
+#include "fvcFlux.H"
 #include "surfaceInterpolate.H"
 
 // * * * * * * * * * * * * * * Static Data Members * * * * * * * * * * * * * //
@@ -102,32 +106,77 @@ Foam::dragModel::~dragModel()
 
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
 
-Foam::tmp<Foam::volScalarField> Foam::dragModel::Ki() const
+Foam::tmp<Foam::volScalarField> Foam::dragModel::Ki
+(
+    const label nodei,
+    const label nodej
+) const
 {
     return
         0.75
-       *CdRe()
-       *swarmCorrection_->Cs()
+       *CdRe(nodei, nodej)
+       *swarmCorrection_->Cs(nodei, nodej)
        *pair_.continuous().rho()
        *pair_.continuous().nu()
-       /sqr(pair_.dispersed().d());
+       /sqr(pair_.dispersed().d(nodei));
 }
 
 
-Foam::tmp<Foam::volScalarField> Foam::dragModel::K() const
+Foam::tmp<Foam::volScalarField> Foam::dragModel::K
+(
+    const label nodei,
+    const label nodej
+) const
 {
-    return max(pair_.dispersed(), pair_.dispersed().residualAlpha())*Ki();
+    if (pair_.continuous().nNodes() > 1)
+    {
+        //  Scale drag so that the sum of the drag forces from a monodisperse
+        //  phase is not counted nNodes times
+        return
+            max
+            (
+                pair_.dispersed().alphas(nodei)
+               *pair_.continuous().alphas(nodej)
+               /max
+                (
+                    pair_.continuous(),
+                    pair_.continuous().residualAlpha()
+                ),
+                pair_.dispersed().residualAlpha()/pair_.dispersed().nNodes()
+            )*Ki(nodei, nodej);
+    }
+
+    return
+        max
+        (
+            pair_.dispersed().alphas(nodei),
+            pair_.dispersed().residualAlpha()
+           /max
+            (
+                pair_.dispersed().nNodes(),
+                pair_.continuous().nNodes()
+            )
+        )*Ki(nodei, nodej);
 }
 
 
-Foam::tmp<Foam::surfaceScalarField> Foam::dragModel::Kf() const
+Foam::tmp<Foam::surfaceScalarField> Foam::dragModel::Kf
+(
+    const label nodei,
+    const label nodej
+) const
 {
     return
         max
         (
-            fvc::interpolate(pair_.dispersed()),
+            fvc::interpolate(pair_.dispersed().alphas(nodei)),
             pair_.dispersed().residualAlpha()
-        )*fvc::interpolate(Ki());
+           /max
+            (
+                pair_.dispersed().nNodes(),
+                pair_.continuous().nNodes()
+            )
+        )*fvc::interpolate(Ki(nodei, nodej));
 }
 
 

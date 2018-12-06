@@ -5,6 +5,8 @@
     \\  /    A nd           | Copyright (C) 2014-2017 OpenFOAM Foundation
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
+2017-05-18 Jeff Heylmun:    Added support of polydisperse phase models
+-------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
 
@@ -66,14 +68,18 @@ Foam::wallLubricationModels::TomiyamaWallLubrication::~TomiyamaWallLubrication()
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
 
 Foam::tmp<Foam::volVectorField>
-Foam::wallLubricationModels::TomiyamaWallLubrication::Fi() const
+Foam::wallLubricationModels::TomiyamaWallLubrication::Fi
+(
+    const label nodei,
+    const label nodej
+) const
 {
-    volVectorField Ur(pair_.Ur());
+    volVectorField Ur(pair_.Ur(nodei, nodej));
 
     const volVectorField& n(nWall());
     const volScalarField& y(yWall());
 
-    volScalarField Eo(pair_.Eo());
+    volScalarField Eo(pair_.Eo(nodei, nodej));
 
     return
         (
@@ -82,7 +88,7 @@ Foam::wallLubricationModels::TomiyamaWallLubrication::Fi() const
           + pos0(Eo - 33.0)*0.179
         )
        *0.5
-       *pair_.dispersed().d()
+       *pair_.dispersed().d(nodei)
        *(
             1/sqr(y)
           - 1/sqr(D_ - y)

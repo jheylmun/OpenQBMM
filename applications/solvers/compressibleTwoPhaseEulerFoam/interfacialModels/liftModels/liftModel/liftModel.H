@@ -5,6 +5,8 @@
     \\  /    A nd           | Copyright (C) 2014-2015 OpenFOAM Foundation
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
+2017-05-18 Jeff Heylmun:    Added support of polydisperse phase models
+-------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
 
@@ -113,16 +115,32 @@ public:
     // Member Functions
 
         //- Return lift coefficient
-        virtual tmp<volScalarField> Cl() const = 0;
+        virtual tmp<volScalarField> Cl
+        (
+            const label nodei,
+            const label nodej
+        ) const = 0;
 
         //- Return phase-intensive lift force
-        virtual tmp<volVectorField> Fi() const;
+        virtual tmp<volVectorField> Fi
+        (
+            const label nodei,
+            const label nodej
+        ) const;
 
         //- Return lift force
-        virtual tmp<volVectorField> F() const;
+        virtual tmp<volVectorField> F
+        (
+            const label nodei,
+            const label nodej
+        ) const;
 
         //- Return face lift force
-        virtual tmp<surfaceScalarField> Ff() const;
+        virtual tmp<surfaceScalarField> Ff
+        (
+            const label nodei,
+            const label nodej
+        ) const;
 };
 
 

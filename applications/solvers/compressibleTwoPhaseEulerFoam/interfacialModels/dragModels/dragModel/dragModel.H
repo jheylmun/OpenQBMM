@@ -2,8 +2,11 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2011-2015 OpenFOAM Foundation
+    \\  /    A nd           | Copyright (C) 2011-2017 OpenFOAM Foundation
      \\/     M anipulation  |
+-------------------------------------------------------------------------------
+2017-05-18 Jeff Heylmun:    Added support of polydisperse phase models
+2017-05-24 Jeff Heylmun:    Added return functions for acceleration
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -90,8 +93,11 @@ public:
 
     // Static data members
 
-        //- Coefficient dimensions
+        //- Force coefficient dimensions
         static const dimensionSet dimK;
+
+        //- acceleration coefficient dimensions
+        static const dimensionSet dimKa;
 
 
     // Constructors
@@ -128,23 +134,32 @@ public:
     // Member Functions
 
         //- Drag coefficient
-        virtual tmp<volScalarField> CdRe() const = 0;
+        virtual tmp<volScalarField> CdRe
+        (
+            const label = -1,
+            const label = -1
+        ) const = 0;
 
         //- Return the phase-intensive drag coefficient Ki
         //  used in the momentum equations
         //    ddt(alpha1*rho1*U1) + ... = ... alphad*K*(U1-U2)
         //    ddt(alpha2*rho2*U2) + ... = ... alphad*K*(U2-U1)
-        virtual tmp<volScalarField> Ki() const;
+        virtual tmp<volScalarField> Ki(const label = -1, const label = -1) const;
 
         //- Return the drag coefficient K
         //  used in the momentum equations
         //    ddt(alpha1*rho1*U1) + ... = ... K*(U1-U2)
         //    ddt(alpha2*rho2*U2) + ... = ... K*(U2-U1)
-        virtual tmp<volScalarField> K() const;
+        virtual tmp<volScalarField> K(const label = -1, const label = -1) const;
 
         //- Return the drag coefficient Kf
         //  used in the face-momentum equations
-        virtual tmp<surfaceScalarField> Kf() const;
+        virtual tmp<surfaceScalarField> Kf
+        (
+            const label = -1,
+            const label = -1
+        ) const;
+
 
         //- Dummy write for regIOobject
         bool writeData(Ostream& os) const;
