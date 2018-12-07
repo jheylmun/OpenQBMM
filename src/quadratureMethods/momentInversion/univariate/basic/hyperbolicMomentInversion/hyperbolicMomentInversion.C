@@ -192,7 +192,7 @@ void Foam::hyperbolicMomentInversion::invert
             centralMoments[3] = q*c2*sqrtC2;
             centralMoments[4] = eta*sqrC2;
 
-            if (realizability < smallNegRealizability_)
+            if (realizability < smallNegRealizability_ && debug)
             {
                 WarningInFunction
                     << "Fourth-order central moment is too small."
