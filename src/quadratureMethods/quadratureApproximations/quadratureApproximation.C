@@ -199,7 +199,7 @@ quadratureApproximation
     {
         moments_.set
         (
-            mi,
+            momentOrders_[mi],
             new volUnivariateMoment
             (
                 name_ + Foam::name(mi),

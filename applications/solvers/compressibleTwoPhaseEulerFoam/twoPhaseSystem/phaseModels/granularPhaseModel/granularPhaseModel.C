@@ -748,6 +748,7 @@ void Foam::granularPhaseModel::advect
 
         if (this->storedDeltaIndexes_[i] != -1)
         {
+            Info<<Foam::min(deltaT*deltaAlphaRhos_[deltai]).value()<<endl;
             deltaAlphaRho += deltaAlphaRhos_[deltai]*Fcoeffs[i];
             deltaAlphaRhoU += deltaAlphaRhoUs_[deltai]*Fcoeffs[i];
             deltaAlphaRhoE += deltaAlphaRhoEs_[deltai]*Fcoeffs[i];
@@ -956,17 +957,6 @@ bool Foam::granularPhaseModel::read(const dictionary& phaseProperties)
     frictionalStressModel_->read();
 
     return true;
-}
-
-
-void Foam::granularPhaseModel::store()
-{
-    (*this).storeOldTime();
-    alphaRho_.storeOldTime();
-    alphaRhoU_.storeOldTime();
-    alphaRhoE_.storeOldTime();
-    alphaRhoPTE_.storeOldTime();
-    Theta_.storeOldTime();
 }
 
 // ************************************************************************* //

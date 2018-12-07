@@ -143,21 +143,6 @@ Foam::vdfPhaseModel::vdfPhaseModel
             )
         )
     ),
-    Pfric_
-    (
-        IOobject
-        (
-            IOobject::groupName("Pfric", phaseName),
-            fluid.mesh().time().timeName(),
-            fluid.mesh()
-        ),
-        frictionalStressModel_->frictionalPressure
-        (
-            *this,
-            alphaMinFriction_,
-            alphaMax_
-        )
-    ),
 
     lambda_
     (
@@ -235,7 +220,6 @@ Foam::vdfPhaseModel::vdfPhaseModel
         (*this)*rho_*U_,
         U_.boundaryField().types()
     ),
-    alphaRhoUs_(),
     alphaRhoE_
     (
         IOobject
@@ -277,6 +261,16 @@ Foam::vdfPhaseModel::vdfPhaseModel
         ),
         massFlux_*fvc::interpolate(E_)
     ),
+    gradP_
+    (
+        IOobject
+        (
+            IOobject::groupName("gradP", name_),
+            fluid.mesh().time().timeName(),
+            fluid.mesh()
+        ),
+        fvc::grad(Ps_)
+    ),
     populationBalance_
     (
         populationBalanceModel::New
@@ -313,7 +307,8 @@ Foam::vdfPhaseModel::vdfPhaseModel
                     fluid.mesh()
                 ),
                 quadrature_.nodes()[nodei].primaryWeight()*rho_
-               *quadrature_.nodes()[nodei].primaryAbscissa()
+               *quadrature_.nodes()[nodei].primaryAbscissa(),
+                alphaRhoU_.boundaryField().types()
             )
         );
     }
@@ -480,6 +475,7 @@ Foam::tmp<Foam::volScalarField> Foam::vdfPhaseModel::c() const
         )
     );
 }
+
 
 Foam::tmp<Foam::volScalarField> Foam::vdfPhaseModel::k() const
 {
@@ -654,7 +650,6 @@ void Foam::vdfPhaseModel::advect
     }
 
     PtrList<volScalarField> deltaMoments(quadrature_.nMoments());
-    volVectorField gradPfric(fvc::grad(Pfric_)/rho_);
     forAll(deltaMoments, mi)
     {
         deltaMoments.set
@@ -665,30 +660,21 @@ void Foam::vdfPhaseModel::advect
                 -fvc::div(populationBalance_->momentFluxes()[mi])
             )
         );
-        volVectorField gMomentSource
-        (
-            IOobject
-            (
-                "gMomentSource",
-                fluid_.mesh().time().timeName(),
-                fluid_.mesh()
-            ),
-            fluid_.mesh(),
-            dimensionedVector("zero", deltaMoments[mi].dimensions(), Zero)
-        );
+
+        // Add gravitational source
         labelList gSourceOrder = quadrature_.momentOrders()[mi];
         forAll(gSourceOrder, cmpti)
         {
-            labelList gSrcOrder = gSourceOrder;
-            gSrcOrder[cmpti] = Foam::max(gSrcOrder[cmpti] - 1, 0);
+            if (gSourceOrder[cmpti] > 0)
+            {
+                labelList gSrcOrder = gSourceOrder;
+                gSrcOrder[cmpti] = gSrcOrder[cmpti] - 1;
 
-            gMomentSource.replace
-            (
-                cmpti,
-                quadrature_.moments()(gSrcOrder)*(g.component(cmpti))
-            );
+                deltaMoments[mi] +=
+                    quadrature_.moments()(gSrcOrder)
+                   *(g.component(cmpti));
+            }
         }
-        deltaMoments[mi] += (gMomentSource & vector::one);
     }
     volScalarField deltaAlphaRhoE(-fvc::div(energyFlux_));
 
@@ -755,63 +741,6 @@ void Foam::vdfPhaseModel::updateFluxes()
     // calculate fluxes with
     c_ = this->c();
     populationBalance_->updateAdvection();
-    gradAlpha_ = fvc::grad(quadrature_.moments()[0]);
-
-    surfaceScalarField own
-    (
-        IOobject
-        (
-            "own",
-            fluid_.mesh().time().timeName(),
-            fluid_.mesh()
-        ),
-        fluid_.mesh(),
-        dimensionedScalar("1", dimless, 1.0)
-    );
-    surfaceScalarField nei
-    (
-        IOobject
-        (
-            "nei",
-            fluid_.mesh().time().timeName(),
-            fluid_.mesh()
-        ),
-        fluid_.mesh(),
-        dimensionedScalar("-1", dimless, -1.0)
-    );
-
-    surfaceScalarField rhoOwn
-    (
-        fvc::interpolate(rho_, own, "reconstruct" + rho_.name() + ")")
-    );
-    surfaceScalarField rhoNei
-    (
-        fvc::interpolate(rho_, nei, "reconstruct" + rho_.name() + ")")
-    );
-
-    surfaceScalarField EOwn
-    (
-        fvc::interpolate(E_, own, "reconstruct" + E_.name() + ")")
-    );
-    surfaceScalarField ENei
-    (
-        fvc::interpolate(E_, nei, "reconstruct" + E_.name() + ")")
-    );
-
-    const surfaceScalarField& m0Flux = populationBalance_->momentFluxes()[0];
-    massFlux_ =
-        m0Flux
-       *(
-            pos(m0Flux)*rhoOwn
-          + neg0(m0Flux)*rhoNei
-        );
-
-    energyFlux_ =
-        massFlux_
-       *(
-            pos(m0Flux)*EOwn
-          + neg0(m0Flux)*ENei
-        );
 }
 
 void Foam::vdfPhaseModel::updateFluxes(const surfaceScalarField& alphaf)
@@ -868,25 +797,21 @@ void Foam::vdfPhaseModel::decode()
 
     gs0_ = radialModel_->g0(*this, alphaMinFriction_, alphaMax_);
 
-    // Frictional pressure
-    Pfric_ =
+    // Granular pressure
+    Ps_ =
         frictionalStressModel_->frictionalPressure
         (
             *this,
             alphaMinFriction_,
             alphaMax_
         );
-    Pfric_.correctBoundaryConditions();
-
-    Ps_ =
-        granularPressureModel_->granularPressureCoeff
-        (
-            *this,
-            gs0_,
-            rho_,
-            e_
-        )*Theta_;
-    Ps_.correctBoundaryConditions();
+//       + granularPressureModel_->granularPressureCoeff
+//         (
+//             *this,
+//             gs0_,
+//             rho_,
+//             e_
+//         )*Theta_;
 }
 
 
@@ -914,7 +839,7 @@ void Foam::vdfPhaseModel::encode()
     }
 
     E_ = he_;
-    alphaRhoE_ = Foam::max((*this), residualAlpha_)*rho_*E_;
+    alphaRhoE_ = alpha*rho_*E_;
     alphaRhoE_.correctBoundaryConditions();
 }
 
@@ -935,24 +860,23 @@ void Foam::vdfPhaseModel::correctThermo()
     quadrature_.updateMoments();
     const volScalarField& alpha = *this;
 
-    // Frictional pressure
-    Pfric_ =
+    // Granular pressure
+    gs0_ = radialModel_->g0(alpha, alphaMinFriction_, alphaMax_);
+
+    Ps_ =
         frictionalStressModel_->frictionalPressure
         (
             *this,
             alphaMinFriction_,
             alphaMax_
         );
-    gs0_ = radialModel_->g0(*this, alphaMinFriction_, alphaMax_);
-
-    Ps_ =
-        granularPressureModel_->granularPressureCoeff
-        (
-            *this,
-            gs0_,
-            rho_,
-            e_
-        )*Theta_;
+//       + granularPressureModel_->granularPressureCoeff
+//         (
+//             alpha,
+//             gs0_,
+//             rho_,
+//             e_
+//         )*Theta_;
 
     //- Solve collisions
     populationBalance_->solveSources();
@@ -967,10 +891,7 @@ void Foam::vdfPhaseModel::correctThermo()
         order1[cmpti] = 1;
         order2[cmpti] = 2;
 
-        alphaRhoU_.replace(cmpti, quadrature_.moments()(order1)*rho_);
         volScalarField meanU("meanU", quadrature_.moments()(order1)/alpha);
-        U_.replace(cmpti, meanU);
-
         Theta_ +=
             Foam::max
             (
@@ -978,32 +899,7 @@ void Foam::vdfPhaseModel::correctThermo()
                 dimensionedScalar("zero", sqr(dimVelocity), 0.0)
             );
     }
-    phi_ = fvc::flux(U_);
     Theta_ /= 3.0;
-
-    E_ = alphaRhoE_/(alpha*rho_);
-    he_ = E_;
-    he_.correctBoundaryConditions();
-    thermoPtr_->correct();
-
-//     nut_ = viscosityModel_->nu(*this, Theta_, gs0_, rho_, da, e_);
-    //lambda_ = (4.0/3.0)*sqr(alpha)*da*gs0_*(1.0 + e_)*ThetaSqrt/sqrtPi;
-
-
-//     volSymmTensorField D(symm(gradU()));
-//     nuFric_ = frictionalStressModel_->nu
-//     (
-//         *this,
-//         alphaMinFriction_,
-//         alphaMax_,
-//         Pfric_/rho_,
-//         D
-//     );
-
-    // Limit viscosity and add frictional viscosity
-//     nut_.min(maxNut_);
-//     nuFric_ = Foam::min(nuFric_, maxNut_ - nut_);
-//     nut_ += nuFric_;
 }
 
 
@@ -1013,21 +909,10 @@ bool Foam::vdfPhaseModel::read(const dictionary& phaseProperties)
     alphaMax_.readIfPresent(phaseDict_);
     alphaMinFriction_.readIfPresent(phaseDict_);
 
-//     viscosityModel_->read();
 //     granularPressureModel_->read();
     frictionalStressModel_->read();
 
     return true;
-}
-
-
-void Foam::vdfPhaseModel::store()
-{
-    forAll(moments_, mi)
-    {
-        quadrature_.moments()[mi].storeOldTime();
-    }
-    alphaRhoE_.storeOldTime();
 }
 
 // ************************************************************************* //

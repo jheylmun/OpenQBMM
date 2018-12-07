@@ -64,17 +64,35 @@ class AUSMPlusKinetic
         //- List of interpolated nodes (owner)
         autoPtr<PtrList<surfaceVectorNode>> nodesOwn_;
 
+        //- Moments interpolated to own face
         PtrList<surfaceScalarField> momentsOwn_;
 
+        //- Moments interpolated to nei face
         PtrList<surfaceScalarField> momentsNei_;
-
-        PtrList<surfaceScalarField> momentsf_;
 
         //- Reference to density field
         const volScalarField& rho_;
 
+        //- Reference to energy field
+        const volScalarField& E_;
+
         //- Reference to frictional pressure field
-        const volScalarField& pFric_;
+        const volScalarField& Ps_;
+
+        //- Reference to frictional pressure field
+        surfaceScalarField& phi_;
+
+        //- Reference to frictional pressure field
+        surfaceScalarField& massFlux_;
+
+        //- Reference to frictional pressure field
+        surfaceScalarField& energyFlux_;
+
+        //- Reference to frictional pressure field
+        volVectorField& gradAlpha_;
+
+        //- Reference to frictional pressure field
+        volVectorField& gradPs_;
 
         //- Maximum volume fraction
         dimensionedScalar alphaMax_;

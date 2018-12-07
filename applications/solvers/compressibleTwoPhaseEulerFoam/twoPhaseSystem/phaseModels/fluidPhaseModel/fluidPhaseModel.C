@@ -353,7 +353,14 @@ void Foam::fluidPhaseModel::correctP()
 
 Foam::tmp<Foam::volScalarField> Foam::fluidPhaseModel::c() const
 {
-    return sqrt(thermoPtr_->gamma()*p_/rho_);
+    return tmp<volScalarField>
+    (
+        new volScalarField
+        (
+            IOobject::groupName("c", name()),
+            sqrt(thermoPtr_->gamma()*p_/rho_)
+        )
+    );
 }
 
 void Foam::fluidPhaseModel::advect
@@ -486,6 +493,7 @@ void Foam::fluidPhaseModel::advect
 void Foam::fluidPhaseModel::updateFluxes()
 {
     volScalarField H(IOobject::groupName("H", name()), E_ + p_/rho_);
+
     this->fluxFunction_->updateFluxes
     (
         massFlux_,
@@ -574,14 +582,6 @@ void Foam::fluidPhaseModel::correctThermo()
     p_.correctBoundaryConditions();
     thermoPtr_->p() = p_;
     thermoPtr_->correct();
-}
-
-void Foam::fluidPhaseModel::store()
-{
-    (*this).storeOldTime();
-    alphaRho_.storeOldTime();
-    alphaRhoU_.storeOldTime();
-    alphaRhoE_.storeOldTime();
 }
 
 // ************************************************************************* //

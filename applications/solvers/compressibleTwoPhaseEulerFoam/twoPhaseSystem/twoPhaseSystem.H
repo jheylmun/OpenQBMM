@@ -132,10 +132,10 @@ class twoPhaseSystem
             Switch instantRelaxation_;
 
             //- Drag time step
-            dimensionedScalar uDt_;
+            scalarField uDt_;
 
             //- Pressure time step
-            dimensionedScalar pDt_;
+            scalarField pDt_;
 
             //- Maximum number of itterations for both pressure and velocity
             //  relaxation
@@ -150,13 +150,13 @@ class twoPhaseSystem
             scalar relTol_;
 
             //- Absolute pressure tolerance
-            dimensionedScalar pTol_;
+            scalar pTol_;
 
             //- Absolute velocity tolerance
-            dimensionedScalar uTol_;
+            scalar uTol_;
 
             //- Absolute volume fraction tolerance
-            dimensionedScalar alphaTol_;
+            scalar alphaTol_;
 
             //- Pressure relaxation time
             dimensionedScalar tauP_;

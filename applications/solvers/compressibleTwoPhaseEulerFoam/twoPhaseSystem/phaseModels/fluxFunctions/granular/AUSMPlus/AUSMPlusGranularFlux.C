@@ -106,7 +106,7 @@ void Foam::granularFluxFunctions::AUSMPlusFlux::updateFluxes
     const volScalarField& E,
     const volScalarField& Theta,
     const volScalarField& p,
-    const volScalarField& a,
+    const volScalarField& c,
     const volScalarField& pi
 )
 {
@@ -147,29 +147,28 @@ void Foam::granularFluxFunctions::AUSMPlusFlux::updateFluxes
     surfaceScalarField pOwn(fvc::interpolate(p, own_, interpScheme(p.name())));
     surfaceScalarField pNei(fvc::interpolate(p, nei_, interpScheme(p.name())));
 
-    surfaceScalarField aOwn(fvc::interpolate(a, own_, interpScheme(a.name())));
-    surfaceScalarField aNei(fvc::interpolate(a, nei_, interpScheme(a.name())));
-
+    surfaceScalarField cOwn(fvc::interpolate(c, own_, interpScheme(c.name())));
+    surfaceScalarField cNei(fvc::interpolate(c, nei_, interpScheme(c.name())));
 
     surfaceScalarField UvOwn(UOwn & normal);
     surfaceScalarField UvNei(UNei & normal);
 
-    surfaceScalarField a12
+    surfaceScalarField c12
     (
-        "aStar",
+        "c12",
         sqrt
         (
-            (alphaOwn*rhoOwn*sqr(aOwn) + alphaNei*rhoNei*sqr(aNei))
+            (alphaOwn*rhoOwn*sqr(cOwn) + alphaNei*rhoNei*sqr(cNei))
            /(alphaOwn*rhoOwn + alphaNei*rhoNei)
         ) + residualU_
     );
 
     // Compute slpit Mach numbers
-    surfaceScalarField MaOwn("MaOwn", UvOwn/a12);
-    surfaceScalarField MaNei("MaNei", UvNei/a12);
+    surfaceScalarField MaOwn("MaOwn", UvOwn/c12);
+    surfaceScalarField MaNei("MaNei", UvNei/c12);
     surfaceScalarField magMaOwn(mag(MaOwn));
     surfaceScalarField magMaNei(mag(MaNei));
-    surfaceScalarField MaBarSqr((sqr(UvOwn) + sqr(UvNei))/(2.0*sqr(a12)));
+    surfaceScalarField MaBarSqr((sqr(UvOwn) + sqr(UvNei))/(2.0*sqr(c12)));
 
     surfaceScalarField Ma4Own
     (
@@ -204,7 +203,7 @@ void Foam::granularFluxFunctions::AUSMPlusFlux::updateFluxes
     (
         Ma4Own + Ma4Nei
       - 2.0*Kp/fa_*max(1.0 - sigma*MaBarSqr, 0.0)*(pNei - pOwn)
-       /((alphaOwn*rhoOwn + alphaOwn*rhoOwn + residualRho_)*sqr(a12))
+       /((alphaOwn*rhoOwn + alphaNei*rhoNei + residualRho_)*sqr(c12))
     );
 
     surfaceScalarField p5Own
@@ -224,13 +223,12 @@ void Foam::granularFluxFunctions::AUSMPlusFlux::updateFluxes
     );
 
     pf_ =
-        -Ku*fa_*(a12 - residualU_)*p5Own*p5Nei
+        -Ku*fa_*(c12 - residualU_)*p5Own*p5Nei
        *(alphaOwn*rhoOwn + alphaNei*rhoNei)*(UvNei - UvOwn)
       + p5Own*pOwn + p5Nei*pNei;
-
     surfaceScalarField F
     (
-        (a12 - residualU_)
+        (c12 - residualU_)
        *(1.0 + mag(Ma12)*(1.0 - G/2.0))
        *max(alphaOwn, alphaNei)
        *(alphaOwn*rhoOwn - alphaNei*rhoNei)/(2.0*alphaMax_)
@@ -239,7 +237,7 @@ void Foam::granularFluxFunctions::AUSMPlusFlux::updateFluxes
     surfaceScalarField mDot
     (
         F
-      + a12*Ma12
+      + c12*Ma12
        *(
             pos(Ma12)*alphaOwn*rhoOwn
           + neg0(Ma12)*alphaNei*rhoNei

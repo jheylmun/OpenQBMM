@@ -397,9 +397,6 @@ public:
         //- Decode conservative variables
         virtual void decode();
 
-        //- Set old time values to current
-        virtual void store();
-
         //- Read phaseProperties dictionary
         virtual bool read(const dictionary& phaseProperties);
 

@@ -293,9 +293,6 @@ public:
         //- Decode conservative variables
         virtual void decode();
 
-        //- Set old time values to current
-        virtual void store();
-
         //- Set the number of steps used in ode solution to hyperbolic terms
         virtual void setNSteps
         (

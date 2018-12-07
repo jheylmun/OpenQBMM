@@ -83,13 +83,10 @@ class esBGKCollision
         Switch frictionalPressure_;
 
         //- Density value
-        dimensionedScalar rho_;
+        const volScalarField* rho_;
 
-        //- Frictional pressure reference
-        const volScalarField& Pfric_;
-
-        //- Calculated gradient of frictional pressure
-        volVectorField gradPfric_;
+        //- Reference to gradient of frictional pressure
+        const volVectorField& gradPfric_;
 
 
 protected:

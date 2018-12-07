@@ -81,8 +81,8 @@ class velocityPDFTransportModel
         //- Minimum local step in realizable ODE solver
         label minLocalDt_;
 
-        //- Stored time step for each cell
-        scalarField deltaT_;
+        //- Stored time step values
+        scalarField localDt_;
 
 
 protected:

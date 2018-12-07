@@ -50,157 +50,157 @@ License
 
 void Foam::twoPhaseSystem::relaxPressure()
 {
-    if
-    (
-        phase1_->granular() || phase1_->slavePressure()
-     || phase2_->granular() || phase2_->slavePressure()
-    )
-    {
-        return;
-    }
-
-    dimensionedScalar localT("localT", dimTime, 0);
-    bool timeComplete = false;
-
-    volScalarField& alpha1(phase1_());
-    volScalarField& alpha2(phase2_());
-    volScalarField& alphaRhoE1(phase1_->alphaRhoERef());
-    volScalarField& alphaRhoE2(phase2_->alphaRhoERef());
-
-    volScalarField& p1(phase1_->pRef());
-    volScalarField& p2(phase2_->pRef());
-
-    while (!timeComplete)
-    {
-        encode();
-
-        // Store old fields
-        volScalarField alpha1Old(alpha1);
-        volScalarField alphaRhoE1Old(alphaRhoE1);
-        volScalarField alphaRhoE2Old(alphaRhoE2);
-
-        // 1st Predictor
-        volScalarField theta(alpha1*alpha2/(tauP_*(p1 + p2)));
-        volScalarField alphaK1(pDt_*theta*(p2 - p1));
-        volScalarField alphaRhoEK1(pDt_*p_*theta*(p2 - p1));
-
-        alpha1 -= 0.5*alphaK1;
-        alpha2 = 1.0 - alpha1;
-
-        alphaRhoE1 += 0.5*alphaRhoEK1;
-        alphaRhoE2 -= 0.5*alphaRhoEK1;
-
-        decode();
-
-        // 2nd Predictor
-        encode();
-
-        theta = alpha1*alpha2/(tauP_*(p1 + p2));
-        volScalarField alphaK2(pDt_*theta*(p2 - p1));
-        volScalarField alphaRhoEK2(pDt_*p_*theta*(p2 - p1));
-
-        alpha1 -= 0.5*alphaK2;
-        alpha2 = 1.0 - alpha1;
-
-        alphaRhoE1 += 0.5*alphaRhoEK2;
-        alphaRhoE2 -= 0.5*alphaRhoEK2;
-
-        decode();
-
-        // 3rd Predictor
-        encode();
-
-        theta = alpha1*alpha2/(tauP_*(p1 + p2));
-        volScalarField alphaK3(pDt_*theta*(p2 - p1));
-        volScalarField alphaRhoEK3(pDt_*p_*theta*(p2 - p1));
-
-        alpha1 = alpha1Old - alphaK3;
-        alpha2 = 1.0 - alpha1;
-
-        alphaRhoE1 = alphaRhoE1Old + alphaRhoEK3;
-        alphaRhoE2 = alphaRhoE2Old - alphaRhoEK3;
-
-        decode();
-
-        volScalarField alphaNew(alpha1);
-        volScalarField pNew(p_);
-
-        // Corrector
-        encode();
-
-        theta = alpha1*alpha2/(tauP_*(p1 + p2));
-        volScalarField alphaK4
-        (
-            (
-                alphaK1 + 2.0*alphaK2 + 2.0*alphaK3
-            + pDt_*theta*(p2 - p1)
-            )/6.0
-        );
-        volScalarField alphaRhoEK4
-        (
-            (
-                alphaRhoEK1 + 2.0*alphaRhoEK2 + 2.0*alphaRhoEK3
-            + pDt_*p_*theta*(p2 - p1)
-            )/6.0
-        );
-
-        alpha1 = alpha1Old - alphaK4;
-        alpha2 = 1.0 - alpha1;
-
-        alphaRhoE1 = alphaRhoE1Old + alphaRhoEK4;
-        alphaRhoE2 = alphaRhoE2Old - alphaRhoEK4;
-
-        decode();
-
-        scalar error =
-            sqr
-            (
-                max(mag(pNew - p_)/(pTol_ + relTol_*max(p_, pNew)))
-            ).value();
-        error +=
-            sqr
-            (
-                max
-                (
-                    mag(alphaNew - alpha1)
-                /(alphaTol_ + relTol_*max(alpha1, alphaNew))
-                )
-            ).value();
-        error = sqrt(error/2.0) + SMALL;
-
-        if (error < 1)
-        {
-            pDt_ *= min(facMax_, max(facMin_, fac_/Foam::pow(error, 1.0/3.0)));
-            dimensionedScalar tmpDt(pDt_);
-
-            dimensionedScalar maxLocalDt =
-                max
-                (
-                    mesh_.time().deltaT() - localT,
-                    dimensionedScalar("0", dimTime, 0.0)
-                );
-            pDt_ = min(maxLocalDt, pDt_);
-            if (pDt_.value() == 0.0)
-            {
-                timeComplete = true;
-                pDt_ = tmpDt;
-            }
-            localT += pDt_;
-        }
-        else
-        {
-            pDt_ *= min(1, max(facMin_, fac_/Foam::pow(error, 1.0/3.0)));
-
-            alpha1 = alpha1Old;
-            alphaRhoE1 = alphaRhoE1Old;
-            alphaRhoE2 = alphaRhoE2Old;
-            decode();
-        }
-    }
-    alpha1.correctBoundaryConditions();
-    alpha2.correctBoundaryConditions();
-    alphaRhoE1.correctBoundaryConditions();
-    alphaRhoE2.correctBoundaryConditions();
+//     if
+//     (
+//         phase1_->granular() || phase1_->slavePressure()
+//      || phase2_->granular() || phase2_->slavePressure()
+//     )
+//     {
+//         return;
+//     }
+//
+//     dimensionedScalar localT("localT", dimTime, 0);
+//     bool timeComplete = false;
+//
+//     volScalarField& alpha1(phase1_());
+//     volScalarField& alpha2(phase2_());
+//     volScalarField& alphaRhoE1(phase1_->alphaRhoERef());
+//     volScalarField& alphaRhoE2(phase2_->alphaRhoERef());
+//
+//     volScalarField& p1(phase1_->pRef());
+//     volScalarField& p2(phase2_->pRef());
+//
+//     while (!timeComplete)
+//     {
+//         encode();
+//
+//         // Store old fields
+//         volScalarField alpha1Old(alpha1);
+//         volScalarField alphaRhoE1Old(alphaRhoE1);
+//         volScalarField alphaRhoE2Old(alphaRhoE2);
+//
+//         // 1st Predictor
+//         volScalarField theta(alpha1*alpha2/(tauP_*(p1 + p2)));
+//         volScalarField alphaK1(pDt_*theta*(p2 - p1));
+//         volScalarField alphaRhoEK1(pDt_*p_*theta*(p2 - p1));
+//
+//         alpha1 -= 0.5*alphaK1;
+//         alpha2 = 1.0 - alpha1;
+//
+//         alphaRhoE1 += 0.5*alphaRhoEK1;
+//         alphaRhoE2 -= 0.5*alphaRhoEK1;
+//
+//         decode();
+//
+//         // 2nd Predictor
+//         encode();
+//
+//         theta = alpha1*alpha2/(tauP_*(p1 + p2));
+//         volScalarField alphaK2(pDt_*theta*(p2 - p1));
+//         volScalarField alphaRhoEK2(pDt_*p_*theta*(p2 - p1));
+//
+//         alpha1 -= 0.5*alphaK2;
+//         alpha2 = 1.0 - alpha1;
+//
+//         alphaRhoE1 += 0.5*alphaRhoEK2;
+//         alphaRhoE2 -= 0.5*alphaRhoEK2;
+//
+//         decode();
+//
+//         // 3rd Predictor
+//         encode();
+//
+//         theta = alpha1*alpha2/(tauP_*(p1 + p2));
+//         volScalarField alphaK3(pDt_*theta*(p2 - p1));
+//         volScalarField alphaRhoEK3(pDt_*p_*theta*(p2 - p1));
+//
+//         alpha1 = alpha1Old - alphaK3;
+//         alpha2 = 1.0 - alpha1;
+//
+//         alphaRhoE1 = alphaRhoE1Old + alphaRhoEK3;
+//         alphaRhoE2 = alphaRhoE2Old - alphaRhoEK3;
+//
+//         decode();
+//
+//         volScalarField alphaNew(alpha1);
+//         volScalarField pNew(p_);
+//
+//         // Corrector
+//         encode();
+//
+//         theta = alpha1*alpha2/(tauP_*(p1 + p2));
+//         volScalarField alphaK4
+//         (
+//             (
+//                 alphaK1 + 2.0*alphaK2 + 2.0*alphaK3
+//             + pDt_*theta*(p2 - p1)
+//             )/6.0
+//         );
+//         volScalarField alphaRhoEK4
+//         (
+//             (
+//                 alphaRhoEK1 + 2.0*alphaRhoEK2 + 2.0*alphaRhoEK3
+//             + pDt_*p_*theta*(p2 - p1)
+//             )/6.0
+//         );
+//
+//         alpha1 = alpha1Old - alphaK4;
+//         alpha2 = 1.0 - alpha1;
+//
+//         alphaRhoE1 = alphaRhoE1Old + alphaRhoEK4;
+//         alphaRhoE2 = alphaRhoE2Old - alphaRhoEK4;
+//
+//         decode();
+//
+//         scalar error =
+//             sqr
+//             (
+//                 max(mag(pNew - p_)/(pTol_ + relTol_*max(p_, pNew)))
+//             ).value();
+//         error +=
+//             sqr
+//             (
+//                 max
+//                 (
+//                     mag(alphaNew - alpha1)
+//                 /(alphaTol_ + relTol_*max(alpha1, alphaNew))
+//                 )
+//             ).value();
+//         error = sqrt(error/2.0) + SMALL;
+//
+//         if (error < 1)
+//         {
+//             pDt_ *= min(facMax_, max(facMin_, fac_/Foam::pow(error, 1.0/3.0)));
+//             dimensionedScalar tmpDt(pDt_);
+//
+//             dimensionedScalar maxLocalDt =
+//                 max
+//                 (
+//                     mesh_.time().deltaT() - localT,
+//                     dimensionedScalar("0", dimTime, 0.0)
+//                 );
+//             pDt_ = min(maxLocalDt.value(), pDt_);
+//             if (pDt_.value() == 0.0)
+//             {
+//                 timeComplete = true;
+//                 pDt_ = tmpDt;
+//             }
+//             localT += pDt_;
+//         }
+//         else
+//         {
+//             pDt_ *= min(1, max(facMin_, fac_/Foam::pow(error, 1.0/3.0)));
+//
+//             alpha1 = alpha1Old;
+//             alphaRhoE1 = alphaRhoE1Old;
+//             alphaRhoE2 = alphaRhoE2Old;
+//             decode();
+//         }
+//     }
+//     alpha1.correctBoundaryConditions();
+//     alpha2.correctBoundaryConditions();
+//     alphaRhoE1.correctBoundaryConditions();
+//     alphaRhoE2.correctBoundaryConditions();
 }
 
 
@@ -212,136 +212,177 @@ void Foam::twoPhaseSystem::relaxVelocity()
         return;
     }
 
-    dimensionedScalar localT("localT", dimTime, 0);
-    label nItt = 0;
-    bool timeComplete = false;
+    volVectorField& U1(phase1_->URef());
+    volVectorField& U2(phase2_->URef());
+    volScalarField& E1(phase1_->ERef());
+    volScalarField& E2(phase2_->ERef());
 
+    const volScalarField& alphaRho1(phase1_->alphaRho());
+    const volScalarField& alphaRho2(phase2_->alphaRho());
     volVectorField& alphaRhoU1(phase1_->alphaRhoURef());
     volVectorField& alphaRhoU2(phase2_->alphaRhoURef());
     volScalarField& alphaRhoE1(phase1_->alphaRhoERef());
     volScalarField& alphaRhoE2(phase2_->alphaRhoERef());
 
-    volVectorField& U1(phase1_->URef());
-    volVectorField& U2(phase2_->URef());
 
-    while (!timeComplete)
+    volScalarField K(Kd());
+
+    forAll(alphaRhoU1, celli)
     {
-        encode();
-        volVectorField alphaRhoU1Old(alphaRhoU1);
-        volVectorField alphaRhoU2Old(alphaRhoU2);
-        volScalarField alphaRhoE1Old(alphaRhoE1);
-        volScalarField alphaRhoE2Old(alphaRhoE2);
+        scalar localT = 0.0;
+        bool timeComplete = false;
 
-        //- 1st predictor
-        volScalarField K(Kd());
-        volVectorField UK1(uDt_*K*(U2 - U1));
-        volScalarField EK1(uDt_*K*(U_ & (U2 - U1)));
-
-        alphaRhoU1 += 0.5*UK1;
-        alphaRhoU2 -= 0.5*UK1;
-        alphaRhoE1 += 0.5*EK1;
-        alphaRhoE2 -= 0.5*EK1;
-
-        decode();
-        U_ = mixtureU();
-
-        //- 2nd predictor
-        encode();
-
-        volVectorField UK2(uDt_*K*(U2 - U1));
-        volScalarField EK2(uDt_*K*(U_ & (U2 - U1)));
-
-        alphaRhoU1 += 0.5*UK2;
-        alphaRhoU2 -= 0.5*UK2;
-        alphaRhoE1 += 0.5*EK2;
-        alphaRhoE2 -= 0.5*EK2;
-
-        decode();
-        U_ = mixtureU();
-
-        //- 3rd predictor
-        encode();
-        volVectorField UK3(uDt_*K*(U2 - U1));
-        volScalarField EK3(uDt_*K*(U_ & (U2 - U1)));
-
-        alphaRhoU1 = alphaRhoU1Old + UK3;
-        alphaRhoU2 = alphaRhoU2Old - UK3;
-        alphaRhoE1 = alphaRhoE1Old + EK3;
-        alphaRhoE2 = alphaRhoE2Old - EK3;
-
-        decode();
-        volVectorField U1New(U1);
-        volVectorField U2New(U2);
-        U_ = mixtureU();
-
-        //- Corrector
-        encode();
-        volVectorField UK4
-        (
-            (UK1 + 2.0*UK2 + 2.0*UK3 + uDt_*K*(U2 - U1))/6.0
-        );
-        volScalarField EK4
-        (
-            (EK1 + 2.0*EK2 + 2.0*EK3 + uDt_*K*(U_ & (U2 - U1)))/6.0
-        );
-
-        alphaRhoU1 = alphaRhoU1Old + UK4;
-        alphaRhoU2 = alphaRhoU2Old - UK4;
-        alphaRhoE1 = alphaRhoE1Old + EK4;
-        alphaRhoE2 = alphaRhoE2Old - EK4;
-
-        decode();
-        U_ = mixtureU();
-
-        scalar error = 0.0;
-        error +=
-            sqr
-            (
-                max(mag(U1New - U1)/(uTol_ + relTol_*mag(U1)))
-            ).value();
-        error +=
-            sqr
-            (
-                max(mag(U2New - U2)/(uTol_ + relTol_*mag(U2)))
-            ).value();
-        error = Foam::sqrt(error/2.0) + SMALL;
-
-        if (error < 1)
+        while (!timeComplete)
         {
-            uDt_ *= min(facMax_, max(facMin_, fac_/Foam::pow(error, 1.0/3.0)));
-            dimensionedScalar tmpDt(uDt_);
-            dimensionedScalar maxLocalDt =
-                max
+            vector alphaRhoU1Old(alphaRhoU1[celli]);
+            vector alphaRhoU2Old(alphaRhoU2[celli]);
+            scalar alphaRhoE1Old(alphaRhoE1[celli]);
+            scalar alphaRhoE2Old(alphaRhoE2[celli]);
+
+            //- 1st predictor
+            vector UK1 =
+                uDt_[celli]*K[celli]*(U2[celli] - U1[celli]);
+            scalar EK1 =
+                uDt_[celli]*K[celli]*(U_[celli] & (U2[celli] - U1[celli]));
+
+            alphaRhoU1[celli] += 0.5*UK1;
+            alphaRhoU2[celli] -= 0.5*UK1;
+            alphaRhoE1[celli] += 0.5*EK1;
+            alphaRhoE2[celli] -= 0.5*EK1;
+
+            U1[celli] = alphaRhoU1[celli]/alphaRho1[celli];
+            U2[celli] = alphaRhoU2[celli]/alphaRho2[celli];
+            E1[celli] = alphaRhoE1[celli]/alphaRho1[celli];
+            E2[celli] = alphaRhoE2[celli]/alphaRho2[celli];
+            U_ =
+                (alphaRhoU1[celli] + alphaRhoU2[celli])
+               /(alphaRho1[celli] + alphaRho2[celli]);
+
+            //- 2nd predictor
+            vector UK2 =
+                uDt_[celli]*K[celli]*(U2[celli] - U1[celli]);
+            scalar EK2 =
+                uDt_[celli]*K[celli]*(U_[celli] & (U2[celli] - U1[celli]));
+
+            alphaRhoU1[celli] += 0.5*UK2;
+            alphaRhoU2[celli] -= 0.5*UK2;
+            alphaRhoE1[celli] += 0.5*EK2;
+            alphaRhoE2[celli] -= 0.5*EK2;
+
+            U1[celli] = alphaRhoU1[celli]/alphaRho1[celli];
+            U2[celli] = alphaRhoU2[celli]/alphaRho2[celli];
+            E1[celli] = alphaRhoE1[celli]/alphaRho1[celli];
+            E2[celli] = alphaRhoE2[celli]/alphaRho2[celli];
+            U_ =
+                (alphaRhoU1[celli] + alphaRhoU2[celli])
+               /(alphaRho1[celli] + alphaRho2[celli]);
+
+            //- 3rd predictor
+            vector UK3 =
+                uDt_[celli]*K[celli]*(U2[celli] - U1[celli]);
+            scalar EK3 =
+                uDt_[celli]*K[celli]*(U_[celli] & (U2[celli] - U1[celli]));
+
+            alphaRhoU1[celli] += 0.5*UK3;
+            alphaRhoU2[celli] -= 0.5*UK3;
+            alphaRhoE1[celli] += 0.5*EK3;
+            alphaRhoE2[celli] -= 0.5*EK3;
+
+            U1[celli] = alphaRhoU1[celli]/alphaRho1[celli];
+            U2[celli] = alphaRhoU2[celli]/alphaRho2[celli];
+            E1[celli] = alphaRhoE1[celli]/alphaRho1[celli];
+            E2[celli] = alphaRhoE2[celli]/alphaRho2[celli];
+            U_ =
+                (alphaRhoU1[celli] + alphaRhoU2[celli])
+               /(alphaRho1[celli] + alphaRho2[celli]);
+
+            vector U1New = U1[celli];
+            vector U2New = U2[celli];
+
+            //- Corrector
+            vector UK4 =
+            (
+                UK1 + 2.0*UK2 + 2.0*UK3
+              + uDt_[celli]*K[celli]*(U2[celli] - U1[celli])
+            )/6.0;
+            scalar EK4 =
+            (
+                EK1 + 2.0*EK2 + 2.0*EK3
+              + uDt_[celli]*K[celli]*(U_[celli] & (U2[celli] - U1[celli]))
+            )/6.0;
+
+            alphaRhoU1[celli] += 0.5*UK4;
+            alphaRhoU2[celli] -= 0.5*UK4;
+            alphaRhoE1[celli] += 0.5*EK4;
+            alphaRhoE2[celli] -= 0.5*EK4;
+
+            U1[celli] = alphaRhoU1[celli]/alphaRho1[celli];
+            U2[celli] = alphaRhoU2[celli]/alphaRho2[celli];
+            E1[celli] = alphaRhoE1[celli]/alphaRho1[celli];
+            E2[celli] = alphaRhoE2[celli]/alphaRho2[celli];
+            U_ =
+                (alphaRhoU1[celli] + alphaRhoU2[celli])
+               /(alphaRho1[celli] + alphaRho2[celli]);
+
+            scalar error = 0.0;
+            error +=
+                sqr
                 (
-                    mesh_.time().deltaT() - localT,
-                    dimensionedScalar("0", dimTime, 0.0)
+                    mag(U1New - U1[celli])/(uTol_ + relTol_*mag(U1[celli]))
                 );
-            uDt_ = min(maxLocalDt, uDt_);
-            if (uDt_.value() == 0.0)
-            {
-                timeComplete = true;
-                uDt_ = tmpDt;
-            }
-            localT += uDt_;
-        }
-        else
-        {
-            uDt_ *= min(1, max(facMin_, fac_/Foam::pow(error, 1.0/3.0)));
+            error +=
+                sqr
+                (
+                    mag(U2New - U2[celli])/(uTol_ + relTol_*mag(U2[celli]))
+                );
+            error = Foam::sqrt(error/2.0) + SMALL;
 
-            alphaRhoU1 = alphaRhoU1Old;
-            alphaRhoU2 = alphaRhoU2Old;
-            alphaRhoE1 = alphaRhoE1Old;
-            alphaRhoE2 = alphaRhoE2Old;
-            decode();
+            if (error < 1)
+            {
+                uDt_[celli] *=
+                    min(facMax_, max(facMin_, fac_/Foam::pow(error, 1.0/3.0)));
+                scalar maxLocalDt =
+                    max
+                    (
+                        mesh_.time().deltaTValue() - localT,
+                        0.0
+                    );
+                if (maxLocalDt == 0.0)
+                {
+                    timeComplete = true;
+                    localT = 0.0;
+                }
+                else
+                {
+                    uDt_[celli] = min(maxLocalDt, uDt_[celli]);
+                    localT += uDt_[celli];
+                }
+            }
+            else
+            {
+                uDt_[celli] *=
+                    min(1, max(facMin_, fac_/Foam::pow(error, 1.0/3.0)));
+
+                alphaRhoU1[celli] = alphaRhoU1Old;
+                alphaRhoU2[celli] = alphaRhoU2Old;
+                alphaRhoE1[celli] = alphaRhoE1Old;
+                alphaRhoE2[celli] = alphaRhoE2Old;
+
+                U1[celli] = alphaRhoU1[celli]/alphaRho1[celli];
+                U2[celli] = alphaRhoU2[celli]/alphaRho2[celli];
+                E1[celli] = alphaRhoE1[celli]/alphaRho1[celli];
+                E2[celli] = alphaRhoE2[celli]/alphaRho2[celli];
+                U_ =
+                    (alphaRhoU1[celli] + alphaRhoU2[celli])
+                   /(alphaRho1[celli] + alphaRho2[celli]);
+
+            }
         }
-        nItt++;
     }
     alphaRhoU1.correctBoundaryConditions();
     alphaRhoU2.correctBoundaryConditions();
     alphaRhoE1.correctBoundaryConditions();
     alphaRhoE2.correctBoundaryConditions();
-
-    Info<< "number of velocity relaxation iterations: " << nItt << endl;
 }
 
 
@@ -421,37 +462,16 @@ Foam::twoPhaseSystem::twoPhaseSystem
     ),
     relaxationDict_(subDict("relaxation")),
     instantRelaxation_(relaxationDict_.lookup("instantRelaxation")),
-    uDt_(mesh_.time().deltaT()/100),
-    pDt_(uDt_),
+    uDt_(mesh.nCells(), mesh_.time().deltaTValue()),
+    pDt_(mesh_.nCells(), mesh_.time().deltaTValue()),
     maxItt_(5000),
     fac_((relaxationDict_.lookupOrDefault("fac", 1.0))),
     facMin_((relaxationDict_.lookupOrDefault("facMin", 0.5))),
     facMax_((relaxationDict_.lookupOrDefault("facMax", 2.0))),
     relTol_((relaxationDict_.lookupOrDefault("relTol", 1e-6))),
-    pTol_
-    (
-        dimensionedScalar::lookupOrDefault
-        (
-            "pTol",
-            relaxationDict_,
-            dimPressure,
-            1.0
-        )
-    ),
-    uTol_
-    (
-        dimensionedScalar::lookupOrDefault
-        (
-            "uTol",
-            relaxationDict_,
-            dimVelocity,
-            1e-4
-        )
-    ),
-    alphaTol_
-    (
-        dimensionedScalar::lookupOrDefault("alphaTol", relaxationDict_, 1e-8)
-    ),
+    pTol_(relaxationDict_.lookupOrDefault("pTol", 1.0)),
+    uTol_(relaxationDict_.lookupOrDefault("uTol", 1e-4)),
+    alphaTol_(relaxationDict_.lookupOrDefault("alphaTol", 1e-8)),
     tauP_("pressureRelaxationTime", dimTime, relaxationDict_)
 {
     volScalarField& alpha2 = phase2_();
@@ -788,8 +808,7 @@ void Foam::twoPhaseSystem::relax()
             mesh_.time().timeName(),
             mesh_
         ),
-        mesh_,
-        dimensionedScalar("0", inv(dimDensity), 0.0)
+        (1.0/phase1_->alphaRho() + 1.0/phase2_->alphaRho())
     );
     volScalarField dragCoeffMean
     (
@@ -820,7 +839,6 @@ void Foam::twoPhaseSystem::relax()
             (
                 1.0/alphaRho1 + 1.0/alphaRho2
             );
-            XiDMean += XiD;
             volScalarField XiE
             (
                 1.0/(alphaRho1*phase1_->Cv())
@@ -847,47 +865,23 @@ void Foam::twoPhaseSystem::relax()
 
             if (!phase1_->granular())
             {
-                tmp<volScalarField> magSqrU2
-                (
-                    magSqr(phase2_->alphaRhoU(nodej)/alphaRho2)
-                );
                 phase1_->alphaRhoERef() -=
                     alphaRho2*0.5
                    *(
-                        magSqrU2 - magSqr(phase2_->U(nodej))
+                        magSqr(phase2_->alphaRhoU(nodej)/alphaRho2)
+                      - magSqr(phase2_->U(nodej))
                     );
             }
             if (!phase2_->granular())
             {
-                tmp<volScalarField> magSqrU1
-                (
-                    magSqr(phase1_->alphaRhoU(nodei)/alphaRho1)
-                );
                 phase2_->alphaRhoERef() -=
                     alphaRho1*0.5
                    *(
-                        magSqrU1 - magSqr(phase1_->U(nodei))
+                        magSqr(phase1_->alphaRhoU(nodei)/alphaRho1)
+                      - magSqr(phase1_->U(nodei))
                     );
             }
         }
-    }
-
-    if(phase1_->nNodes() > 1)
-    {
-        phase1_->correctThermo();
-    }
-    else
-    {
-        phase1_->decode();
-    }
-
-    if(phase2_->nNodes() > 1)
-    {
-        phase2_->correctThermo();
-    }
-    else
-    {
-        phase2_->decode();
     }
 
     if
@@ -908,20 +902,15 @@ void Foam::twoPhaseSystem::relax()
             particles = &phase2_();
             gas = &phase1_();
         }
+
+        volScalarField ThetaOld = particles->Theta();
+        particles->correctThermo();
+
         volScalarField deltaAlphaRhoPTEp
         (
-            3.0/2.0*(*particles)*particles->rho()
-           *(particles->Theta() - particles->Theta()().oldTime())
+            3.0/2.0*(*particles)*particles->rho()*(particles->Theta() - ThetaOld)
         );
 
-        if (mesh_.time().outputTime())
-        {
-            volScalarField
-            (
-                "ddt(Theta)",
-                fvc::ddt(particles->Theta()())
-            ).write();
-        }
         gas->alphaRhoERef() += deltaAlphaRhoPTEp;
     }
     else if (phase1_->granular() || phase2_->granular())

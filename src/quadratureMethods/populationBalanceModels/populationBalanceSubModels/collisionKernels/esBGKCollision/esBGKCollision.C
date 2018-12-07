@@ -283,23 +283,34 @@ Foam::populationBalanceSubModels::collisionKernels::esBGKCollision
     dp_("d", dimLength, dict),
     zeta_(dict_.lookupOrDefault("zeta", 1.0)),
     frictionalPressure_(dict_.lookup("frictionalPressure")),
-    rho_("rho", dimDensity, dict),
-    Pfric_
+    rho_
     (
-        mesh.lookupObject<volScalarField>
+        mesh.foundObject<volScalarField>
         (
-            IOobject::groupName("Pfric", quadrature_.moments()[0].group())
+            IOobject::groupName("thermo:rho", quadrature_.moments()[0].group())
+        )
+      ? &mesh.lookupObject<volScalarField>
+        (
+            IOobject::groupName("thermo:rho", quadrature_.moments()[0].group())
+        )
+      : new volScalarField
+        (
+            IOobject
+            (
+                IOobject::groupName("rho", quadrature_.moments()[0].group()),
+                mesh.time().timeName(),
+                mesh
+            ),
+            mesh,
+            dimensionedScalar("rho", dimDensity, dict)
         )
     ),
     gradPfric_
     (
-        IOobject
+        mesh.lookupObject<volVectorField>
         (
-            IOobject::groupName("gradPfric", Pfric_.group()),
-            mesh.time().timeName(),
-            mesh
-        ),
-        fvc::grad(Pfric_)/rho_
+            IOobject::groupName("gradP", quadrature_.moments()[0].group())
+        )
     ),
     Meqf_(quadrature.moments().size(), momentOrders_),
     Meq_(quadrature.moments().size(), momentOrders_)
@@ -354,11 +365,6 @@ void Foam::populationBalanceSubModels::collisionKernels::esBGKCollision
     const label celli
 )
 {
-    if (frictionalPressure_)
-    {
-        gradPfric_ = fvc::grad(Pfric_)/rho_;
-    }
-
     if (nDimensions_ == 1)
     {
         updateCells1D(celli);
@@ -376,11 +382,6 @@ void Foam::populationBalanceSubModels::collisionKernels::esBGKCollision
 void Foam::populationBalanceSubModels::collisionKernels::esBGKCollision
 ::updateFields()
 {
-    if (frictionalPressure_)
-    {
-        gradPfric_ = fvc::grad(Pfric_)/rho_;
-    }
-
     if (nDimensions_ == 1)
     {
         updateFields1D();
@@ -410,13 +411,10 @@ Foam::populationBalanceSubModels::collisionKernels::esBGKCollision
         );
     scalar source = (Meq_[mi] - quadrature_.moments()[mi][celli])/tauC;
 
-    if (!frictionalPressure_)
+    //if (!frictionalPressure_)
     {
         return source;
     }
-
-    vector gradPfricSource = gradPfric_[celli];
-    vector Mijk = Zero;
 
     labelList order = momentOrders_[mi];
     if (max(order) > 0 )
@@ -427,16 +425,14 @@ Foam::populationBalanceSubModels::collisionKernels::esBGKCollision
             {
                 labelList srcOrder = order;
                 srcOrder[cmpt] = order[cmpt] - 1;
-                Mijk.component(cmpt) = quadrature_.moments()(srcOrder)[celli];
+                source -=
+                    quadrature_.moments()(srcOrder)[celli]
+                  - gradPfric_[celli].component(cmpt)/(*rho_)[celli];
             }
         }
     }
 
-//     if (mag(diff) > 1 &&(order == labelList({2,0}) || order == labelList({0,2})))
-//     {
-//         Info<<Mijk<<endl;
-//     }
-    return source - (gradPfricSource & Mijk);
+    return source;
 }
 
 Foam::tmp<Foam::fvScalarMatrix>
@@ -455,36 +451,31 @@ Foam::populationBalanceSubModels::collisionKernels::esBGKCollision
         )
     );
 
-    volVectorField gradPfricSource
-    (
-        IOobject
-        (
-            "gradPfricSource",
-            mesh_.time().timeName(),
-            mesh_
-        ),
-        mesh_,
-        dimensionedVector("zero", m.dimensions()/dimTime, Zero)
-    );
-    labelList order = m.cmptOrders();
-    forAll(order, cmpt)
-    {
-        labelList srcOrder = order;
-        srcOrder[cmpt] = max(srcOrder[cmpt] - 1, 0);
-
-        gradPfricSource.replace
-        (
-            cmpt,
-            quadrature_.moments()(srcOrder)
-           *gradPfric_.component(cmpt)
-        );
-    }
-
-    return
+    tmp<fvScalarMatrix> mEqn =
     (
         Meqf_(m.cmptOrders())/tauC
       - fvm::Sp(1/tauC, m)
-      - (gradPfricSource & vector::one)
     );
+
+    if (!frictionalPressure_)
+    {
+        return mEqn;
+    }
+
+    labelList order = m.cmptOrders();
+    forAll(order, cmpt)
+    {
+        if (order[cmpt] > 0)
+        {
+            labelList srcOrder = order;
+            srcOrder[cmpt] = max(srcOrder[cmpt] - 1, 0);
+
+            mEqn.ref() -=
+                quadrature_.moments()(srcOrder)
+               *gradPfric_.component(cmpt)/(*rho_);
+        }
+    }
+
+    return mEqn;
 }
 // ************************************************************************* //

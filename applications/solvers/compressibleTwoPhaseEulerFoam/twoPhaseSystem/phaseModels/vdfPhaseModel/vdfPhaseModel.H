@@ -101,9 +101,6 @@ protected:
             //- The granular pressure (collisional and frictional)
             volScalarField Ps_;
 
-            //- Frictional pressure
-            volScalarField Pfric_;
-
             //- The granular bulk viscosity
             volScalarField lambda_;
 
@@ -141,9 +138,16 @@ protected:
             surfaceScalarField energyFlux_;
 
 
+        //- Pressure gradient (calculated in flux function)
+        volVectorField gradP_;
+
+
+    //- PopulationBalanceModel
     autoPtr<populationBalanceModel> populationBalance_;
 
+    //- Reference to quadrature
     velocityQuadratureApproximation& quadrature_;
+
 
         //- Fields stored for partial ode steps
 
@@ -268,7 +272,7 @@ public:
             return
             (
                 i == -1
-              ? phi_*fvc::interpolate(*this)
+              ? tmp<surfaceScalarField>(populationBalance_->momentFluxes()[0])
               : fvc::flux
                 (
                     quadrature_.nodes()[i].primaryWeight()
@@ -392,7 +396,7 @@ public:
         //- Return the gradient of pressure
         virtual tmp<volVectorField> gradp() const
         {
-            return fvc::grad(Ps_ + Pfric_);
+            return gradP_;
         }
 
         //- Return the turbulence kinetic energy
@@ -454,9 +458,6 @@ public:
 
         //- Decode conservative variables
         virtual void decode();
-
-        //- Set old time values to current
-        virtual void store();
 
         //- Read phaseProperties dictionary
         virtual bool read(const dictionary& phaseProperties);

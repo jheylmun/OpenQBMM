@@ -473,9 +473,6 @@ public:
         //- Decode conservative variables
         virtual void decode() = 0;
 
-        //- Set old time values to current
-        virtual void store() = 0;
-
 
     // Read
         //- Read phaseProperties dictionary
