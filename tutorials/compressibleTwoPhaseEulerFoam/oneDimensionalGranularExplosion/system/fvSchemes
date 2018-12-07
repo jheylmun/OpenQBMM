@@ -1,0 +1,80 @@
+/*--------------------------------*- C++ -*----------------------------------*\
+| =========                 |                                                 |
+| \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox           |
+|  \\    /   O peration     | Version:  dev                                   |
+|   \\  /    A nd           | Web:      www.OpenFOAM.org                      |
+|    \\/     M anipulation  |                                                 |
+\*---------------------------------------------------------------------------*/
+FoamFile
+{
+    version     2.0;
+    format      ascii;
+    class       dictionary;
+    location    "system";
+    object      fvSchemes;
+}
+// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
+
+compressible.air
+{
+    fluxScheme      HLLC;
+}
+compressible.particles
+{
+    fluxScheme      AUSMPlus;
+    alphaMax        0.63;
+    alphaMinFriction 0.55;
+}
+
+ddtSchemes
+{
+    default         Euler;
+    fluxIntegrator  Euler;
+}
+
+gradSchemes
+{
+    default         leastSquares faceLimited 1.0;
+}
+
+divSchemes
+{
+    default             none;
+}
+
+laplacianSchemes
+{
+    default         Gauss linear corrected;
+}
+
+scalarLimiter upwind;
+vectorLimiter upwind;
+
+interpolationSchemes
+{
+    default                 linear;
+
+    reconstruct(alpha.particles) $scalarLimiter;
+    reconstruct(thermo:rho.particles)  $scalarLimiter;
+    reconstruct(U.particles)     $vectorLimiter;
+    reconstruct(E.particles)     $scalarLimiter;
+    reconstruct(Theta.particles) $scalarLimiter;
+    reconstruct(Pfric.particles) $scalarLimiter;
+    reconstruct(Ptot.particles)     $scalarLimiter;
+    reconstruct(c.particles)     $scalarLimiter;
+
+    reconstruct(alpha.air)       $scalarLimiter;
+    reconstruct(thermo:rho.air)  $scalarLimiter;
+    reconstruct(U.air)           $vectorLimiter;
+    reconstruct(E.air)           $scalarLimiter;
+    reconstruct(p.air)           $scalarLimiter;
+    reconstruct(c.air)           $scalarLimiter;
+}
+
+snGradSchemes
+{
+    default         corrected;
+}
+
+
+// ************************************************************************* //

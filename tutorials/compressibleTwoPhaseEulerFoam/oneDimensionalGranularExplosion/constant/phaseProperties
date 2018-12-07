@@ -1,0 +1,144 @@
+/*--------------------------------*- C++ -*----------------------------------*\
+| =========                 |                                                 |
+| \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox           |
+|  \\    /   O peration     | Version:  dev                                   |
+|   \\  /    A nd           | Web:      www.OpenFOAM.org                      |
+|    \\/     M anipulation  |                                                 |
+\*---------------------------------------------------------------------------*/
+FoamFile
+{
+    version     2.0;
+    format      ascii;
+    class       dictionary;
+    location    "constant";
+    object      phaseProperties;
+}
+// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
+
+phases (particles air);
+relaxation
+{
+    instantRelaxation       no;
+    pressureRelaxationTime  5e-4;
+}
+
+air
+{
+    type            fluid;
+    diameterModel   constant;
+    constantCoeffs
+    {
+        d               1e-4;
+    }
+
+    residualAlpha       1e-8;
+    residualRho         1e-6;
+}
+
+particles
+{
+    type            vdf;
+    diameterModel   constant;
+    constantCoeffs
+    {
+        d               5e-6;
+    }
+
+    residualAlpha       1e-10;
+    residualRho         1e-4;
+
+    equilibrium             off;
+
+    e                       0.999;
+    alphaMax                0.63;
+    alphaMinFriction        0.55;
+
+    viscosityModel          Gidaspow;
+    conductivityModel       Gidaspow;
+    granularPressureModel   Lun;
+    frictionalStressModel   JohnsonJackson;
+    radialModel             SinclairJackson;
+
+    JohnsonJacksonCoeffs
+    {
+        Fr                      0.05;
+        eta                     2;
+        p                       5;
+        phi                     28.5;
+        alphaDeltaMin           1e-6;
+    }
+    SchaefferCoeffs
+    {
+        Fr                      0.05;
+        eta                     2;
+        p                       5;
+        phi                     28.5;
+        alphaDeltaMin           1e-5;
+    }
+}
+
+blending
+{
+    default
+    {
+        type            none;
+        continuousPhase air;
+    }
+}
+
+sigma
+(
+    (air and particles)     0
+);
+
+aspectRatio
+(
+);
+
+drag
+(
+    (particles in air)
+    {
+        type            WenYu;
+        residualRe      1e-3;
+        swarmCorrection
+        {
+            type        none;
+        }
+    }
+);
+
+virtualMass
+(
+);
+
+heatTransfer
+(
+    (particles in air)
+    {
+        type RanzMarshall;
+    }
+);
+
+lift
+(
+    (particles in air)
+    {
+        type constantCoefficient;
+        Cl 0.5;
+    }
+);
+
+wallLubrication
+(
+);
+
+turbulentDispersion
+(
+);
+
+// Minimum allowable pressure
+pMin            10000;
+
+
+// ************************************************************************* //
