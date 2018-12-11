@@ -434,6 +434,18 @@ void Foam::velocityAdvection::AUSMPlusKinetic::update()
             );
     }
 
+    surfaceScalarField pf
+    (
+        IOobject
+        (
+            "pf",
+            phi_.mesh().time().timeName(),
+            phi_.mesh()
+        ),
+        phi_.mesh(),
+        dimensionedScalar("0", dimPressure, 0.0)
+    );
+
     //- Volume fraction of own and nei faces
     const surfaceScalarField& m0Own = momentsOwn_[0];
     const surfaceScalarField& m0Nei = momentsNei_[0];
@@ -559,12 +571,10 @@ void Foam::velocityAdvection::AUSMPlusKinetic::update()
            *(M2(MaNei, -1)*(-2.0 - MaNei) + 16.0*xi_*MaNei*M2(MaNei, 1))
         );
 
-        surfaceScalarField pf
-        (
+        pf +=
            -Ku*fa_*(c12 - residualU_)*p5Own*p5Nei
            *(weightOwn*rhoOwn + weightNei*rhoNei)*(UvNei - UvOwn)
-          + p5Own*PsOwn  + p5Nei*PsNei
-        );
+          + p5Own*PsOwn  + p5Nei*PsNei;
 
         surfaceScalarField F
         (
@@ -593,7 +603,6 @@ void Foam::velocityAdvection::AUSMPlusKinetic::update()
         massFlux_ += m0Flux*(pos(m0Flux)*rhoOwn + neg0(m0Flux)*rhoNei);
         energyFlux_ +=
             m0Flux*(pos(m0Flux)*rhoOwn*EOwn + neg0(m0Flux)*rhoOwn*ENei);
-        gradPs_ += fvc::surfaceIntegrate(pf*Sf);
 
         m0f += weightOwn*pos(m0Flux) + weightNei*neg0(m0Flux);
 
@@ -639,45 +648,14 @@ void Foam::velocityAdvection::AUSMPlusKinetic::update()
                 tmp<surfaceScalarField> mNeiPow = momentNeiFlux*absCmptNei;
                 momentNeiFlux.dimensions().reset(mNeiPow().dimensions());
                 momentNeiFlux == mNeiPow;
-
-                if (cmptMomentOrder > 0)
-                {
-                    forAll(momentOrder, cmptj)
-                    {
-                        tmp<surfaceScalarField> pOwnPow =
-                            pCmptOwn.component(cmpti)
-                           *pow
-                            (
-                                UOwn.component(cmptj),
-                                cmptMomentOrder - 1
-                            );
-                        tmp<surfaceScalarField> pNeiPow =
-                            pCmptNei.component(cmpti)
-                           *pow
-                            (
-                                UNei.component(cmptj),
-                                cmptMomentOrder - 1
-                            );
-
-                        if (cmpti != cmptj)
-                        {
-                            pOwnPow.ref() *= UOwn.component(cmptj);
-                            pNeiPow.ref() *= UNei.component(cmptj);
-                        }
-                        pCmptOwn.replace(cmpti, pOwnPow);
-                        pCmptNei.replace(cmpti, pNeiPow);
-                    }
-                }
-                pCmptOwn.dimensions().reset(momentOwnFlux.dimensions());
-                pCmptNei.dimensions().reset(momentNeiFlux.dimensions());
             }
 
             momentFluxes_[mi] +=
-                (momentOwnFlux)*pos(m0Flux)
-              + (momentNeiFlux)*neg0(m0Flux);
+                (momentOwnFlux)*pos(m0Flux) + (momentNeiFlux)*neg0(m0Flux);
         }
     }
     gradAlpha_ = fvc::surfaceIntegrate(m0f*Sf);
+    gradPs_ += fvc::surfaceIntegrate(pf*Sf);
 }
 
 void Foam::velocityAdvection::AUSMPlusKinetic::update

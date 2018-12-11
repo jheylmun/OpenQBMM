@@ -66,7 +66,7 @@ Foam::fluidPhaseModel::fluidPhaseModel
             IOobject::AUTO_WRITE
         ),
         this->thermoPtr_->p(),
-        this->thermoPtr_->p().boundaryField().types()
+        this->thermoPtr_->p().boundaryField()
     ),
     alphaRho_
     (
@@ -77,7 +77,7 @@ Foam::fluidPhaseModel::fluidPhaseModel
             fluid.mesh()
         ),
         (*this)*rho(),
-        this->boundaryField().types()
+        this->boundaryField()
     ),
     alphaRhoU_
     (
@@ -88,7 +88,7 @@ Foam::fluidPhaseModel::fluidPhaseModel
             fluid.mesh()
         ),
         alphaRho_*U_,
-        U_.boundaryField().types()
+        U_.boundaryField()
     ),
     alphaRhoE_
     (
@@ -99,7 +99,7 @@ Foam::fluidPhaseModel::fluidPhaseModel
             fluid.mesh()
         ),
         alphaRho_*E_,
-        E_.boundaryField().types()
+        E_.boundaryField()
     ),
     massFlux_
     (

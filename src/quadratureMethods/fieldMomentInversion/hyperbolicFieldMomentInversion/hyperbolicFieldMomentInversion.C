@@ -203,16 +203,13 @@ bool Foam::hyperbolicFieldMomentInversion::invertLocalMoments
         momentsToInvert(momentOrder) = moments(momentOrder)[celli];
     }
 
-//     if (!fatalErrorOnFailedRealizabilityTest)
-//     {
-//         if (!momentsToInvert.isRealizable(fatalErrorOnFailedRealizabilityTest))
-//         {
-//             return false;
-//         }
-//     }
-
     // Find quadrature
     momentInverter_().invert(momentsToInvert);
+
+    if (!momentInverter_->isRealizable())
+    {
+        return false;
+    }
 
     // Recovering quadrature
     const mappedList<scalar>& weights(momentInverter_().weights());

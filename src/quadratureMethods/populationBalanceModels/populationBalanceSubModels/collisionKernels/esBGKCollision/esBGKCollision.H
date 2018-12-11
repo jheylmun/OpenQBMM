@@ -79,15 +79,6 @@ class esBGKCollision
         //- Coefficient related to Prandtl number
         scalar zeta_;
 
-        //- Is frictional pressure used
-        Switch frictionalPressure_;
-
-        //- Density value
-        const volScalarField* rho_;
-
-        //- Reference to gradient of frictional pressure
-        const volVectorField& gradPfric_;
-
 
 protected:
     // Protected data

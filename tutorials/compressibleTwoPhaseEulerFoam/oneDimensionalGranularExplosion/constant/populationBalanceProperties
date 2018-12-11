@@ -21,13 +21,13 @@ velocityCoeffs
 {
     odeCoeffs
     {
-        solveODESource on;
+        solveODESource off;
 
         ATol    1.0e-6;
         RTol    1.0e-4;
-        fac     0.7;
+        fac     0.9;
         facMin  0.1;
-        facMax  5.0;
+        facMax  2.0;
         minLocalDt 1.0e-10;
     }
 
@@ -36,7 +36,7 @@ velocityCoeffs
     collisionKernel
     {
         collisionKernel esBGK;
-        frictionalPressure on;
+        frictionalPressure off;
         e           0.9;
         d           90.0e-6;
         rho         1470;

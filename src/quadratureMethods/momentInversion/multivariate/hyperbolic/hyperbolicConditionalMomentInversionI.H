@@ -26,31 +26,31 @@ License
 
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
 
-//- Return the total number of moments
 Foam::label Foam::hyperbolicConditionalMomentInversion::nMoments()
 {
     return nMoments_;
 }
 
-//- Return the list of nNodes
 Foam::label Foam::hyperbolicConditionalMomentInversion::nNodes()
 {
     return nNodes_;
 }
 
-//- Return mapped list of weights
 const Foam::mappedList<Foam::scalar>&
 Foam::hyperbolicConditionalMomentInversion::weights() const
 {
     return weights_;
 }
 
-//- Return mapped list of abscissae
 const Foam::mappedList< Foam::vector>&
 Foam::hyperbolicConditionalMomentInversion::abscissae() const
 {
     return abscissae_;
 }
 
+bool Foam::hyperbolicConditionalMomentInversion::isRealizable() const
+{
+    return fullyRealizable_;
+}
 
 // ************************************************************************* //

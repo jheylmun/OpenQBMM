@@ -101,6 +101,9 @@ class hyperbolicConditionalMomentInversion
         //- Minimum value of correlation
         scalar minCorrelation_;
 
+        //- Boolean used if the moment set is fully realizable
+        bool fullyRealizable_;
+
 
     // Private member functions
 
@@ -205,6 +208,9 @@ public:
 
         //- Return mapped quadrature abscissae for each dimension
         inline const mappedList<vector>& abscissae() const;
+
+        //- Return if moment set is fully realizable
+        inline bool isRealizable() const;
 };
 
 

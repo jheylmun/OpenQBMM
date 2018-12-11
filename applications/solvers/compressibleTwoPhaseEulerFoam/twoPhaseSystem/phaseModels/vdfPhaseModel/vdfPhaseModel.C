@@ -117,7 +117,7 @@ Foam::vdfPhaseModel::vdfPhaseModel
             IOobject::groupName("Theta", phaseName),
             fluid.mesh().time().timeName(),
             fluid.mesh(),
-            IOobject::NO_READ,
+            IOobject::READ_IF_PRESENT,
             IOobject::AUTO_WRITE
         ),
         fluid.mesh(),
@@ -130,7 +130,9 @@ Foam::vdfPhaseModel::vdfPhaseModel
         (
             IOobject::groupName("Ps", phaseName),
             fluid.mesh().time().timeName(),
-            fluid.mesh()
+            fluid.mesh(),
+            IOobject::NO_READ,
+            IOobject::AUTO_WRITE
         ),
         (
             Theta_
@@ -218,7 +220,7 @@ Foam::vdfPhaseModel::vdfPhaseModel
             fluid.mesh()
         ),
         (*this)*rho_*U_,
-        U_.boundaryField().types()
+        U_.boundaryField()
     ),
     alphaRhoE_
     (
@@ -229,7 +231,7 @@ Foam::vdfPhaseModel::vdfPhaseModel
             fluid.mesh()
         ),
         (*this)*rho_*E_,
-        E_.boundaryField().types()
+        E_.boundaryField()
     ),
     phi_
     (
@@ -237,7 +239,9 @@ Foam::vdfPhaseModel::vdfPhaseModel
         (
             IOobject::groupName("phi", name_),
             fluid.mesh().time().timeName(),
-            fluid.mesh()
+            fluid.mesh(),
+            IOobject::READ_IF_PRESENT,
+            IOobject::AUTO_WRITE
         ),
         fvc::flux(U_)
     ),
@@ -308,7 +312,7 @@ Foam::vdfPhaseModel::vdfPhaseModel
                 ),
                 quadrature_.nodes()[nodei].primaryWeight()*rho_
                *quadrature_.nodes()[nodei].primaryAbscissa(),
-                alphaRhoU_.boundaryField().types()
+                alphaRhoU_.boundaryField()
             )
         );
     }
@@ -317,6 +321,7 @@ Foam::vdfPhaseModel::vdfPhaseModel
     E_ = he_;
 
     decode();
+    updateFluxes();
 }
 
 
@@ -662,17 +667,15 @@ void Foam::vdfPhaseModel::advect
         );
 
         // Add gravitational source
-        labelList gSourceOrder = quadrature_.momentOrders()[mi];
-        forAll(gSourceOrder, cmpti)
+        labelList order = quadrature_.moments()[mi].cmptOrders();
+        forAll(quadrature_.momentOrders()[mi], cmpt)
         {
-            if (gSourceOrder[cmpti] > 0)
+            if (order[cmpt] > 0)
             {
-                labelList gSrcOrder = gSourceOrder;
-                gSrcOrder[cmpti] = gSrcOrder[cmpti] - 1;
-
+                labelList srcOrder = order;
+                srcOrder[cmpt] = srcOrder[cmpt] - 1;
                 deltaMoments[mi] +=
-                    quadrature_.moments()(gSrcOrder)
-                   *(g.component(cmpti));
+                    quadrature_.moments()(srcOrder)*g.component(cmpt);
             }
         }
     }

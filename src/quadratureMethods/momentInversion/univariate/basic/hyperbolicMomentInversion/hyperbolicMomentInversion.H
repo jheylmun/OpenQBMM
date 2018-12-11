@@ -62,6 +62,8 @@ class hyperbolicMomentInversion
         //- Small negative value for realizability
         scalar smallNegRealizability_;
 
+        bool fullyRealizable_;
+
 
 public:
 
@@ -107,6 +109,11 @@ public:
         (
             univariateMomentSet& moments
         );
+
+        bool isRealizable() const
+        {
+            return fullyRealizable_;
+        }
 };
 
 

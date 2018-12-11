@@ -226,6 +226,7 @@ void Foam::granularFluxFunctions::AUSMPlusFlux::updateFluxes
         -Ku*fa_*(c12 - residualU_)*p5Own*p5Nei
        *(alphaOwn*rhoOwn + alphaNei*rhoNei)*(UvNei - UvOwn)
       + p5Own*pOwn + p5Nei*pNei;
+
     surfaceScalarField F
     (
         (c12 - residualU_)

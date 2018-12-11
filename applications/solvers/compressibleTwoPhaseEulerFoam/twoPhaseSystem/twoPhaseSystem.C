@@ -872,6 +872,12 @@ void Foam::twoPhaseSystem::relax()
                       - magSqr(phase2_->U(nodej))
                     );
             }
+            else
+            {
+                phase1_->alphaRhoURef(nodei) -=
+                    deltaT*phase1_->gradp()*phase1_->alphas(nodei)
+                   /max(phase1_(), phase1_->residualAlpha());
+            }
             if (!phase2_->granular())
             {
                 phase2_->alphaRhoERef() -=
@@ -880,6 +886,12 @@ void Foam::twoPhaseSystem::relax()
                         magSqr(phase1_->alphaRhoU(nodei)/alphaRho1)
                       - magSqr(phase1_->U(nodei))
                     );
+            }
+            else
+            {
+                phase2_->alphaRhoURef(nodei) -=
+                    deltaT*phase2_->gradp()*phase2_->alphas(nodei)
+                   /max(phase2_(), phase2_->residualAlpha());
             }
         }
     }
@@ -911,7 +923,7 @@ void Foam::twoPhaseSystem::relax()
             3.0/2.0*(*particles)*particles->rho()*(particles->Theta() - ThetaOld)
         );
 
-        gas->alphaRhoERef() += deltaAlphaRhoPTEp;
+        particles->alphaRhoERef() -= deltaAlphaRhoPTEp;
     }
     else if (phase1_->granular() || phase2_->granular())
     {

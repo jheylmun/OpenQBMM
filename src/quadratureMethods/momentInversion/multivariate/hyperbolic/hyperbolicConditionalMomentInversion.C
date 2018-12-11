@@ -351,6 +351,7 @@ void Foam::hyperbolicConditionalMomentInversion::invert1D
 
     // Find univariate quadrature in first direction
     univariateInverter_().invert(momentsToInvert);
+    fullyRealizable_ = fullyRealizable_ && univariateInverter_->isRealizable();
 
     // Store univariate quadrature in first direction
     forAll(weights1D, wi)
@@ -427,6 +428,7 @@ void Foam::hyperbolicConditionalMomentInversion::invert2D
 
     // Find univariate quadrature in first direction
     univariateInverter_().invert(mDir1);
+    fullyRealizable_ = fullyRealizable_ && univariateInverter_->isRealizable();
 
     // Store univariate quadrature in first direction
     scalarList wDir1(univariateInverter_().weights());
@@ -461,6 +463,8 @@ void Foam::hyperbolicConditionalMomentInversion::invert2D
         //NOTE: Leave Vf elements null. AP
 
         univariateInverter_().invert(mDir2);
+        fullyRealizable_ =
+            fullyRealizable_ && univariateInverter_->isRealizable();
 
         forAll(wDir2, nodei)
         {
@@ -529,6 +533,8 @@ void Foam::hyperbolicConditionalMomentInversion::invert2D
         );
 
         univariateInverter_().invert(mMu);
+        fullyRealizable_ =
+            fullyRealizable_ && univariateInverter_->isRealizable();
 
         forAll(wDir2, nodei)
         {
@@ -746,6 +752,7 @@ void Foam::hyperbolicConditionalMomentInversion::invert3D
     );
     // Find univariate quadrature in first direction
     univariateInverter_().invert(mDir1);
+    fullyRealizable_ = fullyRealizable_ && univariateInverter_->isRealizable();
 
     // Store univariate quadrature in first direction
     scalarList wDir1(univariateInverter_().weights());
@@ -771,6 +778,8 @@ void Foam::hyperbolicConditionalMomentInversion::invert3D
 
             // Find univariate quadrature in first direction
             univariateInverter_().invert(mDir3);
+            fullyRealizable_ =
+                fullyRealizable_ && univariateInverter_->isRealizable();
 
             // Store univariate quadrature in first direction
             scalarList wDir3(univariateInverter_().weights());
@@ -1099,6 +1108,8 @@ void Foam::hyperbolicConditionalMomentInversion::invert3D
             );
             // Find univariate quadrature in final direction
             univariateInverter_().invert(mDir3);
+            fullyRealizable_ =
+                fullyRealizable_ && univariateInverter_->isRealizable();
 
             scalarList wDir3(univariateInverter_().weights());
             scalarList absDir3(univariateInverter_().abscissae());
@@ -1180,6 +1191,8 @@ void Foam::hyperbolicConditionalMomentInversion::invert
 
 void Foam::hyperbolicConditionalMomentInversion::reset()
 {
+    fullyRealizable_ = true;
+
     forAll(weights_, nodei)
     {
         weights_[nodei] = 0.0;

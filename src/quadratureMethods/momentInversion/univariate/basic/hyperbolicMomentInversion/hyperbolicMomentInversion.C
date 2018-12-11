@@ -105,8 +105,15 @@ void Foam::hyperbolicMomentInversion::invert
     const scalar maxKnownAbscissa
 )
 {
+    fullyRealizable_ = true;
+
     if (moments[0] < SMALL)
     {
+        if (moments[0] < 0)
+        {
+            fullyRealizable_ = false;
+        }
+
         weights_[1] = moments[0];
 
         return;
@@ -148,10 +155,15 @@ void Foam::hyperbolicMomentInversion::invert
     {
         if (centralMoments[2] < -1e-10)
         {
-            WarningInFunction
-                << "Second-order central moment is negative. C2 = "
-                << centralMoments[2]
-                << endl;
+            fullyRealizable_ = false;
+
+            if (debug)
+            {
+                WarningInFunction
+                    << "Second-order central moment is negative. C2 = "
+                    << centralMoments[2]
+                    << endl;
+            }
         }
         for (label ci = 2; ci < nInvertibleMoments_; ci++)
         {
@@ -192,12 +204,17 @@ void Foam::hyperbolicMomentInversion::invert
             centralMoments[3] = q*c2*sqrtC2;
             centralMoments[4] = eta*sqrC2;
 
-            if (realizability < smallNegRealizability_ && debug)
+            if (realizability < smallNegRealizability_)
             {
-                WarningInFunction
-                    << "Fourth-order central moment is too small."
-                    << " Realizability = " << realizability << nl
-                    << endl;
+                fullyRealizable_ = false;
+
+                if (debug)
+                {
+                    WarningInFunction
+                        << "Fourth-order central moment is too small."
+                        << " Realizability = " << realizability << nl
+                        << endl;
+                }
             }
         }
         else
@@ -287,6 +304,8 @@ void Foam::hyperbolicMomentInversion::invert
 
         if (weights_[wi] < 0.0)
         {
+            fullyRealizable_ = false;
+
             FatalErrorInFunction
                 << "Negative weight in hyperbolic moment inversion."
                 << exit(FatalError);
