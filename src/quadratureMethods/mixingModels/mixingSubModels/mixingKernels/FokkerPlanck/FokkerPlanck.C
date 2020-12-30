@@ -25,7 +25,7 @@ License
 
 #include "FokkerPlanck.H"
 #include "addToRunTimeSelectionTable.H"
-#include "turbulentFluidThermoModel.H"
+#include "momentumTransportModel.H"
 #include "fundamentalConstants.H"
 
 // * * * * * * * * * * * * * * Static Data Members * * * * * * * * * * * * * //
@@ -76,13 +76,11 @@ Foam::mixingSubModels::mixingKernels::FokkerPlanck::K
     const volScalarMomentFieldSet& moments
 ) const
 {
-    typedef compressible::turbulenceModel cmpTurbModel;
-
     if
     (
-        !moment.mesh().foundObject<cmpTurbModel>
+        !moment.mesh().foundObject<momentumTransportModel>
         (
-            cmpTurbModel::propertiesName
+            momentumTransportModel::typeName
         )
     )
     {
@@ -91,10 +89,10 @@ Foam::mixingSubModels::mixingKernels::FokkerPlanck::K
             << abort(FatalError);
     }
 
-    const compressible::turbulenceModel& flTurb =
-        moment.mesh().lookupObject<compressible::turbulenceModel>
+    const momentumTransportModel& flTurb =
+        moment.mesh().lookupObject<momentumTransportModel>
         (
-            turbulenceModel::propertiesName
+            momentumTransportModel::typeName
         );
 
     label momentOrder = moment.order();

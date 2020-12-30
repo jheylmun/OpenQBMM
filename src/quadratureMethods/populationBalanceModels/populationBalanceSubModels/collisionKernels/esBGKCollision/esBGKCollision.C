@@ -160,7 +160,7 @@ Foam::populationBalanceSubModels::collisionKernels::esBGKCollision
 )
 :
     BGKCollision(dict, mesh, quadrature),
-    e_(dict.lookupType<scalar>("e")),
+    e_(dict.lookup<scalar>("e")),
     b_(dict.lookupOrDefault<scalar>("b", 0)),
     Theta_
     (
@@ -203,7 +203,7 @@ Foam::populationBalanceSubModels::collisionKernels::esBGKCollision
     {
         return 0.0;
     }
-    
+
     if (nSizes_ > 0)
     {
         return Meq_(momentOrder)[celli];

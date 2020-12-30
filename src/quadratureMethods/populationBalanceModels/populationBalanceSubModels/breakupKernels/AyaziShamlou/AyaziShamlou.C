@@ -24,6 +24,7 @@ License
 \*---------------------------------------------------------------------------*/
 
 #include "AyaziShamlou.H"
+#include "momentumTransportModel.H"
 #include "addToRunTimeSelectionTable.H"
 
 // * * * * * * * * * * * * * * Static Data Members * * * * * * * * * * * * * //
@@ -62,22 +63,21 @@ Foam::populationBalanceSubModels::breakupKernels::AyaziShamlou
     df_(dict.lookup("df")),
     H0_(dict.lookup("H0")),
     primarySize_(dict.lookup("primarySize")),
-    flTurb_
+    epsilon_
     (
-        mesh_.lookupObject<turbulenceModel>
+        mesh_.lookupObject<momentumTransportModel>
         (
             IOobject::groupName
             (
-                turbulenceModel::propertiesName,
+                momentumTransportModel::typeName,
                 continuousPhase_
             )
-        )
+        ).epsilon()
     ),
-    epsilon_(flTurb_.epsilon()),
     mu_
     (
         dict.found("mu")
-      ? mesh.lookupObject<volScalarField>(dict.lookupType<word>("mu"))
+      ? mesh.lookupObject<volScalarField>(dict.lookup<word>("mu"))
       : mesh.lookupObject<volScalarField>
         (
             IOobject::groupName("thermo:mu", continuousPhase_)
@@ -86,7 +86,7 @@ Foam::populationBalanceSubModels::breakupKernels::AyaziShamlou
     rho_
     (
         dict.found("rho")
-      ? mesh.lookupObject<volScalarField>(dict.lookupType<word>("rho"))
+      ? mesh.lookupObject<volScalarField>(dict.lookup<word>("rho"))
       : mesh.lookupObject<volScalarField>
         (
             IOobject::groupName("rho", continuousPhase_)

@@ -1,87 +1,81 @@
 /*---------------------------------------------------------------------------*\
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
-   \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2011-2016 OpenFOAM Foundation
+   \\    /   O peration     | Website:  https://openfoam.org
+    \\  /    A nd           | Copyright (C) 2013-2020 OpenFOAM Foundation
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
-
     OpenFOAM is free software: you can redistribute it and/or modify it
     under the terms of the GNU General Public License as published by
     the Free Software Foundation, either version 3 of the License, or
     (at your option) any later version.
-
     OpenFOAM is distributed in the hope that it will be useful, but WITHOUT
     ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or
     FITNESS FOR A PARTICULAR PURPOSE.  See the GNU General Public License
     for more details.
-
     You should have received a copy of the GNU General Public License
     along with OpenFOAM.  If not, see <http://www.gnu.org/licenses/>.
-
 Class
-    Foam::kineticTheory
-
+    Foam::RASModels::phasePressureModel
 Description
-    Kinetic theory particle phase RAS model
-
-    Reference:
+    Particle-particle phase-pressure RAS model
+    The derivative of the phase-pressure with respect to the phase-fraction
+    is evaluated as
+        g0*min(exp(preAlphaExp*(alpha - alphaMax)), expMax)
+    The default model coefficients correspond to the following:
     \verbatim
-        "Derivation, implementation, and validation of computer simulation
-         models for gas-solid fluidized beds",
-        van Wachem, B.G.M.,
-        Ph.D. Thesis, Delft University of Technology, Amsterdam, 2000.
+        phasePressureCoeffs
+        {
+            preAlphaExp     500;
+            expMax          1000;
+            alphaMax        0.62;
+            g0              1000;
+        }
     \endverbatim
-
-    There are no default model coefficients.
-
 SourceFiles
-    kineticTheory.C
-
+    phasePressureModel.C
 \*---------------------------------------------------------------------------*/
 
-#ifndef kineticTheory_H
-#define kineticTheory_H
+#ifndef phasePressureModel_H
+#define phasePressureModel_H
 
 #include "RASModel.H"
-#include "kineticTheoryModel.H"
 #include "eddyViscosity.H"
-#include "phaseCompressibleTurbulenceModel.H"
-#include "EddyDiffusivity.H"
+#include "phaseCompressibleMomentumTransportModel.H"
 #include "phaseModel.H"
-
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
 namespace Foam
 {
-
 namespace RASModels
 {
 
 /*---------------------------------------------------------------------------*\
-                           Class kineticTheory Declaration
+                           Class phasePressureModel Declaration
 \*---------------------------------------------------------------------------*/
 
-class kineticTheory
+class phasePressureModel
 :
-    public eddyViscosity
-    <
-        RASModel<EddyDiffusivity<phaseCompressibleTurbulenceModel>>
-    >
+    public eddyViscosity<RASModel<phaseCompressibleMomentumTransportModel>>
 {
-    // Private data
+    // Private Data
 
-        // Refrence to phase model
-        const phaseModel& phase_;
+        // Kinetic Theory Model coefficients
 
-        //- Kinetic theory model
-        autoPtr<kineticTheoryModel> kineticTheoryModel_;
+            //- Maximum packing phase-fraction
+            scalar alphaMax_;
 
-        //- Maximum turbulent viscosity
-        dimensionedScalar maxNut_;
+            //- Pre-exponential factor
+            scalar preAlphaExp_;
+
+            //- Maximum limit of the exponential
+            scalar expMax_;
+
+            //- g0
+            dimensionedScalar g0_;
 
 
     // Private Member Functions
@@ -93,13 +87,13 @@ class kineticTheory
 public:
 
     //- Runtime type information
-    TypeName("kineticTheory");
+    TypeName("phasePressure");
 
 
     // Constructors
 
         //- Construct from components
-        kineticTheory
+        phasePressureModel
         (
             const volScalarField& alpha,
             const volScalarField& rho,
@@ -107,17 +101,15 @@ public:
             const surfaceScalarField& alphaRhoPhi,
             const surfaceScalarField& phi,
             const phaseModel& transport,
-            const word& propertiesName = turbulenceModel::propertiesName,
             const word& type = typeName
         );
 
-
-        //- Disallow default bitwise copy construct
-        kineticTheory(const kineticTheory&) = delete;
+        //- Disallow default bitwise copy construction
+        phasePressureModel(const phasePressureModel&) = delete;
 
 
     //- Destructor
-    virtual ~kineticTheory();
+    virtual ~phasePressureModel();
 
 
     // Member Functions
@@ -143,8 +135,8 @@ public:
         //- Return the turbulence kinetic energy dissipation rate
         virtual tmp<volScalarField> epsilon() const;
 
-        //- Return the Reynolds stress tensor
-        virtual tmp<volSymmTensorField> R() const;
+        //- Return the stress tensor [m^2/s^2]
+        virtual tmp<volSymmTensorField> sigma() const;
 
         //- Return the phase-pressure'
         // (derivative of phase-pressure w.r.t. phase-fraction)
@@ -155,19 +147,19 @@ public:
         virtual tmp<surfaceScalarField> pPrimef() const;
 
         //- Return the effective stress tensor
-        virtual tmp<volSymmTensorField> devRhoReff() const;
+        virtual tmp<volSymmTensorField> devTau() const;
 
         //- Return the source term for the momentum equation
-        virtual tmp<fvVectorMatrix> divDevRhoReff(volVectorField& U) const;
+        virtual tmp<fvVectorMatrix> divDevTau(volVectorField& U) const;
 
         //- Solve the kinetic theory equations and correct the viscosity
         virtual void correct();
-        
+
 
     // Member Operators
 
         //- Disallow default bitwise assignment
-        void operator=(const kineticTheory&) = delete;
+        void operator=(const phasePressureModel&) = delete;
 };
 
 

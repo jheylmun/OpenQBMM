@@ -9,6 +9,6 @@ wmakeLnInclude interfacialModels
 
 wmake $targetType twoPhaseSystem
 wmake $targetType interfacialModels
-wmake $targetType phaseCompressibleTurbulenceModels
+wmake $targetType phaseCompressibleMomentumTransportModels
 wmake $targetType polydisperseBubbleFoam
 wmake $targetType denseAGFoam

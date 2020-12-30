@@ -1,26 +1,22 @@
 /*---------------------------------------------------------------------------*\
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
-   \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2013-2016 OpenFOAM Foundation
+   \\    /   O peration     | Website:  https://openfoam.org
+    \\  /    A nd           | Copyright (C) 2013-2020 OpenFOAM Foundation
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
-
     OpenFOAM is free software: you can redistribute it and/or modify it
     under the terms of the GNU General Public License as published by
     the Free Software Foundation, either version 3 of the License, or
     (at your option) any later version.
-
     OpenFOAM is distributed in the hope that it will be useful, but WITHOUT
     ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or
     FITNESS FOR A PARTICULAR PURPOSE.  See the GNU General Public License
     for more details.
-
     You should have received a copy of the GNU General Public License
     along with OpenFOAM.  If not, see <http://www.gnu.org/licenses/>.
-
 \*---------------------------------------------------------------------------*/
 
 #include "phasePressureModel.H"
@@ -35,17 +31,10 @@ Foam::RASModels::phasePressureModel::phasePressureModel
     const surfaceScalarField& alphaRhoPhi,
     const surfaceScalarField& phi,
     const transportModel& phase,
-    const word& propertiesName,
     const word& type
 )
 :
-    eddyViscosity
-    <
-        RASModel<EddyDiffusivity<ThermalDiffusivity
-        <
-            PhaseCompressibleTurbulenceModel<phaseModel>
-        >>>
-    >
+    eddyViscosity<RASModel<phaseCompressibleMomentumTransportModel>>
     (
         type,
         alpha,
@@ -53,15 +42,12 @@ Foam::RASModels::phasePressureModel::phasePressureModel
         U,
         alphaRhoPhi,
         phi,
-        phase,
-        propertiesName
+        phase
     ),
 
-    phase_(phase),
-
-    alphaMax_(readScalar(coeffDict_.lookup("alphaMax"))),
-    preAlphaExp_(readScalar(coeffDict_.lookup("preAlphaExp"))),
-    expMax_(readScalar(coeffDict_.lookup("expMax"))),
+    alphaMax_(coeffDict_.lookup<scalar>("alphaMax")),
+    preAlphaExp_(coeffDict_.lookup<scalar>("preAlphaExp")),
+    expMax_(coeffDict_.lookup<scalar>("expMax")),
     g0_
     (
         "g0",
@@ -69,7 +55,7 @@ Foam::RASModels::phasePressureModel::phasePressureModel
         coeffDict_.lookup("g0")
     )
 {
-    nut_ == dimensionedScalar("zero", nut_.dimensions(), 0.0);
+    nut_ == dimensionedScalar(nut_.dimensions(), 0);
 
     if (type == typeName)
     {
@@ -90,14 +76,8 @@ bool Foam::RASModels::phasePressureModel::read()
 {
     if
     (
-        eddyViscosity
-        <
-            RASModel<EddyDiffusivity<ThermalDiffusivity
-            <
-                PhaseCompressibleTurbulenceModel<phaseModel>
-            >>>
-        >::read()
-    )
+        eddyViscosity<RASModel<phaseCompressibleMomentumTransportModel>>
+        ::read())
     {
         coeffDict().lookup("alphaMax") >> alphaMax_;
         coeffDict().lookup("preAlphaExp") >> preAlphaExp_;
@@ -130,7 +110,7 @@ Foam::RASModels::phasePressureModel::epsilon() const
 
 
 Foam::tmp<Foam::volSymmTensorField>
-Foam::RASModels::phasePressureModel::R() const
+Foam::RASModels::phasePressureModel::sigma() const
 {
     return tmp<volSymmTensorField>
     (
@@ -213,7 +193,7 @@ Foam::RASModels::phasePressureModel::pPrimef() const
 
 
 Foam::tmp<Foam::volSymmTensorField>
-Foam::RASModels::phasePressureModel::devRhoReff() const
+Foam::RASModels::phasePressureModel::devTau() const
 {
     return tmp<volSymmTensorField>
     (
@@ -221,7 +201,7 @@ Foam::RASModels::phasePressureModel::devRhoReff() const
         (
             IOobject
             (
-                IOobject::groupName("devRhoReff", U_.group()),
+                IOobject::groupName("devTau", U_.group()),
                 runTime_.timeName(),
                 mesh_,
                 IOobject::NO_READ,
@@ -240,7 +220,7 @@ Foam::RASModels::phasePressureModel::devRhoReff() const
 
 
 Foam::tmp<Foam::fvVectorMatrix>
-Foam::RASModels::phasePressureModel::divDevRhoReff
+Foam::RASModels::phasePressureModel::divDevTau
 (
     volVectorField& U
 ) const

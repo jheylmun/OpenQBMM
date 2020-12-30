@@ -33,7 +33,6 @@ License
 #include "partialSlipFvPatchFields.H"
 #include "fvcFlux.H"
 #include "surfaceInterpolate.H"
-#include "PhaseCompressibleTurbulenceModel.H"
 
 // * * * * * * * * * * * * * * Static Data Members * * * * * * * * * * * * * //
 
@@ -133,7 +132,6 @@ Foam::phaseModel::phaseModel
 {
     thermo_->validate("phaseModel " + name_, "h", "e");
 
-    U_.correctBoundaryConditions();
     const word phiName = IOobject::groupName("phi", name_);
     IOobject phiHeader
     (
@@ -205,7 +203,7 @@ Foam::phaseModel::phaseModel
     }
 
     turbulence_ =
-        PhaseCompressibleTurbulenceModel<phaseModel>::New
+        phaseCompressibleMomentumTransportModel::New
         (
             *this,
             rho(),
@@ -232,14 +230,14 @@ Foam::phaseModel::~phaseModel()
 
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
 
-Foam::PhaseCompressibleTurbulenceModel<Foam::phaseModel>&
+Foam::phaseCompressibleMomentumTransportModel&
 Foam::phaseModel::turbulence()
 {
     return turbulence_();
 }
 
 
-const Foam::PhaseCompressibleTurbulenceModel<Foam::phaseModel>&
+const Foam::phaseCompressibleMomentumTransportModel&
 Foam::phaseModel::turbulence() const
 {
     return turbulence_();

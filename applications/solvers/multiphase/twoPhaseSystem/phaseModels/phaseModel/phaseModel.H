@@ -46,7 +46,7 @@ SourceFiles
 #include "volFields.H"
 #include "surfaceFields.H"
 #include "fvMatricesFwd.H"
-#include "transportModel.H"
+#include "phaseCompressibleMomentumTransportModel.H"
 #include "rhoThermo.H"
 #include "runTimeSelectionTables.H"
 
@@ -61,14 +61,10 @@ namespace Foam
 
 class twoPhaseSystem;
 
-template<class Phase>
-class PhaseCompressibleTurbulenceModel;
-
 
 class phaseModel
 :
-    public volScalarField,
-    public transportModel
+    public volScalarField
 {
 protected:
     // Protected data
@@ -108,7 +104,7 @@ protected:
         volScalarField d_;
 
         //- Turbulence model
-        autoPtr<PhaseCompressibleTurbulenceModel<phaseModel>> turbulence_;
+        autoPtr<phaseCompressibleMomentumTransportModel> turbulence_;
 
         //- Bool to use B&G bubble pressure based viscosity
         bool BGviscosity_;
@@ -235,11 +231,11 @@ public:
 
 
         //- Return the turbulence model
-        const PhaseCompressibleTurbulenceModel<phaseModel>& turbulence() const;
+        const phaseCompressibleMomentumTransportModel& turbulence() const;
 
         //- Return non-const access to the turbulence model
         //  for correction
-        PhaseCompressibleTurbulenceModel<phaseModel>& turbulence();
+        phaseCompressibleMomentumTransportModel& turbulence();
 
         //- Return the thermophysical model
         const rhoThermo& thermo() const

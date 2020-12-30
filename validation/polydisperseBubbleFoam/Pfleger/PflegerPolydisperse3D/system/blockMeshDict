@@ -20,28 +20,28 @@ w       20;
 h       90;
 depth   5;
 dia     1.0;
-R       #calc "$dia/2";
+R       #calc "$dia /2";
 
 cellSize    0.5;
 
-in1  #calc "$w/4";
+in1  #calc "$w /4";
 in11 #calc "$in1 - $R";
 in12 #calc "$in1 + $R";
 
-in2  #calc "$w/2";
+in2  #calc "$w /2";
 in21 #calc "$in2 - $R";
 in22 #calc "$in2 + $R";
 
-in3  #calc "3*$w/4";
+in3  #calc "3*$w /4";
 in31 #calc "$in3 - $R";
 in32 #calc "$in3 + $R";
 
-nWallPts    #calc "round($in11/$cellSize)";
-nInPts      #calc "round($dia/$cellSize)";
-nCtrPts     #calc "round(($in21 - $in12)/$cellSize)";
+nWallPts    #calc "round($in11 /$cellSize)";
+nInPts      #calc "round($dia /$cellSize)";
+nCtrPts     #calc "round(($in21 - $in12) /$cellSize)";
 
-nVertPts    #calc "round($h/$cellSize)";
-nDepthPts   #calc "round($depth/$cellSize)";
+nVertPts    #calc "round($h /$cellSize)";
+nDepthPts   #calc "round($depth /$cellSize)";
 
 vertices
 (

@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2014-2019 OpenFOAM Foundation
+    \\  /    A nd           | Copyright (C) 2014-2016 OpenFOAM Foundation
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -23,13 +23,9 @@ License
 
 \*---------------------------------------------------------------------------*/
 
-#include "PhaseCompressibleTurbulenceModel.H"
-#include "phaseModel.H"
+#include "phaseCompressibleMomentumTransportModel.H"
 #include "addToRunTimeSelectionTable.H"
-#include "makeTurbulenceModel.H"
-
-#include "ThermalDiffusivity.H"
-#include "EddyDiffusivity.H"
+#include "makeMomentumTransportModel.H"
 
 #include "laminarModel.H"
 #include "RASModel.H"
@@ -37,40 +33,41 @@ License
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
-makeTurbulenceModelTypes
+makeMomentumTransportModelTypes
 (
     volScalarField,
     volScalarField,
-    compressibleTurbulenceModel,
-    PhaseCompressibleTurbulenceModel,
-    ThermalDiffusivity,
+    compressibleMomentumTransportModel,
+    PhaseCompressibleMomentumTransportModel,
     phaseModel
 );
 
-makeBaseTurbulenceModel
+makeBaseMomentumTransportModel
 (
     volScalarField,
     volScalarField,
-    compressibleTurbulenceModel,
-    PhaseCompressibleTurbulenceModel,
-    ThermalDiffusivity,
+    compressibleMomentumTransportModel,
+    PhaseCompressibleMomentumTransportModel,
     phaseModel
 );
 
 #define makeLaminarModel(Type)                                                 \
     makeTemplatedLaminarModel                                                  \
-    (phaseModelPhaseCompressibleTurbulenceModel, laminar, Type)
+    (phaseModelPhaseCompressibleMomentumTransportModel, laminar, Type)
 
 #define makeRASModel(Type)                                                     \
-    makeTemplatedTurbulenceModel                                               \
-    (phaseModelPhaseCompressibleTurbulenceModel, RAS, Type)
+    makeTemplatedMomentumTransportModel                                        \
+    (phaseModelPhaseCompressibleMomentumTransportModel, RAS, Type)
 
 #define makeLESModel(Type)                                                     \
-    makeTemplatedTurbulenceModel                                               \
-    (phaseModelPhaseCompressibleTurbulenceModel, LES, Type)
+    makeTemplatedMomentumTransportModel                                        \
+    (phaseModelPhaseCompressibleMomentumTransportModel, LES, Type)
 
 #include "Stokes.H"
 makeLaminarModel(Stokes);
+
+#include "generalizedNewtonian.H"
+makeLaminarModel(generalizedNewtonian);
 
 #include "kEpsilon.H"
 makeRASModel(kEpsilon);
@@ -83,6 +80,5 @@ makeLESModel(Smagorinsky);
 
 #include "kEqn.H"
 makeLESModel(kEqn);
-
 
 // ************************************************************************* //

@@ -27,7 +27,6 @@ License
 \*---------------------------------------------------------------------------*/
 
 #include "nonEquilibrium.H"
-#include "PhaseCompressibleTurbulenceModel.H"
 #include "twoPhaseSystem.H"
 #include "dragModel.H"
 #include "fvm.H"
@@ -142,13 +141,13 @@ void Foam::kineticTheoryModels::nonEquilibrium::solve
     );
 
     fv::options& fvOptions(fv::options::New(phase_.fluid().mesh()));
-    const PhaseCompressibleTurbulenceModel<phaseModel>&
+    const phaseCompressibleMomentumTransportModel&
         particleTurbulenceModel =
-            U.db().lookupObject<PhaseCompressibleTurbulenceModel<phaseModel> >
+            U.db().lookupObject<phaseCompressibleMomentumTransportModel>
             (
                 IOobject::groupName
                 (
-                    turbulenceModel::propertiesName,
+                    momentumTransportModel::typeName,
                     phase_.name()
                 )
             );

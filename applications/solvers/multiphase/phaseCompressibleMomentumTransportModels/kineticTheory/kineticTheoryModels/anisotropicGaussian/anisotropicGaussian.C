@@ -24,7 +24,6 @@ License
 \*---------------------------------------------------------------------------*/
 
 #include "anisotropicGaussian.H"
-#include "PhaseCompressibleTurbulenceModel.H"
 #include "twoPhaseSystem.H"
 #include "dragModel.H"
 #include "fvm.H"
@@ -136,7 +135,7 @@ Foam::kineticTheoryModels::anisotropicGaussian::anisotropicGaussian
             IOobject::groupName("Sigma", phase.name()),
             phase.mesh().time().timeName(),
             phase.mesh(),
-            IOobject::READ_IF_PRESENT,
+            IOobject::MUST_READ,
             IOobject::AUTO_WRITE
         ),
         phase.mesh()

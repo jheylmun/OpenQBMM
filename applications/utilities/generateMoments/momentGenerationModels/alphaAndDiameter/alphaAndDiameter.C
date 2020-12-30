@@ -63,7 +63,7 @@ Foam::momentGenerationSubModels::alphaAndDiameter::alphaAndDiameter
             IOobject::groupName
             (
                 "alpha",
-                IOobject::group(dict.name())
+                dict.dictName()
             ),
             mesh.time().timeName(),
             mesh,

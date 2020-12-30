@@ -14,7 +14,7 @@ FoamFile
     object      phaseProperties;
 }
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
-type heatAndMomentumTransferTwoPhaseSystem;
+type basicMultiphaseSystem;
 
 phases (air water);
 
@@ -46,14 +46,11 @@ blending
 {
     default
     {
-        type                            linear;
-        continuousPhase                 water;
-        dispersedPhase                  air;
-
-        maxFullyDispersedAlpha.air 0.3;
-        maxPartlyDispersedAlpha.air 0.5;
-        maxFullyDispersedAlpha.water 0.3;
-        maxPartlyDispersedAlpha.water 0.5;
+        type            linear;
+        minFullyContinuousAlpha.air 0.7;
+        minPartlyContinuousAlpha.air 0.3;
+        minFullyContinuousAlpha.water 0.7;
+        minPartlyContinuousAlpha.water 0.3;
     }
 }
 
@@ -109,6 +106,10 @@ drag
         }
     }
 );
+
+phaseTransfer
+();
+
 
 virtualMass
 (

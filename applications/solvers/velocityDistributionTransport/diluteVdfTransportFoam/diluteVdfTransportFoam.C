@@ -37,7 +37,6 @@ Description
 \*---------------------------------------------------------------------------*/
 
 #include "fvCFD.H"
-#include "PhaseCompressibleTurbulenceModel.H"
 #include "pimpleControl.H"
 #include "fvOptions.H"
 #include "constants.H"

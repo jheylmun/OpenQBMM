@@ -109,11 +109,7 @@ public:
     // Member Functions
 
         //- Update fields
-        virtual void update
-        (
-            const fluidThermo& thermo,
-            const turbulenceModel& turb
-        );
+        virtual void update(const momentumTransportModel& turb);
 
         //- Aggregation kernel
         virtual scalar omega

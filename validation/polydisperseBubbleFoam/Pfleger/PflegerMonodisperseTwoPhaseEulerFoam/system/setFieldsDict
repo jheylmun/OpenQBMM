@@ -23,6 +23,7 @@ regions
         fieldValues
         (
             volScalarFieldValue alpha.air   0
+            volScalarFieldValue alpha.water 1
         );
     }
 );

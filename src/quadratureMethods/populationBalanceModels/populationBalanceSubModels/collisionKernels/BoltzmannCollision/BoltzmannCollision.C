@@ -122,7 +122,7 @@ Foam::populationBalanceSubModels::collisionKernels::BoltzmannCollision
 )
 :
     collisionKernel(dict, mesh, quadrature),
-    e_(dict.lookupType<scalar>("e")),
+    e_(dict.lookup<scalar>("e")),
     omega_((1.0 + e_)*0.5),
     Enskog_(dict.lookupOrDefault("Enskog", false)),
     scalarIndexes_(quadrature.nodes()[0].scalarIndexes()),
@@ -221,7 +221,7 @@ Foam::populationBalanceSubModels::collisionKernels::BoltzmannCollision
                     ),
                     wordList
                     (
-                        quadrature_.moments()[0].boundaryField().size(), 
+                        quadrature_.moments()[0].boundaryField().size(),
                         "zeroGradient"
                     )
                 )
@@ -323,7 +323,7 @@ preUpdate()
     {
         forAll(gradWs_, nodei)
         {
-            gradWs_[nodei] = 
+            gradWs_[nodei] =
                 fvc::grad(quadrature_.nodes()[nodei].primaryWeight());
         }
     }
@@ -374,7 +374,7 @@ void Foam::populationBalanceSubModels::collisionKernels::BoltzmannCollision
 
                     forAll(velocityIndexes_, cmpt)
                     {
-                        vMomentOrder[cmpt] = 
+                        vMomentOrder[cmpt] =
                             momentOrder[velocityIndexes_[cmpt]];
                     }
 
@@ -466,7 +466,7 @@ void Foam::populationBalanceSubModels::collisionKernels::BoltzmannCollision
             scalar XiSqr = sqr(d12/d2);
             scalar omega = mass2*(1.0 + e_)/(mass1 + mass2);
 
-            scalar xi = Foam::constant::mathematical::pi*(n1*sqr(d1) 
+            scalar xi = Foam::constant::mathematical::pi*(n1*sqr(d1)
                 + n2*sqr(d2))/6.0;
 
             scalar g012 =
@@ -485,7 +485,7 @@ void Foam::populationBalanceSubModels::collisionKernels::BoltzmannCollision
 
                     forAll(velocityIndexes_, cmpt)
                     {
-                        vMomentOrder[cmpt] = 
+                        vMomentOrder[cmpt] =
                             momentOrder[velocityIndexes_[cmpt]];
                     }
 
@@ -580,7 +580,7 @@ Foam::populationBalanceSubModels::collisionKernels::BoltzmannCollision
     {
         iSource.ref() -= fvc::div(Gs_(m.cmptOrders()))();
     }
-    
+
     return iSource;
 
 }

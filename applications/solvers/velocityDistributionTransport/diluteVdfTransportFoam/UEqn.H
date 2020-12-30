@@ -5,7 +5,7 @@ fvVectorMatrix UEqn
 (
     fvm::ddt(alpha1, rho1, U1) + fvm::div(alphaRhoPhi1, U1)
   + MRF.DDt(alpha1*rho1 + Cvm, U1)
-  + phase1->turbulence().divDevRhoReff(U1)
+  + phase1->turbulence().divDevTau(U1)
  ==
     virtualMassSource
   - Cvm

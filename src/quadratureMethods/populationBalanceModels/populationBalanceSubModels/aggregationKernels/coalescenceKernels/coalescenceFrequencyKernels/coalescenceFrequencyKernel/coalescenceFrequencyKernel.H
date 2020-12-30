@@ -35,7 +35,7 @@ SourceFiles
 #ifndef coalescenceFrequencyKernel_H
 #define coalescenceFrequencyKernel_H
 
-#include "turbulentFluidThermoModel.H"
+#include "momentumTransportModel.H"
 #include "dictionary.H"
 #include "volFields.H"
 #include "dimensionedTypes.H"
@@ -108,11 +108,7 @@ public:
     // Member Functions
 
         //- Update fields
-        virtual void update
-        (
-            const fluidThermo& thermo,
-            const turbulenceModel& turb
-        )
+        virtual void update(const momentumTransportModel& turb)
         {}
 
         //- Aggregation kernel

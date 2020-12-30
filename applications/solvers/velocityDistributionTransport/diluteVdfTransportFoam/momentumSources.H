@@ -80,7 +80,7 @@ volScalarField Kh
 
 {
     // Liquid viscous stress
-    volSymmTensorField taul(phase1->turbulence().devRhoReff());
+    volSymmTensorField taul(phase1->turbulence().devTau());
 
     // Acceleration of liquid phase
     volVectorField DDtU

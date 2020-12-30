@@ -24,7 +24,7 @@ License
 \*---------------------------------------------------------------------------*/
 
 #include "twoPhaseSystem.H"
-#include "PhaseCompressibleTurbulenceModel.H"
+#include "phaseCompressibleMomentumTransportModel.H"
 #include "BlendedInterfacialModel.H"
 #include "virtualMassModel.H"
 #include "liftModel.H"
@@ -80,27 +80,7 @@ Foam::twoPhaseSystem::twoPhaseSystem
 
     g_(g),
 
-    phase2_
-    (
-        phaseModel::New
-        (
-            *this,
-            *this,
-            wordList(lookup("phases"))[1]
-        )
-    ),
-
-    phase1_
-    (
-        phaseModel::New
-        (
-            *this,
-            *this,
-            wordList(lookup("phases"))[0]
-        )
-    ),
-
-    nNodes_(phase1_->nNodes()),
+    phases_(2),
 
     dgdt_
     (
@@ -116,7 +96,32 @@ Foam::twoPhaseSystem::twoPhaseSystem
         dimensionedScalar("dgdt", dimless/dimTime, 0)
     )
 {
-    if (phase2_->nNodes() != 1)
+    wordList phaseNames(lookup("phases"));
+    phases_.set
+    (
+        0,
+        phaseNames[0],
+        phaseModel::New
+        (
+            *this,
+            *this,
+            phaseNames[0]
+        ).ptr()
+    );
+    phases_.set
+    (
+        1,
+        phaseNames[1],
+        phaseModel::New
+        (
+            *this,
+            *this,
+            phaseNames[1]
+        ).ptr()
+    );
+    nNodes_ = phase1().nNodes();
+
+    if (phase2().nNodes() != 1)
     {
         FatalErrorInFunction
             << "Phase 2 is not monodisperse. Only one polydisperse phase" << nl
@@ -125,7 +130,7 @@ Foam::twoPhaseSystem::twoPhaseSystem
     }
     phi_ = calcPhi();
 
-    phase2_().volScalarField::operator=(scalar(1) - phase1_());
+    phase2().volScalarField::operator=(scalar(1) - phase1());
 
 
     // Blending
@@ -152,8 +157,8 @@ Foam::twoPhaseSystem::twoPhaseSystem
     (
         new phasePair
         (
-            phase1_(),
-            phase2_(),
+            phase1(),
+            phase2(),
             g,
             sigmaTable
         )
@@ -163,8 +168,8 @@ Foam::twoPhaseSystem::twoPhaseSystem
     (
         new orderedPhasePair
         (
-            phase1_(),
-            phase2_(),
+            phase1(),
+            phase2(),
             g,
             sigmaTable,
             aspectRatioTable
@@ -175,8 +180,8 @@ Foam::twoPhaseSystem::twoPhaseSystem
     (
         new orderedPhasePair
         (
-            phase2_(),
-            phase1_(),
+            phase2(),
+            phase1(),
             g,
             sigmaTable,
             aspectRatioTable
@@ -283,7 +288,7 @@ Foam::twoPhaseSystem::twoPhaseSystem
         )
     );
 
-    phase1_->setModels();
+    phase1().setModels();
 }
 
 
@@ -298,22 +303,22 @@ Foam::twoPhaseSystem::~twoPhaseSystem()
 Foam::tmp<Foam::volScalarField> Foam::twoPhaseSystem::rho() const
 {
     return
-        phase1_()*phase1_->thermo().rho()
-      + phase2_()*phase2_->thermo().rho();
+        phase1()*phase1().thermo().rho()
+      + phase2()*phase2().thermo().rho();
 }
 
 
 Foam::tmp<Foam::volVectorField> Foam::twoPhaseSystem::U() const
 {
-    return phase1_()*phase1_->U() + phase2_()*phase2_->U();
+    return phase1()*phase1().U() + phase2()*phase2().U();
 }
 
 
 Foam::tmp<Foam::surfaceScalarField> Foam::twoPhaseSystem::calcPhi() const
 {
     return
-        fvc::interpolate(phase1_())*phase1_->phi()
-      + fvc::interpolate(phase2_())*phase2_->phi();
+        fvc::interpolate(phase1())*phase1().phi()
+      + fvc::interpolate(phase2())*phase2().phi();
 }
 
 
@@ -480,15 +485,15 @@ Foam::twoPhaseSystem::F(const label nodei) const
 {
     volVectorField DDtU1
     (
-        fvc::ddt(phase1_->U())
-      + fvc::div(phase1_->phi(), phase1_->U())
-      - fvc::div(phase1_->phi())*phase1_->U()
+        fvc::ddt(phase1().U())
+      + fvc::div(phase1().phi(), phase1().U())
+      - fvc::div(phase1().phi())*phase1().U()
     );
     volVectorField DDtUi
     (
-        fvc::ddt(phase1_->U())
-      + fvc::div(phase1_->phi(), phase1_->Us(nodei))
-      - fvc::div(phase1_->phi())*phase1_->Us(nodei)
+        fvc::ddt(phase1().U())
+      + fvc::div(phase1().phi(), phase1().Us(nodei))
+      - fvc::div(phase1().phi())*phase1().Us(nodei)
     );
 
     return
@@ -497,7 +502,7 @@ Foam::twoPhaseSystem::F(const label nodei) const
       - bubblePressure_->F<vector>(nodei, 0)
 
       // Force due to deviation from mean velocity
-      - Kd(nodei)*phase1_->Vs(nodei)
+      - Kd(nodei)*phase1().Vs(nodei)
       + Vm(nodei)
        *(
             DDtU1
@@ -543,15 +548,15 @@ Foam::twoPhaseSystem::Ff(const label nodei) const
 {
     volVectorField DDtU1
     (
-        fvc::ddt(phase1_->U())
-      + fvc::div(phase1_->phi(), phase1_->U())
-      - fvc::div(phase1_->phi())*phase1_->U()
+        fvc::ddt(phase1().U())
+      + fvc::div(phase1().phi(), phase1().U())
+      - fvc::div(phase1().phi())*phase1().U()
     );
     volVectorField DDtUi
     (
-        fvc::ddt(phase1_->U())
-      + fvc::div(phase1_->phi(), phase1_->Us(nodei))
-      - fvc::div(phase1_->phi())*phase1_->Us(nodei)
+        fvc::ddt(phase1().U())
+      + fvc::div(phase1().phi(), phase1().Us(nodei))
+      - fvc::div(phase1().phi())*phase1().Us(nodei)
     );
     return
         lift_->Ff(nodei, 0)
@@ -561,7 +566,7 @@ Foam::twoPhaseSystem::Ff(const label nodei) const
       // Force due to deviation from mean velocity
       + fvc::flux
         (
-          - Kd(nodei)*phase1_->Vs(nodei)
+          - Kd(nodei)*phase1().Vs(nodei)
           + Vm(nodei)
            *(
                 DDtU1
@@ -616,62 +621,62 @@ Foam::tmp<Foam::volScalarField> Foam::twoPhaseSystem::D() const
 
 Foam::tmp<Foam::fvVectorMatrix> Foam::twoPhaseSystem::divDevRhoReff1()
 {
-    if (phase1_().BGviscosity())
+    if (phase1().BGviscosity())
     {
         volScalarField rhoNuEff1
         (
             "rhoNuEff1",
-            phase1_()
-           *phase1_().d()
-           *mag(phase1_().U() - phase2_().U())
-           *sqrt(phase1_()*phase2_())
-           *(phase1_().rho() + phase2_().rho()*virtualMass(phase1_()).Cvm())
+            phase1()
+           *phase1().d()
+           *mag(phase1().U() - phase2().U())
+           *sqrt(phase1()*phase2())
+           *(phase1().rho() + phase2().rho()*virtualMass(phase1()).Cvm())
         );
 
         return
-            fvc::div(rhoNuEff1*dev2(T(fvc::grad(phase1_().U()))))
-          - fvm::laplacian(rhoNuEff1, phase1_().U());
+            fvc::div(rhoNuEff1*dev2(T(fvc::grad(phase1().U()))))
+          - fvm::laplacian(rhoNuEff1, phase1().U());
     }
     else
     {
-        volVectorField& U1(phase1_().U());
+        volVectorField& U1(phase1().U());
 
-        return phase1().turbulence().divDevRhoReff(U1);
+        return phase1().turbulence().divDevTau(U1);
     }
 }
 
 
 Foam::tmp<Foam::fvVectorMatrix> Foam::twoPhaseSystem::divDevRhoReff2()
 {
-    if (phase2_().BGviscosity())
+    if (phase2().BGviscosity())
     {
         volScalarField rhoNuEff2
         (
             "rhoNuEff2",
-            phase2_().rho()
-           *phase2_()
+            phase2().rho()
+           *phase2()
            *(
-                phase2_().nu()
-              + phase1_()/max(phase2_(), phase2_().residualAlpha())
+                phase2().nu()
+              + phase1()/max(phase2(), phase2().residualAlpha())
                *(
-                    phase1_().rho()/phase2_().rho()
-                  + virtualMass(phase1_()).Cvm()
-                )*phase1_().d()
-               *mag(phase1_().U() - phase2_().U())
-               *sqrt(phase1_()*phase2_())
-               *pos0(phase2_() - 0.1)
+                    phase1().rho()/phase2().rho()
+                  + virtualMass(phase1()).Cvm()
+                )*phase1().d()
+               *mag(phase1().U() - phase2().U())
+               *sqrt(phase1()*phase2())
+               *pos0(phase2() - 0.1)
             )
         );
 
         return
-            fvc::div(rhoNuEff2*dev2(T(fvc::grad(phase2_().U()))))
-          - fvm::laplacian(rhoNuEff2, phase2_().U());
+            fvc::div(rhoNuEff2*dev2(T(fvc::grad(phase2().U()))))
+          - fvm::laplacian(rhoNuEff2, phase2().U());
     }
     else
     {
-        volVectorField& U2(phase2_().U());
+        volVectorField& U2(phase2().U());
 
-        return phase2().turbulence().divDevRhoReff(U2);
+        return phase2().turbulence().divDevTau(U2);
     }
 }
 
@@ -680,11 +685,11 @@ void Foam::twoPhaseSystem::solve()
 {
     const Time& runTime = mesh_.time();
 
-    volScalarField& alpha1 = phase1_();
-    volScalarField& alpha2 = phase2_();
+    volScalarField& alpha1 = phase1();
+    volScalarField& alpha2 = phase2();
 
-    const surfaceScalarField& phi1 = phase1_->phi();
-    const surfaceScalarField& phi2 = phase2_->phi();
+    const surfaceScalarField& phi1 = phase1().phi();
+    const surfaceScalarField& phi2 = phase2().phi();
 
     const dictionary& alphaControls = mesh_.solverDict
     (
@@ -774,7 +779,7 @@ void Foam::twoPhaseSystem::solve()
             )
         );
 
-        phase1_->correctInflowOutflow(alphaPhic1);
+        phase1().correctInflowOutflow(alphaPhic1);
 
         if (nAlphaSubCycles > 1)
         {
@@ -794,21 +799,21 @@ void Foam::twoPhaseSystem::solve()
                     alphaPhic10,
                     (alphaSubCycle.index()*Sp)(),
                     (Su - (alphaSubCycle.index() - 1)*Sp*alpha1)(),
-                    UniformField<scalar>(phase1_->alphaMax()),
+                    UniformField<scalar>(phase1().alphaMax()),
                     zeroField()
                 );
 
                 if (alphaSubCycle.index() == 1)
                 {
-                    phase1_->alphaPhi() = alphaPhic10;
+                    phase1().alphaPhi() = alphaPhic10;
                 }
                 else
                 {
-                    phase1_->alphaPhi() += alphaPhic10;
+                    phase1().alphaPhi() += alphaPhic10;
                 }
             }
 
-            phase1_->alphaPhi() /= nAlphaSubCycles;
+            phase1().alphaPhi() /= nAlphaSubCycles;
         }
         else
         {
@@ -820,11 +825,11 @@ void Foam::twoPhaseSystem::solve()
                 alphaPhic1,
                 Sp,
                 Su,
-                UniformField<scalar>(phase1_->alphaMax()),
+                UniformField<scalar>(phase1().alphaMax()),
                 zeroField()
             );
 
-            phase1_->alphaPhi() = alphaPhic1;
+            phase1().alphaPhi() = alphaPhic1;
         }
 
         if (pPrimeByA_.valid())
@@ -838,16 +843,16 @@ void Foam::twoPhaseSystem::solve()
             alpha1Eqn.relax();
             alpha1Eqn.solve();
 
-            phase1_->alphaPhi() += alpha1Eqn.flux();
+            phase1().alphaPhi() += alpha1Eqn.flux();
         }
 
-        phase1_->alphaRhoPhi() =
-            fvc::interpolate(phase1_->rho())*phase1_->alphaPhi();
+        phase1().alphaRhoPhi() =
+            fvc::interpolate(phase1().rho())*phase1().alphaPhi();
 
-        phase2_->alphaPhi() = phi_ - phase1_->alphaPhi();
-        phase2_->correctInflowOutflow(phase2_->alphaPhi());
-        phase2_->alphaRhoPhi() =
-            fvc::interpolate(phase2_->rho())*phase2_->alphaPhi();
+        phase2().alphaPhi() = phi_ - phase1().alphaPhi();
+        phase2().correctInflowOutflow(phase2().alphaPhi());
+        phase2().alphaRhoPhi() =
+            fvc::interpolate(phase2().rho())*phase2().alphaPhi();
 
         Info<< alpha1.name() << " volume fraction = "
             << alpha1.weightedAverage(mesh_.V()).value()
@@ -868,7 +873,7 @@ void Foam::twoPhaseSystem::relativeTransport()
 {
     if (nNodes_ > 1)
     {
-        phase1_->relativeTransport();
+        phase1().relativeTransport();
     }
 }
 
@@ -879,21 +884,21 @@ void Foam::twoPhaseSystem::averageTransport()
 
     if (nNodes_ == 1)
     {
-        phase1_->averageTransport(AEqns);
-        phase1_->correct();
+        phase1().averageTransport(AEqns);
+        phase1().correct();
 
         return;
     }
 
     // Liquid viscous stress
-    volSymmTensorField taul(phase2_->turbulence().devRhoReff());
+    volSymmTensorField taul(phase2().turbulence().devTau());
 
     // Acceleration of liquid phase
     volVectorField DDtU2
     (
-        fvc::ddt(phase2_->U())
-      + fvc::div(phase2_->phi(), phase2_->U())
-      - fvc::div(phase2_->phi())*phase2_->U()
+        fvc::ddt(phase2().U())
+      + fvc::div(phase2().phi(), phase2().U())
+      - fvc::div(phase2().phi())*phase2().U()
     );
 
     for (label nodei = 0; nodei < nNodes_; nodei++)
@@ -905,13 +910,13 @@ void Foam::twoPhaseSystem::averageTransport()
             nodei,
             new fvVectorMatrix
             (
-                phase1_->Us(nodei),
-                phase1_->Us(nodei).dimensions()*dimDensity*dimVol/dimTime
+                phase1().Us(nodei),
+                phase1().Us(nodei).dimensions()*dimDensity*dimVol/dimTime
             )
         );
 
         const volScalarField& p(mesh_.lookupObject<volScalarField>("p"));
-        volScalarField alphaRhoi(phase1_->alphas(nodei)*phase1_->rho());
+        volScalarField alphaRhoi(phase1().alphas(nodei)*phase1().rho());
 
         //  Implicit drag term added to velocity abscissae equations
         volScalarField Kd(this->Kd(nodei));
@@ -923,20 +928,20 @@ void Foam::twoPhaseSystem::averageTransport()
           + (
               - fvc::grad(p)
               + fvc::div(taul)
-            )*phase1_->alphas(nodei)
+            )*phase1().alphas(nodei)
 
             // Drag
-          + Kd*phase2_->U()
-          - fvm::Sp(Kd, phase1_->Us(nodei))
+          + Kd*phase2().U()
+          - fvm::Sp(Kd, phase1().Us(nodei))
 
             // Virtual Mass
           + Vm(nodei)
            *(
                 DDtU2
               - (
-                    fvm::ddt(phase1_->Us(nodei))
-                  + fvm::div(phase1_->phi(), phase1_->Us(nodei))
-                  - fvm::Sp(fvc::div(phase1_->phi()), phase1_->Us(nodei))
+                    fvm::ddt(phase1().Us(nodei))
+                  + fvm::div(phase1().phi(), phase1().Us(nodei))
+                  - fvm::Sp(fvc::div(phase1().phi()), phase1().Us(nodei))
                 )
             )
 
@@ -948,24 +953,24 @@ void Foam::twoPhaseSystem::averageTransport()
 
     }
 
-    phase1_->averageTransport(AEqns);
-    phase1_->correct();
+    phase1().averageTransport(AEqns);
+    phase1().correct();
 
-    phi_ = phase1_->alphaPhi() + phase2_->alphaPhi();
+    phi_ = phase1().alphaPhi() + phase2().alphaPhi();
 }
 
 
 void Foam::twoPhaseSystem::correct()
 {
-    phase1_->correct();
-    phase2_->correct();
+    phase1().correct();
+    phase2().correct();
 }
 
 
 void Foam::twoPhaseSystem::correctTurbulence()
 {
-    phase1_->turbulence().correct();
-    phase2_->turbulence().correct();
+    phase1().turbulence().correct();
+    phase2().turbulence().correct();
 }
 
 
@@ -973,8 +978,8 @@ bool Foam::twoPhaseSystem::read()
 {
     bool readOK = regIOobject::read();
 
-    bool readOK1 = phase1_->read(readOK);
-    bool readOK2 = phase2_->read(readOK);
+    bool readOK1 = phase1().read(readOK);
+    bool readOK2 = phase2().read(readOK);
 
     return (readOK1 || readOK2);
 }

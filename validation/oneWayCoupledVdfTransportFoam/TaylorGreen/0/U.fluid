@@ -53,7 +53,7 @@ internalField   #codeStream
                     0.0
                 );
         }
-        os  << "nonuniform " << u;
+        os  << "nonuniform " << u << ";";
     #};
 };
 

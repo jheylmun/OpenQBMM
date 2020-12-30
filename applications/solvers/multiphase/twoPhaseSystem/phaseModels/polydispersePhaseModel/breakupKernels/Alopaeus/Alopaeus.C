@@ -26,7 +26,6 @@ License
 #include "Alopaeus.H"
 #include "addToRunTimeSelectionTable.H"
 #include "fundamentalConstants.H"
-#include "PhaseCompressibleTurbulenceModel.H"
 #include "phaseModel.H"
 #include "fvc.H"
 

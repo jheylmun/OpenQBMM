@@ -64,13 +64,13 @@ functions
 
         codeOptions
         #{
-            -I$(FOAM_INST_DIR)/OpenQBMM-dev/src/mappedList \
-            -I$(FOAM_INST_DIR)/OpenQBMM-dev/src/mappedPtrList \
-            -I$(FOAM_INST_DIR)/OpenQBMM-dev/src/quadratureMethods/moments \
-            -I$(FOAM_INST_DIR)/OpenQBMM-dev/src/quadratureMethods/fieldMomentInversion/lnInclude \
-            -I$(FOAM_INST_DIR)/OpenQBMM-dev/src/quadratureMethods/momentSets/lnInclude \
-            -I$(FOAM_INST_DIR)/OpenQBMM-dev/src/quadratureMethods/quadratureNode/lnInclude \
-            -I$(FOAM_INST_DIR)/OpenQBMM-dev/src/quadratureMethods/quadratureApproximations/lnInclude
+            -I$(FOAM_INST_DIR)/OpenQBMM/src/mappedList \
+            -I$(FOAM_INST_DIR)/OpenQBMM/src/mappedPtrList \
+            -I$(FOAM_INST_DIR)/OpenQBMM/src/quadratureMethods/moments \
+            -I$(FOAM_INST_DIR)/OpenQBMM/src/quadratureMethods/fieldMomentInversion/lnInclude \
+            -I$(FOAM_INST_DIR)/OpenQBMM/src/quadratureMethods/momentSets/lnInclude \
+            -I$(FOAM_INST_DIR)/OpenQBMM/src/quadratureMethods/quadratureNode/lnInclude \
+            -I$(FOAM_INST_DIR)/OpenQBMM/src/quadratureMethods/quadratureApproximations/lnInclude
         #};
 
         codeExecute

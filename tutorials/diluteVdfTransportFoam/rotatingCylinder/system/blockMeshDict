@@ -17,20 +17,20 @@ convertToMeters 0.01;
 d       50;
 h       10;
 
-r       #calc "$d/2.0";
+r       #calc "$d /2.0";
 nr      #calc  "-$r";
 W       20;
-w       #calc "$W/sqrt(2.0)";
+w       #calc "$W /sqrt(2.0)";
 nw      #calc "-$w";
 
-x       #calc "$r*sqrt(2.0)/2.0";
+x       #calc "$r *sqrt(2.0)/2.0";
 y       $x;
 nx      #calc "-$x";
 ny      $nx;
 
 cellSize 0.25;
 
-nPtR    #calc "round($r/2.0/$cellSize)";
+nPtR    #calc "round($r /2.0/$cellSize)";
 nPtW    #calc "round(($r - $W)/$cellSize)";
 nPtH    1;
 

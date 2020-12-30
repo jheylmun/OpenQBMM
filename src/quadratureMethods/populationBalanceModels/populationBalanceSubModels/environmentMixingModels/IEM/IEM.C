@@ -25,7 +25,7 @@ License
 
 #include "IEM.H"
 #include "addToRunTimeSelectionTable.H"
-#include "turbulentFluidThermoModel.H"
+#include "momentumTransportModel.H"
 #include "fundamentalConstants.H"
 
 // * * * * * * * * * * * * * * Static Data Members * * * * * * * * * * * * * //
@@ -60,9 +60,9 @@ Foam::populationBalanceSubModels::environmentMixingModels::IEM::IEM
     environmentMixingModel(dict, mesh),
     flTurb_
     (
-        mesh_.lookupObject<compressible::turbulenceModel>
+        mesh_.lookupObject<momentumTransportModel>
         (
-            turbulenceModel::propertiesName
+            momentumTransportModel::typeName
         )
     ),
     k_(flTurb_.k()),

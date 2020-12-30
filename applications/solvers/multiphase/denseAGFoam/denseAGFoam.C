@@ -36,7 +36,6 @@ Description
 #include "pimpleControl.H"
 #include "fvOptions.H"
 #include "twoPhaseSystem.H"
-#include "PhaseCompressibleTurbulenceModel.H"
 #include "kineticTheoryModel.H"
 #include "fixedValueFvsPatchFields.H"
 

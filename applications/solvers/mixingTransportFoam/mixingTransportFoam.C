@@ -35,8 +35,7 @@ Description
 
 #include "fvCFD.H"
 #include "rhoThermo.H"
-#include "turbulentFluidThermoModel.H"
-#include "radiationModel.H"
+#include "fluidThermoMomentumTransportModel.H"
 #include "pimpleControl.H"
 #include "fixedFluxPressureFvPatchScalarField.H"
 #include "mixingModel.H"
@@ -53,7 +52,6 @@ int main(int argc, char *argv[])
 
     #include "readGravitationalAcceleration.H"
     #include "createFields.H"
-    #include "createRadiationModel.H"
     #include "createTimeControls.H"
     #include "CourantNos.H"
     #include "setInitialDeltaT.H"

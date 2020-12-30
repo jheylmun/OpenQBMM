@@ -34,7 +34,7 @@ divSchemes
     div(phi.air,U.air)              bounded Gauss limitedLinearV 1;
     div(phiRhoPhi.air,e.air)        bounded Gauss limitedLinear 1;
     div(phiRhoPhi.air,K)            bounded Gauss limitedLinear 1;
-    div(devRhoReff.air)             Gauss linear;
+    div(devTau.air)             Gauss linear;
     div((phi.air|interpolate(thermo:rho.air)),U.air) Gauss linear;
     div((((alpha.air*thermo:rho.air)*nuEff.air)*dev2(T(grad(U.air))))) Gauss linear;
 }

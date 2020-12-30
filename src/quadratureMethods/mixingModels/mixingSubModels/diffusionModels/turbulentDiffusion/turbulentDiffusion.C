@@ -26,8 +26,7 @@ License
 #include "turbulentDiffusion.H"
 #include "addToRunTimeSelectionTable.H"
 
-#include "turbulentTransportModel.H"
-#include "turbulentFluidThermoModel.H"
+#include "momentumTransportModel.H"
 
 // * * * * * * * * * * * * * * Static Data Members * * * * * * * * * * * * * //
 
@@ -89,28 +88,19 @@ Foam::tmp<Foam::volScalarField>
 Foam::mixingSubModels::mixingDiffusionModels::turbulentDiffusion::
 turbViscosity(const volScalarField& moment) const
 {
-    typedef compressible::turbulenceModel cmpTurbModel;
-    typedef incompressible::turbulenceModel icoTurbModel;
 
-    if (moment.mesh().foundObject<cmpTurbModel>(cmpTurbModel::propertiesName))
-    {
-        const cmpTurbModel& turb =
-            moment.mesh().lookupObject<cmpTurbModel>
-            (
-                cmpTurbModel::propertiesName
-            );
-
-        return turb.mut()/turb.rho();
-    }
-    else if
+    if
     (
-        moment.mesh().foundObject<icoTurbModel>(icoTurbModel::propertiesName)
+        moment.mesh().foundObject<momentumTransportModel>
+        (
+            momentumTransportModel::typeName
+        )
     )
     {
-        const incompressible::turbulenceModel& turb =
-            moment.mesh().lookupObject<icoTurbModel>
+        const momentumTransportModel& turb =
+            moment.mesh().lookupObject<momentumTransportModel>
             (
-                icoTurbModel::propertiesName
+                momentumTransportModel::typeName
             );
 
         return turb.nut();

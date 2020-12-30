@@ -46,8 +46,8 @@ kineticTheory/kineticTheorySubModels/frictionalStressModel/JohnsonJacksonSchaeff
 kineticTheory/derivedFvPatchFields/JohnsonJacksonParticleTheta/JohnsonJacksonParticleThetaFvPatchScalarField.C
 kineticTheory/derivedFvPatchFields/JohnsonJacksonParticleSlip/JohnsonJacksonParticleSlipFvPatchVectorField.C
 
-phaseCompressibleTurbulenceModels.C
+phaseCompressibleMomentumTransportModels.C
 phasePressureModel/phasePressureModel.C
 kineticTheory/kineticTheory.C
 
-LIB = $(FOAM_USER_LIBBIN)/libpdTurbulenceModels
+LIB = $(FOAM_USER_LIBBIN)/libpdMomentumTransportModels

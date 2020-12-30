@@ -44,7 +44,6 @@ SourceFiles
 #define LuoSvendsen_H
 
 #include "breakupKernel.H"
-#include "turbulenceModel.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
@@ -81,9 +80,6 @@ private:
 
         //- Exponent of the abscissa
         scalar sizeExp_;
-
-        //- Turbulence model
-        const turbulenceModel& flTurb_;
 
         //- Turbulent dissipation rate
         const volScalarField& epsilon_;

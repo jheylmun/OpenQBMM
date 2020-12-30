@@ -25,7 +25,8 @@ License
 
 #include "fvCFD.H"
 #include "dynamicFvMesh.H"
-#include "turbulentFluidThermoModel.H"
+#include "fluidThermoMomentumTransportModel.H"
+#include "fluidThermophysicalTransportModel.H"
 #include "localEulerDdtScheme.H"
 #include "compressibleSystem.H"
 #include "fvcSmooth.H"
@@ -85,12 +86,12 @@ int main(int argc, char *argv[])
             solve
             (
                 fvm::ddt(rho, e) - fvc::ddt(rho, e)
-              - fvm::laplacian(turbulence().alphaEff(), e)
+              - fvm::laplacian(thermophysicalTransport().alphaEff(), e)
             );
 
             fluid.correctThermo();
         }
-        
+
         turbulence().correct();
 
         runTime.write();

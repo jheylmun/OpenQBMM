@@ -103,7 +103,7 @@ Foam::populationBalanceSubModels::aggregationKernels::coalescenceEfficiencyKerne
 void Foam::populationBalanceSubModels::aggregationKernels::coalescenceEfficiencyKernels::CoulaloglouAndTavlarides::update
 (
     const fluidThermo& thermo,
-    const turbulenceModel& turb
+    const momentumTransportModel& turb
 )
 {
     epsilonf_ = turb.epsilon();

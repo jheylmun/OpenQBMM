@@ -22,7 +22,7 @@ ddtSchemes
 
 gradSchemes
 {
-    default         cellLimited     leastSquares 1;
+    default         cellMDLimited     leastSquares 1;
     grad(p_rgh)     leastSquares;
 }
 
@@ -41,7 +41,7 @@ divSchemes
     "div\(alphaRhoPhi.*,(k|epsilon).*\)"  Gauss upwind;
     "div\(phim,(k|epsilon)m\)"      Gauss upwind;
 
-    div(devRhoReff.water)           Gauss linear;
+    div(devTau.water)           Gauss linear;
     div((((alpha.water*thermo:rho.water)*nuEff.water)*dev2(T(grad(U.water))))) Gauss linear;
     div((((alpha.air*rho.air)*nu.air)*dev2(T(grad(U.air))))) Gauss linear;
     div((((alpha.air*thermo:rho.air)*nuEff.air)*dev2(T(grad(U.air))))) Gauss linear;

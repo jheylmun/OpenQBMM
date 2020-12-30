@@ -1,39 +1,33 @@
 EXE_INC = \
-    -I$(LIB_SRC)/finiteVolume/lnInclude \
-    -I$(LIB_SRC)/fvOptions/lnInclude \
-    -I$(LIB_SRC)/sampling/lnInclude \
-    -I$(LIB_SRC)/meshTools/lnInclude \
-    -I$(LIB_SRC)/transportModels/compressible/lnInclude \
+    -I$(LIB_SRC)/MomentumTransportModels/momentumTransportModels/lnInclude \
+    -I$(LIB_SRC)/MomentumTransportModels/incompressible/lnInclude \
+    -I$(LIB_SRC)/MomentumTransportModels/compressible/lnInclude \
+    -I$(LIB_SRC)/thermophysicalModels/specie/lnInclude \
     -I$(LIB_SRC)/thermophysicalModels/basic/lnInclude \
-    -I$(LIB_SRC)/radiationModels/lnInclude \
-    -I$(LIB_SRC)/TurbulenceModels/turbulenceModels/lnInclude \
-    -I$(LIB_SRC)/TurbulenceModels/compressible/lnInclude \
-    -I$../../../../src/quadratureMethods/univariateMomentSet/lnInclude \
-    -I$../../../../src/quadratureMethods/momentInversion/lnInclude \
-    -I$../../../../src/quadratureMethods/quadratureNode/lnInclude \
-    -I$../../../../src/quadratureMethods/moments \
-    -I$../../../../src/quadratureMethods/fieldMomentInversion/lnInclude \
-    -I$../../../../src/quadratureMethods/quadratureApproximations/lnInclude \
-    -I$../../../../src/quadratureMethods/momentAdvection/lnInclude \
-    -I$../../../../src/quadratureMethods/mixingModels/lnInclude
+    -I$(LIB_SRC)/finiteVolume/lnInclude \
+    -I$(LIB_SRC)/meshTools/lnInclude \
+    -I../../../src/quadratureMethods/univariateMomentSet/lnInclude \
+    -I../../../src/quadratureMethods/momentInversion/lnInclude \
+    -I../../../src/quadratureMethods/quadratureNode/lnInclude \
+    -I../../../src/quadratureMethods/moments \
+    -I../../../src/quadratureMethods/fieldMomentInversion/lnInclude \
+    -I../../../src/quadratureMethods/quadratureApproximations/lnInclude \
+    -I../../../src/quadratureMethods/populationBalanceModels/lnInclude \
+    -I../../../src/quadratureMethods/mixingModels/lnInclude
 
 EXE_LIBS = \
     -L$(FOAM_USER_LIBBIN) \
-    -lfiniteVolume \
-    -lfvOptions \
-    -lsampling \
-    -lmeshTools \
-    -lcompressibleTransportModels \
+    -lmomentumTransportModels \
+    -lfluidThermoMomentumTransportModels \
+    -lincompressibleMomentumTransportModels \
     -lfluidThermophysicalModels \
     -lspecie \
-    -lradiationModels \
-    -lturbulenceModels \
-    -lcompressibleTurbulenceModels \
+    -lfiniteVolume \
     -lmeshTools \
     -lquadratureNode \
     -lmomentSets \
     -lmomentInversion \
     -lfieldMomentInversion \
     -lquadratureApproximation \
-    -lmomentAdvection \
+    -lpopulationBalance \
     -lmixing

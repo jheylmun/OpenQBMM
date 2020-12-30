@@ -73,7 +73,7 @@ SourceFiles
 #define turbulentBrownian_H
 
 #include "aggregationKernel.H"
-#include "turbulenceModel.H"
+#include "momentumTransportModel.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
@@ -98,7 +98,7 @@ class turbulentBrownian
         const word continuousPhase_;
 
         //- Turbulence model
-        const turbulenceModel& flTurb_;
+        const momentumTransportModel& flTurb_;
 
         //- Temperature field
         const volScalarField& T_;

@@ -24,6 +24,7 @@ License
 \*---------------------------------------------------------------------------*/
 
 #include "LuoSvendsen.H"
+#include "momentumTransportModel.H"
 #include "addToRunTimeSelectionTable.H"
 
 // * * * * * * * * * * * * * * Static Data Members * * * * * * * * * * * * * //
@@ -62,22 +63,21 @@ Foam::populationBalanceSubModels::breakupKernels::LuoSvendsen
     epsilonExp_(readScalar(dict.lookup("epsilonExp"))),
     nuExp_(readScalar(dict.lookup("nuExp"))),
     sizeExp_(readScalar(dict.lookup("sizeExp"))),
-    flTurb_
+    epsilon_
     (
-        mesh_.lookupObject<turbulenceModel>
+        mesh_.lookupObject<momentumTransportModel>
         (
             IOobject::groupName
             (
-                turbulenceModel::propertiesName,
+                momentumTransportModel::typeName,
                 continuousPhase_
             )
-        )
+        ).epsilon()
     ),
-    epsilon_(flTurb_.epsilon()),
     mu_
     (
         dict.found("mu")
-      ? mesh.lookupObject<volScalarField>(dict.lookupType<word>("mu"))
+      ? mesh.lookupObject<volScalarField>(dict.lookup<word>("mu"))
       : mesh.lookupObject<volScalarField>
         (
             IOobject::groupName("thermo:mu", continuousPhase_)
@@ -86,7 +86,7 @@ Foam::populationBalanceSubModels::breakupKernels::LuoSvendsen
     rho_
     (
         dict.found("rho")
-      ? mesh.lookupObject<volScalarField>(dict.lookupType<word>("rho"))
+      ? mesh.lookupObject<volScalarField>(dict.lookup<word>("rho"))
       : mesh.lookupObject<volScalarField>
         (
             IOobject::groupName("rho", continuousPhase_)

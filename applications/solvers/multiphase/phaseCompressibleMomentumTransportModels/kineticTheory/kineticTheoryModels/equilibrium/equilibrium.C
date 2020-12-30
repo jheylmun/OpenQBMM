@@ -27,7 +27,7 @@ License
 \*---------------------------------------------------------------------------*/
 
 #include "equilibrium.H"
-#include "PhaseCompressibleTurbulenceModel.H"
+#include "phaseCompressibleMomentumTransportModel.H"
 #include "addToRunTimeSelectionTable.H"
 
 // * * * * * * * * * * * * * * Static Data Members * * * * * * * * * * * * * //

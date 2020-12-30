@@ -79,28 +79,18 @@ Foam::populationBalanceSubModels::aggregationKernels::coalescence::
 void Foam::populationBalanceSubModels::aggregationKernels::coalescence::
 preUpdate()
 {
-    const fluidThermo& thermo =
-        mesh_.lookupObject<fluidThermo>
+    const momentumTransportModel& turb =
+        mesh_.lookupObject<momentumTransportModel>
         (
             IOobject::groupName
             (
-                basicThermo::dictName,
+                momentumTransportModel::typeName,
                 continuousPhase_
             )
         );
 
-    const turbulenceModel& turb =
-        mesh_.lookupObject<turbulenceModel>
-        (
-            IOobject::groupName
-            (
-                turbulenceModel::propertiesName,
-                continuousPhase_
-            )
-        );
-
-    frequency_->update(thermo, turb);
-    efficiency_->update(thermo, turb);
+    frequency_->update(turb);
+    efficiency_->update(turb);
 }
 
 Foam::scalar

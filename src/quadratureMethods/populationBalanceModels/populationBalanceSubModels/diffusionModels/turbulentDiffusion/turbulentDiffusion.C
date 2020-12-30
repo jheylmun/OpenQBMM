@@ -26,8 +26,7 @@ License
 #include "turbulentDiffusion.H"
 #include "addToRunTimeSelectionTable.H"
 
-#include "turbulentTransportModel.H"
-#include "turbulentFluidThermoModel.H"
+#include "momentumTransportModel.H"
 
 // * * * * * * * * * * * * * * Static Data Members * * * * * * * * * * * * * //
 
@@ -92,14 +91,14 @@ Foam::populationBalanceSubModels::diffusionModels::turbulentDiffusion
 {
     word turbName = IOobject::groupName
         (
-            turbulenceModel::propertiesName,
+            momentumTransportModel::typeName,
             continuousPhase_
         );
-        
-    if (moment.mesh().foundObject<turbulenceModel>(turbName))
+
+    if (moment.mesh().foundObject<momentumTransportModel>(turbName))
     {
-        const turbulenceModel& turb =
-            moment.mesh().lookupObject<turbulenceModel>(turbName);
+        const momentumTransportModel& turb =
+            moment.mesh().lookupObject<momentumTransportModel>(turbName);
 
         return turb.nut();
     }

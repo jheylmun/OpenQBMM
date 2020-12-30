@@ -36,10 +36,8 @@ Description
 
 #include "fvCFD.H"
 #include "psiThermo.H"
-#include "turbulentFluidThermoModel.H"
+#include "fluidThermoMomentumTransportModel.H"
 #include "OFstream.H"
-//#include "thermoPhysicsTypes.H"
-//#include "basicMultiComponentMixture.H"
 #include "cellModeller.H"
 #include "populationBalanceModel.H"
 

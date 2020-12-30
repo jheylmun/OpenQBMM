@@ -29,7 +29,6 @@ License
 #include "phaseModel.H"
 #include "twoPhaseSystem.H"
 #include "fvMatrix.H"
-#include "PhaseCompressibleTurbulenceModel.H"
 #include "dragModel.H"
 #include "fixedValueFvsPatchFields.H"
 #include "fixedValueFvPatchFields.H"
@@ -218,7 +217,7 @@ Foam::phaseModel::phaseModel
     }
 
     turbulence_ =
-        PhaseCompressibleTurbulenceModel<phaseModel>::New
+        phaseCompressibleMomentumTransportModel::New
         (
             *this,
             thermo_->rho(),
@@ -257,14 +256,14 @@ void Foam::phaseModel::correct()
 }
 
 
-Foam::PhaseCompressibleTurbulenceModel<Foam::phaseModel>&
+Foam::phaseCompressibleMomentumTransportModel&
 Foam::phaseModel::turbulence()
 {
     return turbulence_();
 }
 
 
-const Foam::PhaseCompressibleTurbulenceModel<Foam::phaseModel>&
+const Foam::phaseCompressibleMomentumTransportModel&
 Foam::phaseModel::turbulence() const
 {
     return turbulence_();

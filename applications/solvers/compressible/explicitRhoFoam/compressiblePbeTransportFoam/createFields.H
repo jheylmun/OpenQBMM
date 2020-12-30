@@ -12,15 +12,22 @@ const volScalarField& rho = fluid.rho();
 const volVectorField& U = fluid.U();
 const surfaceScalarField& phi = fluid.phi();
 
-autoPtr<compressible::turbulenceModel> turbulence
+Info<< "Creating turbulence model\n" << endl;
+autoPtr<compressible::momentumTransportModel> turbulence
 (
-    compressible::turbulenceModel::New
+    compressible::momentumTransportModel::New
     (
         rho,
         U,
         fluid.massFlux(),
         fluid.thermo()
     )
+);
+
+Info<< "Creating thermophysical transport model\n" << endl;
+autoPtr<fluidThermophysicalTransportModel> thermophysicalTransport
+(
+    fluidThermophysicalTransportModel::New(turbulence(), thermo)
 );
 
 const volScalarField& muEff(fluid.thermo().mu());

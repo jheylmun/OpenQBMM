@@ -45,19 +45,14 @@ SourceFiles
 #include "volFields.H"
 #include "surfaceFields.H"
 #include "fvMatricesFwd.H"
-#include "transportModel.H"
 #include "rhoThermo.H"
-#include "turbulentFluidThermoModel.H"
+#include "phaseCompressibleMomentumTransportModel.H"
 #include "runTimeSelectionTables.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
 namespace Foam
 {
-
-template<class Phase>
-class PhaseCompressibleTurbulenceModel;
-
 
 /*---------------------------------------------------------------------------*\
                            Class phaseModel Declaration
@@ -66,8 +61,7 @@ class PhaseCompressibleTurbulenceModel;
 
 class phaseModel
 :
-    public volScalarField,
-    public transportModel
+    public volScalarField
 {
 protected:
     // Protected data
@@ -104,7 +98,7 @@ protected:
         surfaceScalarField alphaRhoPhi_;
 
         //- Turbulence model
-        autoPtr<PhaseCompressibleTurbulenceModel<phaseModel>> turbulence_;
+        autoPtr<phaseCompressibleMomentumTransportModel> turbulence_;
 
 
 public:
@@ -169,12 +163,12 @@ public:
         }
 
         //- Return the turbulence model
-        const PhaseCompressibleTurbulenceModel<phaseModel>&
+        const phaseCompressibleMomentumTransportModel&
             turbulence() const;
 
         //- Return non-const access to the turbulence model
         //  for correction
-        PhaseCompressibleTurbulenceModel<phaseModel>&
+        phaseCompressibleMomentumTransportModel&
             turbulence();
 
         //- Return the residual phase-fraction for given phase

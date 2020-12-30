@@ -31,27 +31,53 @@ const Foam::fvMesh& Foam::twoPhaseSystem::mesh() const
 }
 
 
+const Foam::twoPhaseSystem::phaseModelList&
+Foam::twoPhaseSystem::phases() const
+{
+    return phases_;
+}
+
+
+Foam::twoPhaseSystem::phaseModelList& Foam::twoPhaseSystem::phases()
+{
+    return phases_;
+}
+
+
+const Foam::twoPhaseSystem::phaseModelList&
+Foam::twoPhaseSystem::movingPhases() const
+{
+    return phases_;
+}
+
+
+Foam::twoPhaseSystem::phaseModelList& Foam::twoPhaseSystem::movingPhases()
+{
+    return phases_;
+}
+
+
 const Foam::phaseModel& Foam::twoPhaseSystem::phase1() const
 {
-    return phase1_();
+    return phases_[0];
 }
 
 
 Foam::phaseModel& Foam::twoPhaseSystem::phase1()
 {
-    return phase1_();
+    return phases_[0];
 }
 
 
 const Foam::phaseModel& Foam::twoPhaseSystem::phase2() const
 {
-    return phase2_();
+    return phases_[1];
 }
 
 
 Foam::phaseModel& Foam::twoPhaseSystem::phase2()
 {
-    return phase2_();
+    return phases_[1];
 }
 
 
@@ -60,13 +86,13 @@ const Foam::phaseModel& Foam::twoPhaseSystem::otherPhase
     const phaseModel& phase
 ) const
 {
-    if (&phase == &phase1_())
+    if (&phase == &phases_[1])
     {
-        return phase2_();
+        return phases_[0];
     }
     else
     {
-        return phase1_();
+        return phases_[1];
     }
 }
 

@@ -33,7 +33,6 @@ License
 #include "partialSlipFvPatchFields.H"
 #include "constants.H"
 #include "fvc.H"
-#include "fvm.H"
 
 // * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
 
@@ -232,7 +231,7 @@ Foam::compressibleSystem::compressibleSystem
             )
         );
     }
-    
+
     thermoPtr_->validate("compressibleSystem ", "e");
     calcConservativeVariables();
 
@@ -544,7 +543,7 @@ void Foam::compressibleSystem::correctThermo()
     thermoPtr_->correct();
     p_ = rho_/thermoPtr_->psi();
     p_.correctBoundaryConditions();
-    
+
     rho_.boundaryFieldRef() ==
         thermoPtr_->psi().boundaryField()*p_.boundaryField();
 

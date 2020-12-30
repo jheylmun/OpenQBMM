@@ -41,14 +41,10 @@ Foam::RASModels::kineticTheory::kineticTheory
     const surfaceScalarField& alphaRhoPhi,
     const surfaceScalarField& phi,
     const transportModel& phase,
-    const word& propertiesName,
     const word& type
 )
 :
-    eddyViscosity
-    <
-        RASModel<EddyDiffusivity<phaseCompressibleTurbulenceModel>>
-    >
+    eddyViscosity<RASModel<phaseCompressibleMomentumTransportModel>>
     (
         type,
         alpha,
@@ -56,8 +52,7 @@ Foam::RASModels::kineticTheory::kineticTheory
         U,
         alphaRhoPhi,
         phi,
-        phase,
-        propertiesName
+        phase
     ),
 
     phase_(phase),
@@ -90,10 +85,7 @@ bool Foam::RASModels::kineticTheory::read()
 {
     if
     (
-        eddyViscosity
-        <
-            RASModel<EddyDiffusivity<phaseCompressibleTurbulenceModel>>
-        >::read()
+        eddyViscosity<RASModel<phaseCompressibleMomentumTransportModel>>::read()
     )
     {
         kineticTheoryModel_->read();
@@ -161,7 +153,7 @@ Foam::RASModels::kineticTheory::epsilon() const
 
 
 Foam::tmp<Foam::volSymmTensorField>
-Foam::RASModels::kineticTheory::R() const
+Foam::RASModels::kineticTheory::sigma() const
 {
     return tmp<volSymmTensorField>
     (
@@ -197,7 +189,7 @@ Foam::RASModels::kineticTheory::pPrimef() const
 
 
 Foam::tmp<Foam::volSymmTensorField>
-Foam::RASModels::kineticTheory::devRhoReff() const
+Foam::RASModels::kineticTheory::devTau() const
 {
     return tmp<volSymmTensorField>
     (
@@ -205,7 +197,7 @@ Foam::RASModels::kineticTheory::devRhoReff() const
         (
             IOobject
             (
-                IOobject::groupName("devRhoReff", U_.group()),
+                IOobject::groupName("devTau", U_.group()),
                 runTime_.timeName(),
                 mesh_,
                 IOobject::NO_READ,
@@ -221,7 +213,7 @@ Foam::RASModels::kineticTheory::devRhoReff() const
 
 
 Foam::tmp<Foam::fvVectorMatrix>
-Foam::RASModels::kineticTheory::divDevRhoReff
+Foam::RASModels::kineticTheory::divDevTau
 (
     volVectorField& U
 ) const

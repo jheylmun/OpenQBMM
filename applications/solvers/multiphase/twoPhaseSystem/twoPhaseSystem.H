@@ -37,6 +37,7 @@ SourceFiles
 #define twoPhaseSystem_H
 
 #include "IOdictionary.H"
+#include "PtrListDictionary.H"
 #include "phaseModel.H"
 #include "phasePair.H"
 #include "orderedPhasePair.H"
@@ -68,6 +69,10 @@ class twoPhaseSystem
 :
     public IOdictionary
 {
+public:
+    typedef PtrListDictionary<phaseModel> phaseModelList;
+
+private:
     // Private data
 
         //- Reference to the mesh
@@ -79,11 +84,8 @@ class twoPhaseSystem
         //- Gravity
         const dimensionedVector g_;
 
-        //- continuous phase
-        autoPtr<phaseModel> phase2_;
-
-        //- polydispersePhase
-        autoPtr<phaseModel> phase1_;
+        //- Phase models
+        phaseModelList phases_;
 
         //- Number of nodes in the dispersed phase
         label nNodes_;
@@ -252,6 +254,18 @@ public:
 
             //- Return the mesh
             inline const fvMesh& mesh() const;
+
+            //- Return phase models
+            inline const phaseModelList& phases() const;
+
+            //- Access phase models
+            inline phaseModelList& phases();
+
+            //- Return phase models
+            inline const phaseModelList& movingPhases() const;
+
+            //- Access phase models
+            inline phaseModelList& movingPhases();
 
             //- Return phase model 1
             inline const phaseModel& phase1() const;

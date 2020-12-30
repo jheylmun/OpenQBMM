@@ -90,7 +90,7 @@ Foam::populationBalanceSubModels::aggregationKernels::coalescenceEfficiencyKerne
 void Foam::populationBalanceSubModels::aggregationKernels::coalescenceEfficiencyKernels::Chesters::update
 (
     const fluidThermo& thermo,
-    const turbulenceModel& turb
+    const momentumTransportModel& turb
 )
 {
     const phasePair& pair = fluid_.pair1In2();

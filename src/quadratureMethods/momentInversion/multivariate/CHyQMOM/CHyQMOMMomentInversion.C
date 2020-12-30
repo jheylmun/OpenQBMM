@@ -1070,7 +1070,7 @@ bool Foam::multivariateMomentInversions::CHyQMOM::invert
 )
 {
     reset();
-    
+
     if (nvelocityDimensions_ == 3)
     {
         invert3D(moments);

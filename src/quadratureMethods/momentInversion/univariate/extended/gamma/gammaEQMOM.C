@@ -278,10 +278,11 @@ Foam::tmp<Foam::scalarField> Foam::gammaEQMOM::f(const scalarField& x) const
         new scalarField(x.size(), 0.0)
     );
     scalarField& y = tmpY.ref();
+    scalar sigma(max(sigma_, sigmaMin_));
 
     for (label pNodei = 0; pNodei < nPrimaryNodes_; pNodei++)
     {
-        scalar lambda = sqr(primaryAbscissae_[pNodei]/sigma_);
+        scalar lambda = sqr(primaryAbscissae_[pNodei]/sigma);
         scalar theta = primaryAbscissae_[pNodei]/lambda;
 
         y +=

@@ -113,7 +113,7 @@ public:
         virtual void update
         (
             const fluidThermo& thermo,
-            const turbulenceModel& turb
+            const momentumTransportModel& turb
         );
 
         //- Aggregation kernel

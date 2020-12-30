@@ -27,7 +27,6 @@ License
 #include "addToRunTimeSelectionTable.H"
 #include "fundamentalConstants.H"
 #include "phaseModel.H"
-#include "PhaseCompressibleTurbulenceModel.H"
 
 
 // * * * * * * * * * * * * * * Static Data Members * * * * * * * * * * * * * //

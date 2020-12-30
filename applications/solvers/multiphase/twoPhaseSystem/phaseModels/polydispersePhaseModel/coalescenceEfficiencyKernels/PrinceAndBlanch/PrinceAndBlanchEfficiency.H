@@ -65,8 +65,6 @@ SourceFiles
 
 #include "coalescenceEfficiencyKernel.H"
 #include "twoPhaseSystem.H"
-#include "phaseModel.H"
-#include "PhaseCompressibleTurbulenceModel.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
@@ -129,7 +127,7 @@ public:
         virtual void update
         (
             const fluidThermo& thermo,
-            const turbulenceModel& turb
+            const momentumTransportModel& turb
         );
 
         //- Aggregation kernel

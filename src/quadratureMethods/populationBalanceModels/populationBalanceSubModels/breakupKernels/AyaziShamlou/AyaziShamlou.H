@@ -45,7 +45,6 @@ SourceFiles
 #define AyaziShamlou_H
 
 #include "breakupKernel.H"
-#include "turbulenceModel.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
@@ -82,9 +81,6 @@ private:
 
         //- Primary particle size
         dimensionedScalar primarySize_;
-
-        //- Turbulence model
-        const turbulenceModel& flTurb_;
 
         //- Turbulent dissipation rate
         const volScalarField& epsilon_;

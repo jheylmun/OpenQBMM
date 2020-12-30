@@ -37,7 +37,6 @@ SourceFiles
 #define fluxFunction_H
 
 #include "rhoThermo.H"
-#include "turbulentFluidThermoModel.H"
 #include "volFields.H"
 #include "surfaceFields.H"
 

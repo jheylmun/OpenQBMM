@@ -46,7 +46,7 @@ namespace coalescenceFrequencyKernels
         PrinceAndBlanch,
         dictionary
     );
-    
+
 } // End namespace coalescenceFrequencyKernels
 } // End namespace aggregationKernels
 } // End namespace populationBalanceSubModels
@@ -96,7 +96,7 @@ Foam::populationBalanceSubModels::aggregationKernels::
 coalescenceFrequencyKernels::PrinceAndBlanch::update
 (
     const fluidThermo& thermo,
-    const turbulenceModel& turb
+    const momentumTransportModel& turb
 )
 {
     epsilonf_ = turb.epsilon();

@@ -357,12 +357,13 @@ Foam::tmp<Foam::scalarField> Foam::betaEQMOM::f(const scalarField& x) const
         new scalarField(x.size(), 0.0)
     );
     scalarField& y = tmpY.ref();
+    scalar sigma(max(sigma_, sigmaMin_));
 
     for (label pNodei = 0; pNodei < nPrimaryNodes_; pNodei++)
     {
         scalar pAbscissa = primaryAbscissae_[pNodei];
-        scalar lambda = pAbscissa/sigma_;
-        scalar mu = (1.0 - pAbscissa)/sigma_;
+        scalar lambda = pAbscissa/sigma;
+        scalar mu = (1.0 - pAbscissa)/sigma;
 
         y +=
             pow(x, lambda - 1)*pow(1.0 - x, mu - 1)
